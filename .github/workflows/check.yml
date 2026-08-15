@@ -1,0 +1,25 @@
+name: Check
+
+on:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: |
+            apps/site/package-lock.json
+            apps/studio/package-lock.json
+            apps/trackinghaus/package-lock.json
+            apps/drafts-mcp/package-lock.json
+      - run: npm run setup
+      - run: npm run check

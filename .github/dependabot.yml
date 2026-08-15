@@ -1,0 +1,18 @@
+version: 2
+
+updates:
+  - package-ecosystem: npm
+    directory: /apps/site
+    schedule: { interval: weekly }
+  - package-ecosystem: npm
+    directory: /apps/studio
+    schedule: { interval: weekly }
+  - package-ecosystem: npm
+    directory: /apps/trackinghaus
+    schedule: { interval: weekly }
+  - package-ecosystem: npm
+    directory: /apps/drafts-mcp
+    schedule: { interval: weekly }
+  - package-ecosystem: github-actions
+    directory: /
+    schedule: { interval: weekly }

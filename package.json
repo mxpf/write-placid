@@ -1,0 +1,21 @@
+{
+  "name": "write-placid",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": ">=22.13.0"
+  },
+  "scripts": {
+    "setup": "npm ci --prefix apps/site && npm ci --prefix apps/studio && npm ci --prefix apps/trackinghaus && npm ci --prefix apps/drafts-mcp",
+    "dev:site": "npm run dev --prefix apps/site",
+    "dev:studio": "npm run dev --prefix apps/studio",
+    "dev:tracking": "npm run dev --prefix apps/trackinghaus",
+    "check:config": "node scripts/check-config.mjs",
+    "check:site": "npm test --prefix apps/site",
+    "check:studio": "npm test --prefix apps/studio",
+    "check:tracking": "npm test --prefix apps/trackinghaus",
+    "check:mcp": "npm run type-check --prefix apps/drafts-mcp",
+    "check": "npm run check:config && npm run check:site && npm run check:studio && npm run check:tracking && npm run check:mcp"
+  }
+}

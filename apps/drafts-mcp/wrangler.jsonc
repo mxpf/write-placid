@@ -1,0 +1,55 @@
+/**
+ * For more details on how to configure Wrangler, refer to:
+ * https://developers.cloudflare.com/workers/wrangler/configuration/
+ */
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "write-placid-drafts-mcp",
+  "main": "src/index.ts",
+  "compatibility_date": "2026-08-14",
+  "migrations": [
+    {
+      "new_sqlite_classes": ["WritePlacidMCP"],
+      "tag": "v1"
+    }
+  ],
+  "compatibility_flags": ["nodejs_compat"],
+  "durable_objects": {
+    "bindings": [
+      {
+        "class_name": "WritePlacidMCP",
+        "name": "MCP_OBJECT"
+      }
+    ]
+  },
+  "kv_namespaces": [
+    {
+      "binding": "OAUTH_KV",
+      "id": "00000000000000000000000000000000"
+    }
+  ],
+  "services": [
+    {
+      "binding": "STUDIO",
+      "service": "write-placid-studio"
+    }
+  ],
+  "observability": {
+    "enabled": true
+  },
+  "dev": {
+    "port": 8788
+  },
+  "secrets": {
+    "required": [
+      "ACCESS_CLIENT_ID",
+      "ACCESS_CLIENT_SECRET",
+      "ACCESS_TOKEN_URL",
+      "ACCESS_AUTHORIZATION_URL",
+      "ACCESS_JWKS_URL",
+      "COOKIE_ENCRYPTION_KEY",
+      "STUDIO_API_TOKEN",
+      "ALLOWED_EMAIL"
+    ]
+  }
+}

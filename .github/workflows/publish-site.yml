@@ -1,0 +1,66 @@
+name: Publish site
+
+on:
+  push:
+    branches: [main]
+
+permissions:
+  contents: write
+
+concurrency:
+  group: write-placid-pages
+  cancel-in-progress: true
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: apps/site
+    steps:
+      - name: Check out the repository
+        uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+
+      - name: Use Node.js
+        uses: actions/setup-node@v5
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: apps/site/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build published writing
+        run: |
+          npm run build:pages
+          node scripts/verify-static-export.mjs
+
+      - name: Update the GitHub Pages branch
+        shell: bash
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          if git ls-remote --exit-code --heads origin gh-pages >/dev/null 2>&1; then
+            git fetch origin gh-pages
+            git worktree add --detach /tmp/write-placid-pages origin/gh-pages
+          else
+            git worktree add --detach /tmp/write-placid-pages
+            cd /tmp/write-placid-pages
+            git checkout --orphan gh-pages
+            git rm -rf .
+            cd "$GITHUB_WORKSPACE/apps/site"
+          fi
+          rsync -a --checksum --delete --exclude .git --exclude _next/static/css/ \
+            dist/client/ /tmp/write-placid-pages/
+          mkdir -p /tmp/write-placid-pages/_next/static/css
+          rsync -a dist/client/_next/static/css/ /tmp/write-placid-pages/_next/static/css/
+          touch /tmp/write-placid-pages/.nojekyll
+          node scripts/verify-static-export.mjs /tmp/write-placid-pages
+          cd /tmp/write-placid-pages
+          git add -A
+          if git diff --cached --quiet; then exit 0; fi
+          git commit -m "Publish site"
+          git push origin HEAD:gh-pages

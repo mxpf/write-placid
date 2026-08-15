@@ -1,0 +1,1 @@
+CREATE INDEX `idx_documents_type_status_date` ON `documents` (`type`,`status`,`date`);
