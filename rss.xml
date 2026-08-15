@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/">
+  <channel>
+    <title>Write Placid</title>
+    <link>https://example.com/</link>
+    <description>A quiet place for notes, essays, and the occasional strange thing.</description>
+    <language>en-US</language>
+    <lastBuildDate>Fri, 14 Aug 2026 12:00:00 GMT</lastBuildDate>
+    <atom:link href="https://example.com/rss.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>A small note</title>
+      <link>https://example.com/a-small-note</link>
+      <guid isPermaLink="true">https://example.com/a-small-note</guid>
+      <pubDate>Fri, 14 Aug 2026 12:00:00 GMT</pubDate>
+      <description>Writing does not always need a launch plan.</description>
+      <content:encoded><![CDATA[<p>Writing does not always need a launch plan.</p>
+<p>Sometimes it only needs a place to go, a little attention, and a publish button that does not make a <em>fuss</em>.</p>
+<p>This is the sample post included with Write Placid. Replace it with something of your own.</p>]]></content:encoded>
+    </item>
+    <item>
+      <title>Now — August 14, 2026</title>
+      <link>https://example.com/now</link>
+      <guid isPermaLink="false">write-placid:now:now-20260814</guid>
+      <pubDate>Fri, 14 Aug 2026 12:00:00 GMT</pubDate>
+      <description>A few things receiving attention right now:</description>
+      <content:encoded><![CDATA[<p>A few things receiving attention right now:</p>
+<ul><li>Replacing this sample with an honest account of what is actually occupying the week.</li><li>Keeping the list short enough to remain useful.</li></ul>]]></content:encoded>
+    </item>
+  </channel>
+</rss>
