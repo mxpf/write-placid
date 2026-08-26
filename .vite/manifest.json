@@ -1,6 +1,6 @@
 {
   "_app-elements-DHcpiQtq.js": {
-    "file": "_next/static/chunks/app-elements-DHcpiQtq.js",
+    "file": "write-placid/_next/static/chunks/app-elements-DHcpiQtq.js",
     "name": "app-elements",
     "imports": [
       "_rolldown-runtime-hePW80VL.js",
@@ -9,8 +9,8 @@
       "_hash-B9TVtkv9.js"
     ]
   },
-  "_app-rsc-cache-busting-CZw-bevO.js": {
-    "file": "_next/static/chunks/app-rsc-cache-busting-CZw-bevO.js",
+  "_app-rsc-cache-busting-Du2UtuHL.js": {
+    "file": "write-placid/_next/static/chunks/app-rsc-cache-busting-Du2UtuHL.js",
     "name": "app-rsc-cache-busting",
     "imports": [
       "_rolldown-runtime-hePW80VL.js",
@@ -21,29 +21,29 @@
     ]
   },
   "_app-rsc-render-mode-fsLZfEO0.js": {
-    "file": "_next/static/chunks/app-rsc-render-mode-fsLZfEO0.js",
+    "file": "write-placid/_next/static/chunks/app-rsc-render-mode-fsLZfEO0.js",
     "name": "app-rsc-render-mode",
     "imports": [
       "_rolldown-runtime-hePW80VL.js"
     ]
   },
   "_deployment-id-omnKpZ2w.js": {
-    "file": "_next/static/chunks/deployment-id-omnKpZ2w.js",
+    "file": "write-placid/_next/static/chunks/deployment-id-omnKpZ2w.js",
     "name": "deployment-id"
   },
   "_framework-CgvwdT60.js": {
-    "file": "_next/static/chunks/framework-CgvwdT60.js",
+    "file": "write-placid/_next/static/chunks/framework-CgvwdT60.js",
     "name": "framework",
     "imports": [
       "_rolldown-runtime-hePW80VL.js"
     ]
   },
   "_hash-B9TVtkv9.js": {
-    "file": "_next/static/chunks/hash-B9TVtkv9.js",
+    "file": "write-placid/_next/static/chunks/hash-B9TVtkv9.js",
     "name": "hash"
   },
   "_headers-CjJR8pP7.js": {
-    "file": "_next/static/chunks/headers-CjJR8pP7.js",
+    "file": "write-placid/_next/static/chunks/headers-CjJR8pP7.js",
     "name": "headers",
     "imports": [
       "_rolldown-runtime-hePW80VL.js",
@@ -51,7 +51,7 @@
     ]
   },
   "_navigation-errors-C078jkgP.js": {
-    "file": "_next/static/chunks/navigation-errors-C078jkgP.js",
+    "file": "write-placid/_next/static/chunks/navigation-errors-C078jkgP.js",
     "name": "navigation-errors",
     "imports": [
       "_rolldown-runtime-hePW80VL.js",
@@ -59,23 +59,23 @@
     ]
   },
   "_protocol-headers-De2985Ry.js": {
-    "file": "_next/static/chunks/protocol-headers-De2985Ry.js",
+    "file": "write-placid/_next/static/chunks/protocol-headers-De2985Ry.js",
     "name": "protocol-headers"
   },
   "_query-DugiHe4Q.js": {
-    "file": "_next/static/chunks/query-DugiHe4Q.js",
+    "file": "write-placid/_next/static/chunks/query-DugiHe4Q.js",
     "name": "query"
   },
   "_record-BGze3w87.js": {
-    "file": "_next/static/chunks/record-BGze3w87.js",
+    "file": "write-placid/_next/static/chunks/record-BGze3w87.js",
     "name": "record"
   },
   "_rolldown-runtime-hePW80VL.js": {
-    "file": "_next/static/chunks/rolldown-runtime-hePW80VL.js",
+    "file": "write-placid/_next/static/chunks/rolldown-runtime-hePW80VL.js",
     "name": "rolldown-runtime"
   },
   "app/Footer.tsx": {
-    "file": "_next/static/chunks/Footer-DOo5XsIo.js",
+    "file": "write-placid/_next/static/chunks/Footer-BS6obupg.js",
     "name": "Footer",
     "src": "app/Footer.tsx",
     "isDynamicEntry": true,
@@ -85,7 +85,7 @@
     ]
   },
   "app/TypographyGuards.tsx": {
-    "file": "_next/static/chunks/TypographyGuards-BRGnKR4J.js",
+    "file": "write-placid/_next/static/chunks/TypographyGuards-BRGnKR4J.js",
     "name": "TypographyGuards",
     "src": "app/TypographyGuards.tsx",
     "isDynamicEntry": true,
@@ -95,7 +95,7 @@
     ]
   },
   "node_modules/vinext/dist/shims/internal/app-route-prefetch-policy.js": {
-    "file": "_next/static/chunks/app-route-prefetch-policy-BYgXg0Qf.js",
+    "file": "write-placid/_next/static/chunks/app-route-prefetch-policy-kBaj2jRu.js",
     "name": "app-route-prefetch-policy",
     "src": "node_modules/vinext/dist/shims/internal/app-route-prefetch-policy.js",
     "isDynamicEntry": true,
@@ -104,7 +104,7 @@
     ]
   },
   "node_modules/vinext/dist/shims/internal/hybrid-client-route-owner.js": {
-    "file": "_next/static/chunks/hybrid-client-route-owner-2NM0co3Q.js",
+    "file": "write-placid/_next/static/chunks/hybrid-client-route-owner-9aNWKKK8.js",
     "name": "hybrid-client-route-owner",
     "src": "node_modules/vinext/dist/shims/internal/hybrid-client-route-owner.js",
     "isDynamicEntry": true,
@@ -115,7 +115,7 @@
     ]
   },
   "node_modules/vinext/dist/shims/layout-segment-context.js": {
-    "file": "_next/static/chunks/layout-segment-context-Rwv2BFs8.js",
+    "file": "write-placid/_next/static/chunks/layout-segment-context-D14nh5Gk.js",
     "name": "layout-segment-context",
     "src": "node_modules/vinext/dist/shims/layout-segment-context.js",
     "isDynamicEntry": true,
@@ -127,7 +127,7 @@
     ]
   },
   "node_modules/vinext/dist/shims/link.js": {
-    "file": "_next/static/chunks/link-_YtADUQV.js",
+    "file": "write-placid/_next/static/chunks/link-aZ_WDodG.js",
     "name": "link",
     "src": "node_modules/vinext/dist/shims/link.js",
     "isDynamicEntry": true,
@@ -145,13 +145,13 @@
       "node_modules/vinext/dist/shims/internal/hybrid-client-route-owner.js",
       "virtual:vinext-app-browser-entry",
       "_app-elements-DHcpiQtq.js",
-      "_app-rsc-cache-busting-CZw-bevO.js",
+      "_app-rsc-cache-busting-Du2UtuHL.js",
       "_app-rsc-render-mode-fsLZfEO0.js",
       "_headers-CjJR8pP7.js"
     ]
   },
   "node_modules/vinext/dist/shims/streamed-icons.js": {
-    "file": "_next/static/chunks/streamed-icons-DRzS5EuZ.js",
+    "file": "write-placid/_next/static/chunks/streamed-icons-DRzS5EuZ.js",
     "name": "streamed-icons",
     "src": "node_modules/vinext/dist/shims/streamed-icons.js",
     "isDynamicEntry": true,
@@ -161,7 +161,7 @@
     ]
   },
   "virtual:vinext-app-browser-entry": {
-    "file": "_next/static/chunks/index-DuEi5OSY.js",
+    "file": "write-placid/_next/static/chunks/index-CpqALukp.js",
     "name": "index",
     "src": "virtual:vinext-app-browser-entry",
     "isEntry": true,
@@ -173,7 +173,7 @@
       "_app-elements-DHcpiQtq.js",
       "_hash-B9TVtkv9.js",
       "_navigation-errors-C078jkgP.js",
-      "_app-rsc-cache-busting-CZw-bevO.js"
+      "_app-rsc-cache-busting-Du2UtuHL.js"
     ],
     "dynamicImports": [
       "node_modules/vinext/dist/shims/internal/hybrid-client-route-owner.js",
