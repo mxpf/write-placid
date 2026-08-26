@@ -17,7 +17,7 @@ async function visit(directory) {
 
     htmlFiles += 1;
     const html = await readFile(location, "utf8");
-    for (const match of html.matchAll(/(?:href|src)="(\/_next\/[^"?#]+)(?:[?#][^"]*)?"/g)) {
+    for (const match of html.matchAll(/(?:href|src)="(\/(?:[^"?#]+\/)?_next\/[^"?#]+)(?:[?#][^"]*)?"/g)) {
       const asset = path.join(outputDirectory, decodeURIComponent(match[1]).replace(/^\/+/, ""));
       try {
         await access(asset);
@@ -27,7 +27,7 @@ async function visit(directory) {
     }
 
     for (const match of html.matchAll(
-      /href="(\/_next\/static\/css\/[\w-]+\.[\w-]+\.css)(?:[?#][^"]*)?"/g,
+      /href="(\/(?:[^"?#]+\/)?_next\/static\/css\/[\w-]+\.[\w-]+\.css)(?:[?#][^"]*)?"/g,
     )) {
       globalStylesheets.add(match[1]);
     }

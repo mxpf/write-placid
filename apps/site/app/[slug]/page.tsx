@@ -1,4 +1,3 @@
-/* eslint-disable @next/next/no-html-link-for-pages */
 import type { Metadata } from "next";
 import { ArticleBody } from "../ArticleBody";
 import { Footer } from "../Footer";
@@ -7,6 +6,7 @@ import { Webmentions } from "../Webmentions";
 import { stripInlineMarkdown } from "../inline-markdown";
 import { getPost, getStandalonePage, posts, standalonePages } from "../posts";
 import { siteConfig } from "../site-config";
+import { sitePath } from "../site-path";
 
 type PageProps = {
   params: Promise<{ slug: string }>;
@@ -41,10 +41,10 @@ export default async function PostPage({ params }: PageProps) {
     return (
       <main className="site article-page">
         <div className="article-frame">
-          <a className="desktop-brand" href="/"><LetterCascade text={siteConfig.name} /></a>
+          <a className="desktop-brand" href={sitePath("/")}><LetterCascade text={siteConfig.name} /></a>
           <article className="article-column">
             <h1>Nothing here yet.</h1>
-            <p><a href="/">Back to the notes.</a></p>
+            <p><a href={sitePath("/")}>Back to the notes.</a></p>
           </article>
         </div>
       </main>
@@ -54,14 +54,14 @@ export default async function PostPage({ params }: PageProps) {
   return (
     <main className="site article-page">
       <div className="article-frame">
-        <a className="desktop-brand" href="/"><LetterCascade text={siteConfig.name} /></a>
+        <a className="desktop-brand" href={sitePath("/")}><LetterCascade text={siteConfig.name} /></a>
         <article className="article-column" data-content-slug={slug} data-content-title={content.title}>
           <header className="article-header">
             <h1>{content.title}</h1>
             {post ? <p>{post.date}</p> : null}
             {post ? <p>{post.readingTime}</p> : null}
             <p className="author-edit-action" hidden>
-              <a href={siteConfig.studioUrl || "/"}>Edit</a>
+              <a href={siteConfig.studioUrl || sitePath("/")}>Edit</a>
             </p>
           </header>
           <div className="article-body">

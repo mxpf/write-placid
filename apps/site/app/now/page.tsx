@@ -1,4 +1,3 @@
-/* eslint-disable @next/next/no-html-link-for-pages */
 import type { Metadata } from "next";
 import { ArticleBody } from "../ArticleBody";
 import { Footer } from "../Footer";
@@ -6,6 +5,7 @@ import { LetterCascade } from "../LetterCascade";
 import { stripInlineMarkdown } from "../inline-markdown";
 import { currentNow } from "../posts";
 import { siteConfig } from "../site-config";
+import { sitePath } from "../site-path";
 
 export const metadata: Metadata = {
   title: "Now",
@@ -22,7 +22,7 @@ export default function NowPage() {
   return (
     <main className="site article-page">
       <div className="article-frame">
-        <a className="desktop-brand" href="/"><LetterCascade text={siteConfig.name} /></a>
+        <a className="desktop-brand" href={sitePath("/")}><LetterCascade text={siteConfig.name} /></a>
         <article
           className="article-column"
           data-content-slug={currentNow?.slug || ""}
@@ -33,7 +33,7 @@ export default function NowPage() {
             {currentNow ? <p>{currentNow.date}</p> : null}
             {currentNow ? (
               <p className="author-edit-action" hidden>
-                <a href={siteConfig.studioUrl || "/"}>Edit</a>
+                <a href={siteConfig.studioUrl || sitePath("/")}>Edit</a>
               </p>
             ) : null}
           </header>

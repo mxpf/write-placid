@@ -1,9 +1,9 @@
-/* eslint-disable @next/next/no-html-link-for-pages */
 "use client";
 
 import { useEffect, useState } from "react";
 
 import { siteConfig } from "./site-config";
+import { sitePath } from "./site-path";
 
 export function Footer({
   showBrand = false,
@@ -46,17 +46,17 @@ export function Footer({
 
   return (
     <footer className={className}>
-      {showBrand ? <a className="footer-brand" href="/">{siteConfig.name}</a> : null}
+      {showBrand ? <a className="footer-brand" href={sitePath("/")}>{siteConfig.name}</a> : null}
       <nav className="footer-links" aria-label="Site">
         <span className="footer-link-group">
           {siteConfig.authorUrl ? <a href={siteConfig.authorUrl} rel="me">Work</a> : null}
-          <a href="/about">About</a>
-          <a href="/links">Links</a>
-          <a href="/now">Now</a>
+          <a href={sitePath("/about")}>About</a>
+          <a href={sitePath("/links")}>Links</a>
+          <a href={sitePath("/now")}>Now</a>
         </span>
         <span className="footer-link-group">
           {siteConfig.statsUrl ? <a href={siteConfig.statsUrl}>Stats</a> : null}
-          <a href="/rss.xml" type="application/rss+xml">RSS</a>
+          <a href={sitePath("/rss.xml")} type="application/rss+xml">RSS</a>
         </span>
       </nav>
     </footer>

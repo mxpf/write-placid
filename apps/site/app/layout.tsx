@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import "./globals.css";
 import { siteConfig } from "./site-config";
+import { sitePath } from "./site-path";
 import { TypographyGuards } from "./TypographyGuards";
 
 const author = siteConfig.authorName && siteConfig.authorUrl
@@ -41,8 +42,8 @@ export const metadata: Metadata = {
     publisher: author.name,
   } : {}),
   icons: {
-    icon: [{ url: "/favicon.svg", type: "image/svg+xml" }],
-    shortcut: "/favicon.svg",
+    icon: [{ url: sitePath("/favicon.svg"), type: "image/svg+xml" }],
+    shortcut: sitePath("/favicon.svg"),
   },
   alternates: {
     types: {
@@ -85,7 +86,7 @@ export default function RootLayout({
             __html: JSON.stringify(structuredData).replace(/</g, "\\u003c"),
           }}
         />
-        <script defer src="/author-mode.js" />
+        <script defer src={sitePath("/author-mode.js")} />
         {siteConfig.trackingScriptUrl && siteConfig.trackingEndpoint && siteConfig.trackingSiteKey ? (
           <script
             defer

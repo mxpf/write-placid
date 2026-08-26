@@ -17,6 +17,9 @@ concurrency:
 jobs:
   publish:
     runs-on: ubuntu-latest
+    env:
+      PAGES_BASE_PATH: /write-placid
+      NEXT_PUBLIC_PAGES_BASE_PATH: /write-placid
     defaults:
       run:
         working-directory: apps/site
@@ -63,10 +66,11 @@ jobs:
             git rm -rf .
             cd "$GITHUB_WORKSPACE/apps/site"
           fi
-          rsync -a --checksum --delete --exclude .git --exclude _next/static/css/ \
+          pages_asset_root="${PAGES_BASE_PATH#/}/_next/static/css"
+          rsync -a --checksum --delete --exclude .git --exclude "$pages_asset_root/" \
             dist/client/ /tmp/write-placid-pages/
-          mkdir -p /tmp/write-placid-pages/_next/static/css
-          rsync -a dist/client/_next/static/css/ /tmp/write-placid-pages/_next/static/css/
+          mkdir -p "/tmp/write-placid-pages/$pages_asset_root"
+          rsync -a "dist/client/$pages_asset_root/" "/tmp/write-placid-pages/$pages_asset_root/"
           touch /tmp/write-placid-pages/.nojekyll
           node scripts/verify-static-export.mjs /tmp/write-placid-pages
           cd /tmp/write-placid-pages

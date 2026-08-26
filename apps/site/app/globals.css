@@ -9,7 +9,7 @@
 
 @font-face {
   font-family: "Instrument Sans";
-  src: url("/fonts/InstrumentSans-Variable.ttf") format("truetype");
+  src: url("../public/fonts/InstrumentSans-Variable.ttf") format("truetype");
   font-style: normal;
   font-weight: 100 900;
   font-display: swap;
@@ -17,7 +17,7 @@
 
 @font-face {
   font-family: "Instrument Sans";
-  src: url("/fonts/InstrumentSans-Italic-Variable.ttf") format("truetype");
+  src: url("../public/fonts/InstrumentSans-Italic-Variable.ttf") format("truetype");
   font-style: italic;
   font-weight: 100 900;
   font-display: swap;

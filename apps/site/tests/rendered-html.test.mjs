@@ -61,6 +61,16 @@ test("static homepage links point directly to exported article files", async () 
   }
 });
 
+test("can prefix internal links for a GitHub project Pages deployment", async () => {
+  process.env.NEXT_PUBLIC_PAGES_BASE_PATH = "/write-placid";
+  const moduleUrl = new URL("../app/site-path.ts", import.meta.url);
+  moduleUrl.searchParams.set("test", `${process.pid}-${Date.now()}`);
+  const { sitePath } = await import(moduleUrl.href);
+  delete process.env.NEXT_PUBLIC_PAGES_BASE_PATH;
+  assert.equal(sitePath("/about"), "/write-placid/about");
+  assert.equal(sitePath("https://example.com"), "https://example.com");
+});
+
 test("keeps edit controls private until author mode is activated", async () => {
   const source = await readFile(new URL("../public/author-mode.js", import.meta.url), "utf8");
 

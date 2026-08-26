@@ -5,7 +5,12 @@ import path from "node:path";
 // deployment. Keep this one retired filename available during that window so a
 // cached document still receives the current site styles instead of browser
 // defaults. New builds always use the current hashed stylesheet.
-const stylesheetDirectory = path.resolve("dist/client/_next/static/css");
+const pagesBasePath = (process.env.PAGES_BASE_PATH || "").replace(/^\/+|\/+$/g, "");
+const stylesheetDirectory = path.resolve(
+  "dist/client",
+  pagesBasePath,
+  "_next/static/css",
+);
 const cachedStylesheetName = "index.BcckSQMS.css";
 const stylesheetNames = await readdir(stylesheetDirectory);
 const currentStylesheetName = stylesheetNames.find(
