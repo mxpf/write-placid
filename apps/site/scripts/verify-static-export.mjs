@@ -2,6 +2,7 @@ import { access, readFile, readdir } from "node:fs/promises";
 import path from "node:path";
 
 const outputDirectory = path.resolve(process.argv[2] || "dist/client");
+const mountPath = (process.env.STATIC_EXPORT_MOUNT_PATH || "").replace(/\/+$/, "");
 const missing = new Set();
 const globalStylesheets = new Set();
 let htmlFiles = 0;
@@ -18,7 +19,11 @@ async function visit(directory) {
     htmlFiles += 1;
     const html = await readFile(location, "utf8");
     for (const match of html.matchAll(/(?:href|src)="(\/(?:[^"?#]+\/)?_next\/[^"?#]+)(?:[?#][^"]*)?"/g)) {
-      const asset = path.join(outputDirectory, decodeURIComponent(match[1]).replace(/^\/+/, ""));
+      const publicPath = decodeURIComponent(match[1]);
+      const mountedPath = mountPath && publicPath.startsWith(`${mountPath}/`)
+        ? publicPath.slice(mountPath.length)
+        : publicPath;
+      const asset = path.join(outputDirectory, mountedPath.replace(/^\/+/, ""));
       try {
         await access(asset);
       } catch {

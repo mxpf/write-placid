@@ -66,15 +66,17 @@ jobs:
             git rm -rf .
             cd "$GITHUB_WORKSPACE/apps/site"
           fi
-          pages_asset_root="${PAGES_BASE_PATH#/}/_next/static/css"
-          rsync -a --checksum --delete --exclude .git --exclude "$pages_asset_root/" \
+          pages_asset_source="${PAGES_BASE_PATH#/}/_next"
+          rsync -a --checksum --delete --exclude .git --exclude "$pages_asset_source/" \
             dist/client/ /tmp/write-placid-pages/
-          mkdir -p "/tmp/write-placid-pages/$pages_asset_root"
-          rsync -a "dist/client/$pages_asset_root/" "/tmp/write-placid-pages/$pages_asset_root/"
+          mkdir -p /tmp/write-placid-pages/_next
+          rsync -a "dist/client/$pages_asset_source/" /tmp/write-placid-pages/_next/
           touch /tmp/write-placid-pages/.nojekyll
-          node scripts/verify-static-export.mjs /tmp/write-placid-pages
+          STATIC_EXPORT_MOUNT_PATH="$PAGES_BASE_PATH" \
+            node scripts/verify-static-export.mjs /tmp/write-placid-pages
           cd /tmp/write-placid-pages
           git add -A
+          git add -f _next
           if git diff --cached --quiet; then exit 0; fi
           git commit -m "Publish site"
           git push origin HEAD:gh-pages
