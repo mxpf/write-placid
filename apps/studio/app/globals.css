@@ -1,36 +1,8 @@
-:root {
-  --paper: #f7f6f2;
-  --panel: #eeece6;
-  --ink: #1c1c1a;
-  --muted: #6f6d67;
-  --line: #d7d4cc;
-  --green: #2e5d45;
-  --header: rgba(247, 246, 242, 0.96);
-  --button-hover: #363632;
-  --placeholder: #6f6d67;
-  --overlay: rgba(28, 28, 26, 0.26);
-  color-scheme: light;
-}
-
-:root[data-theme="dark"] {
-  --paper: #171816;
-  --panel: #242521;
-  --ink: #f0eee8;
-  --muted: #aaa79f;
-  --line: #3b3c37;
-  --green: #91bca3;
-  --header: rgba(23, 24, 22, 0.96);
-  --button-hover: #d8d5ce;
-  --placeholder: #85837c;
-  --overlay: rgba(0, 0, 0, 0.5);
-  color-scheme: dark;
-}
-
 @font-face {
   font-family: "Instrument Sans";
   src: url("/fonts/InstrumentSans-Variable.ttf") format("truetype");
   font-style: normal;
-  font-weight: 400 700;
+  font-weight: 100 900;
   font-display: swap;
 }
 
@@ -38,7 +10,7 @@
   font-family: "Instrument Sans";
   src: url("/fonts/InstrumentSans-Italic-Variable.ttf") format("truetype");
   font-style: italic;
-  font-weight: 400 700;
+  font-weight: 100 900;
   font-display: swap;
 }
 
@@ -255,7 +227,7 @@ button {
 
 .new-button span {
   font-size: 20px;
-  font-weight: 400;
+  font-weight: 300;
 }
 
 .library-section {
@@ -277,12 +249,46 @@ button {
 }
 
 .library-section button {
+  position: relative;
   width: 100%;
   padding: 8px 9px 9px;
   border-radius: 3px;
   background: transparent;
   cursor: pointer;
   text-align: left;
+}
+
+.library-section li.is-reorderable {
+  cursor: grab;
+}
+
+.library-section li.is-reorderable:active {
+  cursor: grabbing;
+}
+
+.library-section li.is-reorderable button {
+  padding-right: 28px;
+  cursor: grab;
+}
+
+.library-section li.is-reorderable:active button {
+  cursor: grabbing;
+}
+
+.library-section li.is-dragging {
+  opacity: 0.45;
+}
+
+.library-section li.is-drop-target button {
+  box-shadow: inset 0 -1px 0 var(--muted);
+}
+
+.drag-handle {
+  position: absolute;
+  top: 50%;
+  right: 8px;
+  color: var(--muted);
+  transform: translateY(-50%);
 }
 
 .library-section button:hover,
@@ -324,6 +330,22 @@ button {
   margin-bottom: 24px;
 }
 
+.post-dates {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-left: auto;
+}
+
+.post-dates label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--muted);
+  font-size: 11px;
+  text-transform: uppercase;
+}
+
 .editor-meta input {
   width: 134px;
   border: 0;
@@ -332,6 +354,13 @@ button {
   color: var(--muted);
   font-size: 13px;
   text-align: right;
+}
+
+.modified-date {
+  color: var(--muted);
+  font-size: 12px;
+  font-style: italic;
+  white-space: nowrap;
 }
 
 .post-state {
@@ -499,10 +528,19 @@ button {
   margin-bottom: 0;
 }
 
+.body-input ul,
+.body-input ol {
+  margin: 0 0 24px;
+}
+
 .body-input ul {
   padding: 0;
-  margin: 0 0 24px;
   list-style: none;
+}
+
+.body-input ol {
+  padding-inline-start: 2em;
+  list-style: decimal;
 }
 
 .body-input li {
@@ -515,10 +553,17 @@ button {
   margin-bottom: 0;
 }
 
-.body-input li::before {
+.body-input ul li::before {
   position: absolute;
   inset-inline-end: calc(100% + 0.45em);
   content: "•";
+}
+
+.body-input ol li::marker {
+  color: var(--muted);
+  font-size: 12px;
+  font-variant-numeric: tabular-nums;
+  font-weight: 400;
 }
 
 .body-input a {
@@ -794,6 +839,26 @@ button {
   .library-section button {
     min-height: 54px;
     padding: 8px 10px 9px;
+  }
+
+  .editor-meta {
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+
+  .post-dates {
+    order: 3;
+    width: 100%;
+    justify-content: space-between;
+    margin-left: 0;
+  }
+
+  .library-section li.is-reorderable {
+    cursor: pointer;
+  }
+
+  .drag-handle {
+    display: none;
   }
 
   .editor {

@@ -7,6 +7,7 @@ export type WritingDocument = {
   date: string;
   status: "draft" | "published";
   publishedAt: string;
+  publicUpdatedAt: string;
   body: string;
   source?: {
     label: string;
@@ -64,7 +65,7 @@ export function calculateReadingTime(body: string) {
     .replace(/[*_]/g, "");
   const words = readableBody.trim().match(/[\p{L}\p{N}’'-]+/gu)?.length ?? 0;
   const minutes = Math.max(1, Math.ceil(words / 180));
-  return `${minutes} minute read`;
+  return `${minutes} minute${minutes === 1 ? "" : "s"}`;
 }
 
 export function displayDate(value: string) {
@@ -100,6 +101,7 @@ export function parseWritingDocument(
     date: type !== "page" ? metadata.date || new Date().toISOString().slice(0, 10) : "",
     status: type !== "page" && metadata.status === "draft" ? "draft" : "published",
     publishedAt: metadata.publishedAt || "",
+    publicUpdatedAt: type === "post" ? metadata.updatedAt || "" : "",
     body,
     source:
       metadata.sourceLabel && metadata.sourceHref
@@ -128,6 +130,9 @@ export function serializeWritingDocument(document: WritingDocument) {
     );
     if (document.publishedAt) {
       metadata.push(`publishedAt: ${document.publishedAt}`);
+    }
+    if (document.type === "post" && document.publicUpdatedAt) {
+      metadata.push(`updatedAt: ${document.publicUpdatedAt}`);
     }
     if (document.source?.label && document.source?.href) {
       metadata.push(`sourceLabel: ${quote(document.source.label.trim())}`);
@@ -185,6 +190,8 @@ export function normalizeIncomingDocument(
       type !== "page" && input.status === "published" ? "published" : type === "page" ? "published" : "draft",
     publishedAt:
       type !== "page" ? String(input.publishedAt || existing?.publishedAt || "") : "",
+    publicUpdatedAt:
+      type === "post" ? String(existing?.publicUpdatedAt || "") : "",
     body: String(input.body || ""),
     source: type === "post" ? source : undefined,
     remoteSha: existing?.remoteSha || String(input.remoteSha || ""),
@@ -198,4 +205,19 @@ export function normalizeIncomingDocument(
 
 export function isDocumentDirty(document: WritingDocument) {
   return serializeWritingDocument(document).trim() !== document.publishedSource.trim();
+}
+
+export function markRevisedPost(
+  document: WritingDocument,
+  revisedAt = new Date().toISOString(),
+) {
+  if (
+    document.type !== "post" ||
+    document.status !== "published" ||
+    !document.publishedSource.trim() ||
+    !isDocumentDirty(document)
+  ) {
+    return document;
+  }
+  return { ...document, publicUpdatedAt: revisedAt };
 }

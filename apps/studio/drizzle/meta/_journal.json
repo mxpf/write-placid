@@ -22,6 +22,13 @@
       "when": 1786111947701,
       "tag": "0002_chunky_joshua_kane",
       "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "6",
+      "when": 1787157288388,
+      "tag": "0003_colorful_moondragon",
+      "breakpoints": true
     }
   ]
 }

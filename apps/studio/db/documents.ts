@@ -2,7 +2,6 @@ import { asc, desc, eq } from "drizzle-orm";
 import type { WritingDocument } from "../app/content";
 import { getD1, getDb, ensureSchema } from ".";
 import { documents } from "./schema";
-import { mappedGoogleDocId } from "../app/drive-document-map";
 
 type DocumentRow = typeof documents.$inferSelect;
 
@@ -16,6 +15,7 @@ function fromRow(row: DocumentRow): WritingDocument {
     date: row.date,
     status: row.status,
     publishedAt: row.publishedAt,
+    publicUpdatedAt: row.publicUpdatedAt,
     body: row.body,
     source:
       row.sourceLabel && row.sourceHref
@@ -24,7 +24,7 @@ function fromRow(row: DocumentRow): WritingDocument {
     remoteSha: row.remoteSha,
     publishedSource: row.publishedSource,
     updatedAt: row.updatedAt,
-    googleDocId: row.googleDocId || mappedGoogleDocId(row.path),
+    googleDocId: row.googleDocId,
     driveRevision: row.driveRevision,
     driveSyncedBody: row.driveSyncedBody,
   };
@@ -40,6 +40,7 @@ function toRow(document: WritingDocument, sortOrder = 0) {
     date: document.date,
     status: document.status,
     publishedAt: document.publishedAt,
+    publicUpdatedAt: document.publicUpdatedAt,
     body: document.body,
     sourceLabel: document.source?.label || "",
     sourceHref: document.source?.href || "",
@@ -47,10 +48,16 @@ function toRow(document: WritingDocument, sortOrder = 0) {
     publishedSource: document.publishedSource,
     updatedAt: document.updatedAt,
     sortOrder,
-    googleDocId: document.googleDocId || mappedGoogleDocId(document.path),
+    googleDocId: document.googleDocId,
     driveRevision: document.driveRevision,
     driveSyncedBody: document.driveSyncedBody,
   };
+}
+
+function rowUpdates(row: ReturnType<typeof toRow>) {
+  const { sortOrder, ...updates } = row;
+  void sortOrder;
+  return updates;
 }
 
 export async function listDocuments() {
@@ -58,7 +65,7 @@ export async function listDocuments() {
   const rows = await getDb()
     .select()
     .from(documents)
-    .orderBy(asc(documents.type), desc(documents.date), asc(documents.sortOrder));
+    .orderBy(asc(documents.type), asc(documents.sortOrder), desc(documents.date));
   return rows.map(fromRow);
 }
 
@@ -90,7 +97,7 @@ export async function saveDocument(document: WritingDocument, sortOrder = 0) {
     .values(row)
     .onConflictDoUpdate({
       target: documents.id,
-      set: row,
+      set: rowUpdates(row),
     });
   return document;
 }
@@ -102,7 +109,12 @@ export async function replaceDocument(
 ) {
   await ensureSchema();
   const db = getDb();
-  const row = toRow(document, sortOrder);
+  const [existing] = await db
+    .select({ sortOrder: documents.sortOrder })
+    .from(documents)
+    .where(eq(documents.id, previousId))
+    .limit(1);
+  const row = toRow(document, existing?.sortOrder ?? sortOrder);
   await db.batch([
     db.delete(documents).where(eq(documents.id, previousId)),
     db.insert(documents).values(row).onConflictDoUpdate({
@@ -111,6 +123,34 @@ export async function replaceDocument(
     }),
   ]);
   return document;
+}
+
+export async function reorderDraftDocuments(ids: string[]) {
+  await ensureSchema();
+  const db = getDb();
+  const rows = await db
+    .select({ id: documents.id, type: documents.type, status: documents.status })
+    .from(documents);
+  const draftIds = rows
+    .filter((row) => row.type === "post" && row.status === "draft")
+    .map((row) => row.id);
+  const uniqueIds = new Set(ids);
+  if (
+    uniqueIds.size !== ids.length ||
+    ids.length !== draftIds.length ||
+    draftIds.some((id) => !uniqueIds.has(id))
+  ) {
+    throw new Error("The draft list changed. Reload Studio and try again.");
+  }
+
+  if (ids.length) {
+    const d1 = getD1();
+    await d1.batch(
+      ids.map((id, sortOrder) =>
+        d1.prepare("UPDATE documents SET sort_order = ? WHERE id = ?").bind(sortOrder, id),
+      ),
+    );
+  }
 }
 
 export async function seedDocuments(items: WritingDocument[]) {
@@ -139,4 +179,24 @@ export async function deleteDocument(id: string) {
     d1.prepare("DELETE FROM documents WHERE id = ?").bind(document.id),
   ]);
   return document;
+}
+
+export async function getSyncCursor(key: string) {
+  await ensureSchema();
+  const result = await getD1()
+    .prepare("SELECT value FROM sync_state WHERE key = ?")
+    .bind(key)
+    .first<{ value: string }>();
+  const cursor = Number.parseInt(result?.value || "0", 10);
+  return Number.isSafeInteger(cursor) && cursor >= 0 ? cursor : 0;
+}
+
+export async function setSyncCursor(key: string, cursor: number) {
+  await ensureSchema();
+  await getD1()
+    .prepare(
+      "INSERT INTO sync_state (key, value) VALUES (?, ?) ON CONFLICT(key) DO UPDATE SET value = excluded.value",
+    )
+    .bind(key, String(cursor))
+    .run();
 }

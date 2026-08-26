@@ -43,6 +43,23 @@ export function ArticleBody({ paragraphs }: { paragraphs: readonly string[] }) {
       continue;
     }
 
+    if (/^\s*\d+\.\s+/.test(paragraph)) {
+      const listStart = index;
+      const start = Number(paragraph.match(/^\s*(\d+)\./)?.[1] || 1);
+      const items: ReactNode[] = [];
+      while (index < paragraphs.length && /^\s*\d+\.\s+/.test(paragraphs[index])) {
+        const item = paragraphs[index].replace(/^\s*\d+\.\s+/, "");
+        items.push(<li key={`${index}-${item}`}><InlineText text={item} /></li>);
+        index += 1;
+      }
+      blocks.push(
+        <ol className="article-list article-numbered-list" key={`list-${listStart}`} start={start}>
+          {items}
+        </ol>,
+      );
+      continue;
+    }
+
     blocks.push(
       <p className={paragraphClassName(paragraph)} key={`${index}-${paragraph}`}>
         <InlineText text={paragraph} />

@@ -15,13 +15,13 @@ npm run check:config
 
 ## 2. Configure and publish the site
 
-Edit `apps/site/site.config.json`. At minimum, change `name`, `description`, and `url`. Replace the sample Markdown in:
+Edit `apps/site/site.config.json`. At minimum, change `name`, `description`, and `url`. Optional author fields add person metadata and a `rel=me` link. Set `webmentionEndpoint` only if you want cached Webmentions. Replace the sample Markdown in:
 
 - `apps/site/content/posts`
 - `apps/site/content/pages`
 - `apps/site/content/now`
 
-The included GitHub Actions workflow builds `apps/site` and publishes its static export to the `gh-pages` branch on each push to `main`. In repository settings, set Pages to deploy from the `gh-pages` branch. Add a `CNAME` file under `apps/site/public` only when using a custom domain.
+The included GitHub Actions workflow builds `apps/site` and publishes its static export to the `gh-pages` branch on each push to `main`. It also runs daily so an enabled Webmention cache can refresh without a content change. A temporary Webmention failure does not block publication. In repository settings, set Pages to deploy from the `gh-pages` branch. Add a `CNAME` file under `apps/site/public` only when using a custom domain.
 
 ## 3. Add the private Studio
 
@@ -50,11 +50,19 @@ npm run types
 npm run deploy
 ```
 
+Keep `WRITE_PLACID_GITHUB_CONTENT_ROOT=apps/site` for this monorepo. Studio uses logical document paths such as `content/posts/example.md` internally and adds that repository prefix only at the GitHub boundary.
+
 Return to `apps/site/site.config.json` and set `studioUrl` to the protected Worker URL. Visiting the public site with `#edit` once enables private edit links in that browser; `#edit-off` removes them.
 
 ### Optional Google Docs sync
 
 Follow `apps/studio/google-apps-script/README.md`. The bridge secret belongs in both Apps Script properties and `WRITE_PLACID_DRIVE_BRIDGE_SECRET`.
+
+### Optional KDrive repository
+
+Create `Drafts` and `Published` folders under a private KDrive root. Configure `WRITE_PLACID_KDRIVE_WEBDAV_URL`, `WRITE_PLACID_KDRIVE_USERNAME`, and `WRITE_PLACID_KDRIVE_ROOT` as Worker variables, then add the KDrive application password as the `WRITE_PLACID_KDRIVE_APP_PASSWORD` Worker secret. Do not commit a live username, URL, password, or private path.
+
+When all four KDrive values are present, Studio saves post Markdown there and the Worker reconciles up to five remote files every five minutes. Files moved into `Published` are published through GitHub; files moved back into `Drafts` are removed from the public content tree. Pages and `/now` entries remain in D1/GitHub. Leave the KDrive values empty to keep D1 as the private canonical library.
 
 ## 4. Add Trackinghaus
 

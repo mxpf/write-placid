@@ -85,6 +85,17 @@ function renderPostHtml(post) {
       paragraphs.push(`<ul>${items.join("")}</ul>`);
       continue;
     }
+    if (/^\s*\d+\.\s+/.test(post.paragraphs[index])) {
+      const start = Number(post.paragraphs[index].match(/^\s*(\d+)\./)?.[1] || 1);
+      const items = [];
+      while (index < post.paragraphs.length && /^\s*\d+\.\s+/.test(post.paragraphs[index])) {
+        items.push(`<li>${renderInlineHtml(post.paragraphs[index].replace(/^\s*\d+\.\s+/, ""))}</li>`);
+        index += 1;
+      }
+      const startAttribute = start === 1 ? "" : ` start="${start}"`;
+      paragraphs.push(`<ol${startAttribute}>${items.join("")}</ol>`);
+      continue;
+    }
     paragraphs.push(`<p>${renderInlineHtml(post.paragraphs[index])}</p>`);
     index += 1;
   }

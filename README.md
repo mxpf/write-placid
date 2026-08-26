@@ -8,8 +8,8 @@ Write Placid packages the system developed for [Thinkinghaus](https://thinking.h
 
 ## What is included
 
-- **Site** — a fast public home for essays, pages, links, RSS, and a single current `/now` entry.
-- **Studio** — a private, phone-friendly rich-text editor that saves drafts to Cloudflare D1 and publishes Markdown through GitHub.
+- **Site** — a fast public home for essays, pages, links, RSS, a single current `/now` entry, revision dates, and optional cached Webmentions.
+- **Studio** — a private, phone-friendly rich-text editor that saves drafts to Cloudflare D1, optionally synchronizes KDrive or Google Docs, and publishes Markdown through GitHub.
 - **Drafts MCP** — an optional private bridge that lets a compatible AI assistant save a complete draft or revision to Studio without permission to publish or delete.
 - **Trackinghaus** — optional, public, aggregate-only weekly analytics for the publication.
 

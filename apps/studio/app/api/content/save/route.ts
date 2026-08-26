@@ -4,6 +4,7 @@ import {
   type WritingDocument,
 } from "../../../content";
 import { authorizeStudioRequest } from "../../../server-auth";
+import { saveKdrivePost } from "../../../kdrive";
 import {
   findDocument,
   findDocumentByPath,
@@ -29,6 +30,7 @@ export async function POST(request: Request) {
         { status: 409 },
       );
     }
+    await saveKdrivePost(document, existing);
     await saveDocument(document);
     return Response.json({
       document: { ...document, isDirty: isDocumentDirty(document) },

@@ -20,3 +20,9 @@ export function smartenQuotes(value: string) {
     destinations[Number(index)] ?? "",
   );
 }
+
+export function smartQuoteForInput(quote: "\"" | "'", previousCharacter = "") {
+  const opensQuote = !previousCharacter || /[\s([{—]/u.test(previousCharacter);
+  if (quote === "\"") return opensQuote ? "“" : "”";
+  return opensQuote ? "‘" : "’";
+}

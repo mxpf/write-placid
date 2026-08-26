@@ -1,4 +1,5 @@
 import { deleteGithubDocument } from "../../../github";
+import { deleteKdrivePost } from "../../../kdrive";
 import { authorizeStudioRequest } from "../../../server-auth";
 import { deleteDocument, findDocument } from "../../../../db/documents";
 
@@ -17,6 +18,7 @@ export async function POST(request: Request) {
     }
 
     const removedFromGithub = await deleteGithubDocument(document);
+    await deleteKdrivePost(document);
     await deleteDocument(document.id);
     return Response.json({
       deleted: { id: document.id, title: document.title },

@@ -12,6 +12,7 @@ export async function generatePostsModule() {
     title: post.title,
     slug: post.slug,
     date: displayDate(post.date),
+    ...(post.updatedAt ? { updatedAt: displayDate(post.updatedAt.slice(0, 10)) } : {}),
     readingTime: post.readingTime,
     paragraphs: post.paragraphs,
     ...(post.source ? { source: post.source } : {}),

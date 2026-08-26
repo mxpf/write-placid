@@ -11,6 +11,7 @@ export const documents = sqliteTable(
     date: text("date").notNull().default(""),
     status: text("status", { enum: ["draft", "published"] }).notNull(),
     publishedAt: text("published_at").notNull().default(""),
+    publicUpdatedAt: text("public_updated_at").notNull().default(""),
     body: text("body").notNull().default(""),
     sourceLabel: text("source_label").notNull().default(""),
     sourceHref: text("source_href").notNull().default(""),

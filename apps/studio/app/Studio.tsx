@@ -8,10 +8,22 @@ import {
   useRef,
   useState,
 } from "react";
-import { Heading2, Italic, Link as LinkIcon, Quote as QuoteIcon } from "lucide-react";
+import {
+  GripVertical,
+  Heading2,
+  Italic,
+  Link as LinkIcon,
+  Quote as QuoteIcon,
+} from "lucide-react";
 import { displayDate, type WritingDocument } from "./content";
-import { editorToMarkdown, markdownToEditorHtml } from "./rich-text";
-import { smartenQuotes } from "./smart-quotes";
+import {
+  editorToMarkdown,
+  markdownPasteToEditorHtml,
+  markdownToEditorHtml,
+  numberedListShortcutStart,
+} from "./rich-text";
+import { smartenQuotes, smartQuoteForInput } from "./smart-quotes";
+import { moveItemToTarget } from "./reorder";
 import { studioConfig } from "./studio-config";
 
 type StudioDocument = WritingDocument & { isDirty?: boolean };
@@ -21,7 +33,6 @@ type SaveState =
   | "Unsaved changes"
   | "Saving…"
   | "Deleting…"
-  | "Updating live…"
   | "Could not save";
 
 function today() {
@@ -41,6 +52,7 @@ function newPost(type: "post" | "now" = "post"): StudioDocument {
     date,
     status: "draft",
     publishedAt: "",
+    publicUpdatedAt: "",
     body: "",
     remoteSha: "",
     publishedSource: "",
@@ -61,6 +73,7 @@ function snapshot(document: StudioDocument | null) {
     date: document.date,
     status: document.status,
     publishedAt: document.publishedAt,
+    publicUpdatedAt: document.publicUpdatedAt,
     body: document.body,
     source: document.source,
   });
@@ -106,27 +119,79 @@ function LibrarySection({
   documents,
   selectedId,
   onSelect,
+  onReorder,
 }: {
   title: string;
   documents: StudioDocument[];
   selectedId: string;
   onSelect: (document: StudioDocument) => void;
+  onReorder?: (sourceId: string, targetId: string) => void;
 }) {
+  const [draggedId, setDraggedId] = useState("");
+  const [dropTargetId, setDropTargetId] = useState("");
+  const [desktopDragEnabled, setDesktopDragEnabled] = useState(false);
+  useEffect(() => {
+    const query = window.matchMedia("(min-width: 701px) and (pointer: fine)");
+    const update = () => setDesktopDragEnabled(query.matches);
+    update();
+    query.addEventListener("change", update);
+    return () => query.removeEventListener("change", update);
+  }, []);
   if (!documents.length) return null;
+  const reorderable = Boolean(onReorder && desktopDragEnabled);
   return (
     <section className="library-section">
       <h2>{title}</h2>
       <ol>
         {documents.map((document) => (
-          <li key={document.id}>
+          <li
+            key={document.id}
+            className={`${reorderable ? "is-reorderable" : ""} ${
+              draggedId === document.id ? "is-dragging" : ""
+            } ${dropTargetId === document.id ? "is-drop-target" : ""}`.trim()}
+            draggable={reorderable}
+            onDragStart={(event) => {
+              if (!reorderable) return;
+              setDraggedId(document.id);
+              event.dataTransfer.effectAllowed = "move";
+              event.dataTransfer.setData("text/plain", document.id);
+            }}
+            onDragOver={(event) => {
+              if (!reorderable || !draggedId || draggedId === document.id) return;
+              event.preventDefault();
+              event.dataTransfer.dropEffect = "move";
+              setDropTargetId(document.id);
+            }}
+            onDragLeave={() => {
+              if (dropTargetId === document.id) setDropTargetId("");
+            }}
+            onDrop={(event) => {
+              event.preventDefault();
+              if (onReorder && draggedId && draggedId !== document.id) {
+                onReorder(draggedId, document.id);
+              }
+              setDraggedId("");
+              setDropTargetId("");
+            }}
+            onDragEnd={() => {
+              setDraggedId("");
+              setDropTargetId("");
+            }}
+          >
             <button
               className={document.id === selectedId ? "is-active" : ""}
               type="button"
               onClick={() => onSelect(document)}
             >
+              {reorderable ? (
+                <GripVertical className="drag-handle" aria-hidden="true" size={14} />
+              ) : null}
               <span>{document.title || "Untitled"}</span>
               <small>
                 {document.type === "page" ? "Page" : displayDate(document.date)}
+                {document.type === "post" && document.publicUpdatedAt
+                  ? ` · Last edited ${displayDate(document.publicUpdatedAt.slice(0, 10))}`
+                  : ""}
                 {document.status === "published" && document.isDirty
                   ? " · Unpublished changes"
                   : ""}
@@ -487,6 +552,35 @@ export function Studio() {
     selectDocument(document);
   };
 
+  const reorderDrafts = async (sourceId: string, targetId: string) => {
+    const drafts = documents.filter(
+      (document) => document.type === "post" && document.status === "draft",
+    );
+    const reordered = moveItemToTarget(drafts, sourceId, targetId);
+    if (reordered === drafts) return;
+    const previousDocuments = documents;
+    let draftIndex = 0;
+    const nextDocuments = documents.map((document) =>
+      document.type === "post" && document.status === "draft"
+        ? reordered[draftIndex++]
+        : document,
+    );
+    setDocuments(nextDocuments);
+
+    try {
+      const response = await fetch("/api/content/reorder", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ ids: reordered.map((document) => document.id) }),
+      });
+      const result = (await response.json()) as { error?: string };
+      if (!response.ok) throw new Error(result.error || "The drafts could not be reordered.");
+    } catch (error) {
+      setDocuments(previousDocuments);
+      showNotice(error instanceof Error ? error.message : "The drafts could not be reordered.");
+    }
+  };
+
   const publishSavedDocument = async (document: StudioDocument) => {
     setPublishing(true);
     setSaveState("Saving…");
@@ -526,13 +620,15 @@ export function Studio() {
 
   const waitForLive = async (document: StudioDocument) => {
     const pollId = ++livePollRef.current;
-    setSaveState("Updating live…");
     for (let attempt = 0; attempt < 18; attempt += 1) {
       if (attempt) await new Promise((resolve) => window.setTimeout(resolve, 5000));
       if (pollId !== livePollRef.current) return;
+      const controller = new AbortController();
+      const timeout = window.setTimeout(() => controller.abort(), 8000);
       try {
         const response = await fetch(`/api/content/live?id=${encodeURIComponent(document.id)}`, {
           cache: "no-store",
+          signal: controller.signal,
         });
         const result = (await response.json()) as { live?: boolean };
         if (response.ok && result.live) {
@@ -542,6 +638,8 @@ export function Studio() {
         }
       } catch {
         // Keep checking while the public site rebuilds.
+      } finally {
+        window.clearTimeout(timeout);
       }
     }
     if (pollId === livePollRef.current) {
@@ -640,7 +738,7 @@ export function Studio() {
       setCurrent(next);
       currentRef.current = next;
       lastSavedRef.current = snapshot(next);
-      setSaveState(result.removedFromGithub ? "Updating live…" : "Saved online");
+      setSaveState("Saved online");
       showNotice(
         result.removedFromGithub
           ? `Deleted “${document.title}”. ${studioConfig.publicationName} is updating.`
@@ -790,16 +888,81 @@ export function Studio() {
     openExistingLink(target as HTMLAnchorElement);
   };
 
+  const convertNumberedListShortcut = () => {
+    const editor = bodyRef.current;
+    const selection = window.getSelection();
+    if (!editor || !selection?.rangeCount || !selection.isCollapsed) return false;
+
+    const range = selection.getRangeAt(0);
+    if (!editor.contains(range.commonAncestorContainer)) return false;
+    const anchorElement = selection.anchorNode?.nodeType === Node.ELEMENT_NODE
+      ? selection.anchorNode as Element
+      : selection.anchorNode?.parentElement;
+    const closestBlock = anchorElement?.closest("p, div");
+    const block = closestBlock && closestBlock !== editor ? closestBlock : selection.anchorNode;
+    if (!block || block.textContent === null) return false;
+
+    const start = numberedListShortcutStart(block.textContent);
+    if (start === null) return false;
+    const markerRange = document.createRange();
+    markerRange.selectNodeContents(block);
+    markerRange.deleteContents();
+    markerRange.collapse(true);
+    selection.removeAllRanges();
+    selection.addRange(markerRange);
+
+    document.execCommand("insertOrderedList", false);
+    const selectedElement = selection.anchorNode?.nodeType === Node.ELEMENT_NODE
+      ? selection.anchorNode as Element
+      : selection.anchorNode?.parentElement;
+    const list = selectedElement?.closest("ol");
+    if (list && start !== 1) list.setAttribute("start", String(start));
+    return true;
+  };
+
   const handleEditorInput = () => {
     if (!bodyRef.current) return;
+    convertNumberedListShortcut();
     updateCurrent({ body: editorToMarkdown(bodyRef.current) });
   };
 
   const handleEditorPaste = (event: React.ClipboardEvent<HTMLDivElement>) => {
     event.preventDefault();
     const text = smartenQuotes(event.clipboardData.getData("text/plain"));
-    document.execCommand("insertText", false, text);
+    const richHtml = markdownPasteToEditorHtml(text);
+    document.execCommand(richHtml ? "insertHTML" : "insertText", false, richHtml || text);
     handleEditorInput();
+  };
+
+  const insertSmartQuote = (quote: "\"" | "'") => {
+    const editor = bodyRef.current;
+    const selection = window.getSelection();
+    if (!editor || !selection?.rangeCount) return false;
+    const range = selection.getRangeAt(0);
+    if (!editor.contains(range.commonAncestorContainer)) return false;
+
+    const before = range.cloneRange();
+    before.selectNodeContents(editor);
+    before.setEnd(range.startContainer, range.startOffset);
+    const nextCharacter = smartQuoteForInput(quote, before.toString().slice(-1));
+
+    range.deleteContents();
+    const text = document.createTextNode(nextCharacter);
+    range.insertNode(text);
+    range.setStartAfter(text);
+    range.collapse(true);
+    selection.removeAllRanges();
+    selection.addRange(range);
+    handleEditorInput();
+    return true;
+  };
+
+  const handleEditorBeforeInput = (event: React.FormEvent<HTMLDivElement>) => {
+    const inputEvent = event.nativeEvent as InputEvent;
+    if (inputEvent.inputType !== "insertText") return;
+    if (inputEvent.data !== "\"" && inputEvent.data !== "'") return;
+    if (!insertSmartQuote(inputEvent.data)) return;
+    event.preventDefault();
   };
 
   const handleEditorKeyDown = (event: React.KeyboardEvent<HTMLDivElement>) => {
@@ -809,31 +972,7 @@ export function Studio() {
       return;
     }
     if (event.key !== "\"" && event.key !== "'") return;
-
-    const editor = bodyRef.current;
-    const selection = window.getSelection();
-    if (!editor || !selection?.rangeCount) return;
-    const range = selection.getRangeAt(0);
-    if (!editor.contains(range.commonAncestorContainer)) return;
-
-    const before = range.cloneRange();
-    before.selectNodeContents(editor);
-    before.setEnd(range.startContainer, range.startOffset);
-    const previousCharacter = before.toString().slice(-1);
-    const opensQuote = !previousCharacter || /[\s([{—]/u.test(previousCharacter);
-    const nextCharacter = event.key === "\""
-      ? opensQuote ? "“" : "”"
-      : opensQuote ? "‘" : "’";
-
-    event.preventDefault();
-    range.deleteContents();
-    const text = document.createTextNode(nextCharacter);
-    range.insertNode(text);
-    range.setStartAfter(text);
-    range.collapse(true);
-    selection.removeAllRanges();
-    selection.addRange(range);
-    handleEditorInput();
+    if (insertSmartQuote(event.key)) event.preventDefault();
   };
 
   const handleDialogKeyDown = (event: React.KeyboardEvent<HTMLElement>) => {
@@ -965,7 +1104,7 @@ export function Studio() {
         <nav aria-label="Writing">
           <LibrarySection title="Pages" documents={grouped.pages} selectedId={current?.id || ""} onSelect={chooseDocument} />
           <LibrarySection title="Now" documents={grouped.now} selectedId={current?.id || ""} onSelect={chooseDocument} />
-          <LibrarySection title="Drafts" documents={grouped.drafts} selectedId={current?.id || ""} onSelect={chooseDocument} />
+          <LibrarySection title="Drafts" documents={grouped.drafts} selectedId={current?.id || ""} onSelect={chooseDocument} onReorder={reorderDrafts} />
           <LibrarySection title="Published" documents={grouped.published} selectedId={current?.id || ""} onSelect={chooseDocument} />
         </nav>
       </aside>
@@ -987,12 +1126,22 @@ export function Studio() {
                       : current.status === "published" ? "Published" : "Draft"}
                 </button>
                 {current.type !== "page" ? (
-                  <input
-                    aria-label="Publication date"
-                    type="date"
-                    value={current.date}
-                    onChange={(event) => updateCurrent({ date: event.target.value })}
-                  />
+                  <div className="post-dates">
+                    <label>
+                      <span>{current.type === "post" ? "Post date" : "Date"}</span>
+                      <input
+                        aria-label={current.type === "post" ? "Post date" : "Date"}
+                        type="date"
+                        value={current.date}
+                        onChange={(event) => updateCurrent({ date: event.target.value })}
+                      />
+                    </label>
+                    {current.type === "post" && current.publicUpdatedAt ? (
+                      <span className="modified-date">
+                        Last edited {displayDate(current.publicUpdatedAt.slice(0, 10))}
+                      </span>
+                    ) : null}
+                  </div>
                 ) : null}
                   {current.type !== "page" && !current.id.startsWith("new:") ? (
                     <>
@@ -1081,6 +1230,7 @@ export function Studio() {
                 aria-label="Main text"
                 aria-multiline="true"
                 data-placeholder="Begin anywhere."
+                onBeforeInput={handleEditorBeforeInput}
                 onInput={handleEditorInput}
                 onPaste={handleEditorPaste}
                 onClick={handleEditorClick}

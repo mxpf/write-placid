@@ -7,7 +7,19 @@ import {
 const owner = process.env.WRITE_PLACID_GITHUB_OWNER || "your-github-name";
 const repository = process.env.WRITE_PLACID_GITHUB_REPO || "write-placid";
 const branch = process.env.WRITE_PLACID_GITHUB_BRANCH || "main";
+const contentRoot = (process.env.WRITE_PLACID_GITHUB_CONTENT_ROOT || "apps/site")
+  .trim()
+  .replace(/^\/+|\/+$/g, "");
 const apiRoot = `https://api.github.com/repos/${owner}/${repository}`;
+
+function repositoryPath(pathname: string) {
+  return contentRoot ? `${contentRoot}/${pathname}` : pathname;
+}
+
+function documentPath(pathname: string) {
+  const prefix = contentRoot ? `${contentRoot}/` : "";
+  return prefix && pathname.startsWith(prefix) ? pathname.slice(prefix.length) : pathname;
+}
 
 type GithubFile = {
   type: "file";
@@ -111,15 +123,15 @@ async function listGithubDirectory(pathname: string) {
 
 export async function loadPublishedDocuments() {
   const [postEntries, pageEntries, nowEntries] = await Promise.all([
-    listGithubDirectory("content/posts"),
-    listGithubDirectory("content/pages"),
-    listGithubDirectory("content/now"),
+    listGithubDirectory(repositoryPath("content/posts")),
+    listGithubDirectory(repositoryPath("content/pages")),
+    listGithubDirectory(repositoryPath("content/now")),
   ]);
   const entries = [...pageEntries, ...nowEntries, ...postEntries];
   return Promise.all(
     entries.map(async (entry) => {
       const file = await readGithubFile(entry.path);
-      return parseWritingDocument(file.source, entry.path, file.sha);
+      return parseWritingDocument(file.source, documentPath(entry.path), file.sha);
     }),
   );
 }
@@ -130,8 +142,10 @@ export async function publishDocument(document: WritingDocument) {
     document.id.startsWith("content/") && document.id !== document.path
       ? document.id
       : document.path;
+  const currentRepositoryPath = repositoryPath(document.path);
+  const previousRepositoryPath = repositoryPath(previousPath);
   const current = await githubFetch<GithubFile>(
-    `/contents/${encodePath(document.path)}?ref=${encodeURIComponent(branch)}`,
+    `/contents/${encodePath(currentRepositoryPath)}?ref=${encodeURIComponent(branch)}`,
     {},
     { allowNotFound: true, write: true },
   );
@@ -139,16 +153,16 @@ export async function publishDocument(document: WritingDocument) {
     previousPath === document.path
       ? current
       : await githubFetch<GithubFile>(
-          `/contents/${encodePath(previousPath)}?ref=${encodeURIComponent(branch)}`,
+          `/contents/${encodePath(previousRepositoryPath)}?ref=${encodeURIComponent(branch)}`,
           {},
           { allowNotFound: true, write: true },
         );
 
   if (document.type !== "page" && document.status === "draft") {
     const publishedFiles = [
-      ...(current ? [{ path: document.path, file: current }] : []),
+      ...(current ? [{ path: currentRepositoryPath, file: current }] : []),
       ...(previousPath !== document.path && previous
-        ? [{ path: previousPath, file: previous }]
+        ? [{ path: previousRepositoryPath, file: previous }]
         : []),
     ];
     for (const publishedFile of publishedFiles) {
@@ -176,14 +190,14 @@ export async function publishDocument(document: WritingDocument) {
   }
 
   const result = await githubFetch<{ content: { sha: string } }>(
-    `/contents/${encodePath(document.path)}`,
+    `/contents/${encodePath(currentRepositoryPath)}`,
     {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         message:
           document.type === "page"
-            ? `Publish ${document.title}`
+            ? `Publish Write Placid ${document.title}`
             : document.status === "draft"
               ? `Move ${document.title} to drafts`
               : `Publish ${document.title}`,
@@ -198,7 +212,7 @@ export async function publishDocument(document: WritingDocument) {
   if (!result) throw new Error("GitHub did not return the published file.");
   if (previousPath !== document.path && previous) {
     await githubFetch(
-      `/contents/${encodePath(previousPath)}`,
+      `/contents/${encodePath(previousRepositoryPath)}`,
       {
         method: "DELETE",
         headers: { "Content-Type": "application/json" },
@@ -228,15 +242,16 @@ export async function deleteGithubDocument(document: WritingDocument) {
   ];
   let removed = false;
   for (const path of paths) {
+    const repositoryDocumentPath = repositoryPath(path);
     const current = await githubFetch<GithubFile>(
-      `/contents/${encodePath(path)}?ref=${encodeURIComponent(branch)}`,
+      `/contents/${encodePath(repositoryDocumentPath)}?ref=${encodeURIComponent(branch)}`,
       {},
       { allowNotFound: true },
     );
     if (!current) continue;
 
     await githubFetch(
-      `/contents/${encodePath(path)}`,
+      `/contents/${encodePath(repositoryDocumentPath)}`,
       {
         method: "DELETE",
         headers: { "Content-Type": "application/json" },

@@ -6,6 +6,7 @@ export type Post = {
   title: string;
   slug: string;
   date: string;
+  updatedAt?: string;
   readingTime: string;
   paragraphs: readonly string[];
   source?: { readonly label: string; readonly href: string };

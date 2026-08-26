@@ -39,9 +39,26 @@ export function markdownToEditorHtml(markdown: string) {
   const blocks = markdown
     .replace(/\r\n/g, "\n")
     .split(/\n{2,}/)
-    .map((paragraph) => paragraph.trim())
+    .flatMap((block) => {
+      const lines = block.split("\n").map((line) => line.trim()).filter(Boolean);
+      if (!/^(?:[-+*]|\d+\.)\s+/.test(lines[0] || "")) {
+        return [block.trim()];
+      }
+
+      const items: string[] = [];
+      for (const line of lines) {
+        if (/^(?:[-+*]|\d+\.)\s+/.test(line)) {
+          items.push(line);
+        } else if (items.length) {
+          items[items.length - 1] += ` ${line}`;
+        }
+      }
+      return items;
+    })
     .filter(Boolean);
   const html: string[] = [];
+  const listItemPattern = /^[-+*]\s+/;
+  const numberedItemPattern = /^(\d+)\.\s+/;
 
   for (let index = 0; index < blocks.length;) {
     if (/^##\s+/.test(blocks[index])) {
@@ -55,13 +72,32 @@ export function markdownToEditorHtml(markdown: string) {
       index += 1;
       continue;
     }
-    if (/^-\s+/.test(blocks[index])) {
+    if (listItemPattern.test(blocks[index])) {
       const items: string[] = [];
-      while (index < blocks.length && /^-\s+/.test(blocks[index])) {
-        items.push(`<li>${renderInlineMarkdown(blocks[index].replace(/^-\s+/, ""))}</li>`);
+      while (index < blocks.length) {
+        const lines = blocks[index].split("\n");
+        if (!lines.every((line) => listItemPattern.test(line))) break;
+        items.push(
+          ...lines.map(
+            (line) => `<li>${renderInlineMarkdown(line.replace(listItemPattern, ""))}</li>`,
+          ),
+        );
         index += 1;
       }
       html.push(`<ul>${items.join("")}</ul>`);
+      continue;
+    }
+    if (numberedItemPattern.test(blocks[index])) {
+      const start = Number(blocks[index].match(numberedItemPattern)?.[1] || 1);
+      const items: string[] = [];
+      while (index < blocks.length && numberedItemPattern.test(blocks[index])) {
+        items.push(
+          `<li>${renderInlineMarkdown(blocks[index].replace(numberedItemPattern, ""))}</li>`,
+        );
+        index += 1;
+      }
+      const startAttribute = start === 1 ? "" : ` start="${start}"`;
+      html.push(`<ol${startAttribute}>${items.join("")}</ol>`);
       continue;
     }
     html.push(`<p>${renderInlineMarkdown(blocks[index])}</p>`);
@@ -69,6 +105,20 @@ export function markdownToEditorHtml(markdown: string) {
   }
 
   return html.join("");
+}
+
+export function markdownPasteToEditorHtml(value: string) {
+  const hasBlockFormatting = /(^|\n)\s*(?:##\s+|>\s?|[-+*]\s+|\d+\.\s+)/m.test(value);
+  const hasItalic = /(^|[^*])\*[^*\n]+\*(?!\*)/.test(value);
+  const hasLink = /\[[^\]\n]+]\((?:https?:\/\/|mailto:|\/|#)[^)\s]+\)/.test(value);
+
+  if (!hasBlockFormatting && !hasItalic && !hasLink) return null;
+  return markdownToEditorHtml(value);
+}
+
+export function numberedListShortcutStart(value: string) {
+  const match = value.match(/^(\d+)\.$/);
+  return match ? Number(match[1]) : null;
 }
 
 function nodeToMarkdown(node: Node): string {
@@ -89,9 +139,17 @@ function nodeToMarkdown(node: Node): string {
       const href = element.getAttribute("href") || "";
       return children && href ? `[${children}](${href})` : children;
     }
-    case "li":
+    case "li": {
+      const parent = element.parentElement;
+      if (parent?.tagName.toLowerCase() === "ol") {
+        const start = Number(parent.getAttribute("start") || 1);
+        const index = Array.from(parent.children).indexOf(element);
+        return children.trim() ? `${start + Math.max(index, 0)}. ${children.trim()}\n\n` : "";
+      }
       return children.trim() ? `- ${children.trim()}\n\n` : "";
+    }
     case "ul":
+    case "ol":
       return children;
     case "h2":
       return children.trim() ? `## ${children.trim()}\n\n` : "";

@@ -3,7 +3,7 @@
  *
  * Script properties required:
  *   BRIDGE_SECRET — a long random value shared only with the Studio server
- *   FOLDER_ID     — the writing drafts folder ID
+ *   FOLDER_ID     — the Write Placid Working Drafts folder ID
  */
 
 function doGet() {

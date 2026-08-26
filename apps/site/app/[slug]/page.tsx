@@ -3,6 +3,7 @@ import type { Metadata } from "next";
 import { ArticleBody } from "../ArticleBody";
 import { Footer } from "../Footer";
 import { LetterCascade } from "../LetterCascade";
+import { Webmentions } from "../Webmentions";
 import { stripInlineMarkdown } from "../inline-markdown";
 import { getPost, getStandalonePage, posts, standalonePages } from "../posts";
 import { siteConfig } from "../site-config";
@@ -68,8 +69,12 @@ export default async function PostPage({ params }: PageProps) {
             {post?.source ? (
               <p className="article-source"><a href={post.source.href}>{post.source.label}</a></p>
             ) : null}
+            {post?.updatedAt ? (
+              <p className="article-last-edited"><em>Last edited {post.updatedAt}</em></p>
+            ) : null}
           </div>
-          <Footer showBrand />
+          {post ? <Webmentions slug={slug} /> : null}
+          <Footer showBrand revealAtEnd />
         </article>
       </div>
     </main>

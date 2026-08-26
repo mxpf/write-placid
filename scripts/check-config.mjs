@@ -12,6 +12,13 @@ const knownAccountValues = [
   ["maxpfennighaus", "gmail.com"].join("@"),
   ["flaringhaus", "cloudflareaccess.com"].join("."),
 ];
+const knownTemplateLeaks = [
+  "https://thinking.haus",
+  "thinkinghaus-studio",
+  "maxpfennig.haus",
+  "Untitled Sans",
+  "/03 Projects/Writing/Thinkinghaus",
+];
 
 async function walk(directory) {
   for (const entry of await readdir(directory, { withFileTypes: true })) {
@@ -27,6 +34,9 @@ async function walk(directory) {
     if (/gh[pousr]_[A-Za-z0-9_]{20,}/.test(source)) problems.push(`${relative}: looks like a GitHub token`);
     if (knownInfrastructureIds.some((value) => source.includes(value))) problems.push(`${relative}: contains a live infrastructure ID`);
     if (knownAccountValues.some((value) => source.includes(value))) problems.push(`${relative}: contains a personal account value`);
+    if (relative.startsWith(`apps${path.sep}`) && knownTemplateLeaks.some((value) => source.includes(value))) {
+      problems.push(`${relative}: contains upstream identity or licensed-asset configuration`);
+    }
   }
 }
 

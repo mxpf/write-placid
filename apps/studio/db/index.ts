@@ -32,6 +32,7 @@ export async function ensureSchema() {
         date TEXT NOT NULL DEFAULT '',
         status TEXT NOT NULL,
         published_at TEXT NOT NULL DEFAULT '',
+        public_updated_at TEXT NOT NULL DEFAULT '',
         body TEXT NOT NULL DEFAULT '',
         source_label TEXT NOT NULL DEFAULT '',
         source_href TEXT NOT NULL DEFAULT '',
@@ -55,6 +56,12 @@ export async function ensureSchema() {
         deleted_at TEXT NOT NULL
       )
     `),
+    d1.prepare(`
+      CREATE TABLE IF NOT EXISTS sync_state (
+        key TEXT PRIMARY KEY NOT NULL,
+        value TEXT NOT NULL
+      )
+    `),
   ]);
   const columns = await d1.prepare("PRAGMA table_info(documents)").all<{ name: string }>();
   const names = new Set((columns.results || []).map((column) => column.name));
@@ -62,6 +69,7 @@ export async function ensureSchema() {
     ["google_doc_id", "TEXT NOT NULL DEFAULT ''"],
     ["drive_revision", "TEXT NOT NULL DEFAULT ''"],
     ["drive_synced_body", "TEXT NOT NULL DEFAULT ''"],
+    ["public_updated_at", "TEXT NOT NULL DEFAULT ''"],
   ] as const;
   for (const [name, definition] of additions) {
     if (!names.has(name)) {
