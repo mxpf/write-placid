@@ -95,7 +95,7 @@ export function buildWeeklySummary(rows, { endDate, today = endDate } = {}) {
     } else if (primary.change > 0) {
       headline = "One piece found a little momentum.";
     } else {
-      headline = "The week stayed quiet.";
+      headline = "The week stayed uneventful.";
     }
 
     const secondSentence =

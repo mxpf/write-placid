@@ -63,8 +63,8 @@ test("uses the configured publication identity", async () => {
 
 test("preserves Write Placid Markdown and computes reading time", () => {
   const source = `---
-title: "A quiet test"
-slug: a-quiet-test
+title: "A plain test"
+slug: a-plain-test
 date: 2026-08-07
 status: draft
 sourceLabel: "Read more"
@@ -75,7 +75,7 @@ One *small* paragraph with a [link](https://example.com).
 `;
   const document = parseWritingDocument(
     source,
-    "content/posts/a-quiet-test.md",
+    "content/posts/a-plain-test.md",
     "abc123",
   );
   assert.equal(document.status, "draft");
@@ -425,15 +425,15 @@ test("preserves monorepo publishing and private Drafts MCP authorization", async
 
 test("pulls Google Docs edits and detects two-sided conflicts", async () => {
   const source = `---
-title: "A quiet test"
-slug: a-quiet-test
+title: "A plain test"
+slug: a-plain-test
 date: 2026-08-07
 status: draft
 ---
 
 Original body.
 `;
-  const document = parseWritingDocument(source, "content/posts/a-quiet-test.md");
+  const document = parseWritingDocument(source, "content/posts/a-plain-test.md");
   document.googleDocId = "doc-1";
   document.driveRevision = "1";
   document.driveSyncedBody = "Original body.";

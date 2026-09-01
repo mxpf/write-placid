@@ -332,7 +332,7 @@ export function Studio() {
   const syncOne = useCallback(async (
     id: string,
     resolution: "auto" | "drive" | "studio" = "auto",
-    quiet = false,
+    silent = false,
   ): Promise<StudioDocument | null> => {
     if (!driveConnected) return null;
     setSyncing(true);
@@ -350,7 +350,7 @@ export function Studio() {
           error?: string;
         };
         if (response.status === 409 && result.state === "conflict") {
-          if (quiet) return null;
+          if (silent) return null;
           const keepStudio = window.confirm(
             "This piece changed in both Studio and Google Docs. Choose OK to keep your Studio version and update Google Docs, or Cancel to leave both versions unchanged.",
           );
@@ -365,7 +365,7 @@ export function Studio() {
           throw new Error(result.error || "Google Docs could not finish syncing.");
         }
         applySyncedDocument(result.document, id);
-        if (!quiet) {
+        if (!silent) {
           const message =
             result.state === "pulled"
               ? "Brought in the latest Google Docs changes."
@@ -379,14 +379,14 @@ export function Studio() {
         return result.document;
       }
     } catch (error) {
-      if (!quiet) showNotice(error instanceof Error ? error.message : "Google Docs could not finish syncing.");
+      if (!silent) showNotice(error instanceof Error ? error.message : "Google Docs could not finish syncing.");
       return null;
     } finally {
       setSyncing(false);
     }
   }, [applySyncedDocument, driveConnected, showNotice]);
 
-  const discoverDocuments = useCallback(async (quiet = false) => {
+  const discoverDocuments = useCallback(async (silent = false) => {
     if (!driveConnected) return;
     setSyncing(true);
     try {
@@ -408,9 +408,9 @@ export function Studio() {
         ? result.documents.find((item) => item.id === active.id)
         : result.documents[0];
       if (refreshed) applySyncedDocument(refreshed);
-      if (!quiet) showNotice("Checked Google Docs for new pieces.");
+      if (!silent) showNotice("Checked Google Docs for new pieces.");
     } catch (error) {
-      if (!quiet) showNotice(error instanceof Error ? error.message : "Google Docs could not finish syncing.");
+      if (!silent) showNotice(error instanceof Error ? error.message : "Google Docs could not finish syncing.");
     } finally {
       setSyncing(false);
     }

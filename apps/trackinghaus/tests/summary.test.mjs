@@ -6,24 +6,24 @@ test("builds a seven-day reading and compares it with the previous week", () => 
   const rows = [
     {
       day: "2026-08-01",
-      path: "/quiet-software",
-      title: "Quiet Software",
+      path: "/small-software",
+      title: "Small Software",
       source: "search",
       reads: 3,
       returning_reads: 0,
     },
     {
       day: "2026-08-05",
-      path: "/quiet-software",
-      title: "Quiet Software",
+      path: "/small-software",
+      title: "Small Software",
       source: "search",
       reads: 9,
       returning_reads: 2,
     },
     {
       day: "2026-08-06",
-      path: "/quiet-software",
-      title: "Quiet Software",
+      path: "/small-software",
+      title: "Small Software",
       source: "direct",
       reads: 4,
       returning_reads: 1,
@@ -50,7 +50,7 @@ test("builds a seven-day reading and compares it with the previous week", () => 
   );
 });
 
-test("returns a quiet first-run reading when there is no data", () => {
+test("returns a calm first-run reading when there is no data", () => {
   const summary = buildWeeklySummary([], { endDate: "2026-08-09" });
   assert.equal(summary.insight.total, 0);
   assert.equal(summary.writing.length, 0);

@@ -18,5 +18,12 @@
 		"@types/node": "^26.0.1",
 		"typescript": "6.0.3",
 		"wrangler": "^4.105.0"
+	},
+	"allowScripts": {
+		"core-js-pure@3.50.0": true,
+		"esbuild@0.28.2": true,
+		"esbuild@0.28.1": true,
+		"fsevents@2.3.3": true,
+		"workerd@1.20260804.1": true
 	}
 }

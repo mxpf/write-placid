@@ -2,8 +2,8 @@ export const demoWeekly = {
   range: { start: "2026-08-03", end: "2026-08-09", label: "August 3–9, 2026" },
   insight: {
     headline: "An old essay found new readers.",
-    detail: "Notes on Quiet Software was read by 78 people. 34 arrived through search.",
-    primaryTitle: "Notes on Quiet Software",
+    detail: "Notes on Small Software was read by 78 people. 34 arrived through search.",
+    primaryTitle: "Notes on Small Software",
     total: 78,
     search: 34,
     returning: 17,
@@ -25,7 +25,7 @@ export const demoWeekly = {
   evidenceNote:
     "Search accounted for 44% of this week’s reading. No individual visitors are identified. Trackinghaus alpha stores only aggregate counters.",
   writing: [
-    { path: "/notes-on-quiet-software", title: "Notes on Quiet Software", readers: 78, change: 42 },
+    { path: "/notes-on-small-software", title: "Notes on Small Software", readers: 78, change: 42 },
     { path: "/a-small-internet", title: "A Small Internet", readers: 41, change: 9 },
     { path: "/the-shape-of-enough", title: "The Shape of Enough", readers: 26, change: 3 },
     { path: "/against-the-dashboard", title: "Against the Dashboard", readers: 19, change: 0 },

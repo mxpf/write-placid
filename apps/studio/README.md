@@ -7,7 +7,7 @@ The private, phone-friendly authoring app for a Write Placid publication.
 - Studio keeps its private working library and interface metadata in Cloudflare D1.
 - It reads published Markdown from `apps/site/content` in the configured GitHub repository and publishes through the GitHub Contents API.
 - Drafts can be reordered on desktop without changing public-site ordering.
-- Published revisions receive optional `updatedAt` metadata so the public site can show a quiet “Last edited” note.
+- Published revisions receive optional `updatedAt` metadata so the public site can show a small “Last edited” note.
 - Google Docs synchronization remains optional and detects conflicts when both copies changed.
 - KDrive is an optional canonical repository for post Markdown. When configured, Studio reads and writes `Drafts` and `Published` folders and reconciles bounded batches every five minutes.
 - Saving never publishes. Publish remains an explicit action; moving a published piece back to Draft removes its public Markdown while preserving the private copy.

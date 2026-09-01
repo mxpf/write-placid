@@ -1,6 +1,6 @@
 # Write Placid
 
-Write Placid is an open-source publishing system for writers who want the machinery to stay quiet.
+Write Placid is an open-source publishing system for writers who want the machinery to stay out of the way.
 
 It gives you a fast public site, a private writing studio, optional aggregate analytics, and a narrow AI bridge for saving drafts. The pieces are separate on purpose: the public writing should keep working even when the private tools are being changed, removed, or ignored.
 
