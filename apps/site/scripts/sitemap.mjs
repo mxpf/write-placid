@@ -1,9 +1,7 @@
 import { writeFile } from "node:fs/promises";
 import path from "node:path";
+import { SITE_URL } from "../site-config.mjs";
 import { projectRoot } from "./content.mjs";
-import siteConfig from "../site.config.json" with { type: "json" };
-
-const siteUrl = siteConfig.url;
 
 function generateSitemap(posts, pages) {
   const paths = [
@@ -14,7 +12,7 @@ function generateSitemap(posts, pages) {
   ];
 
   const urls = paths
-    .map((pathname) => `  <url><loc>${new URL(pathname, siteUrl).href}</loc></url>`)
+    .map((pathname) => `  <url><loc>${new URL(pathname, SITE_URL).href}</loc></url>`)
     .join("\n");
 
   return `<?xml version="1.0" encoding="UTF-8"?>
@@ -33,7 +31,7 @@ export async function writeSitemap(posts, pages) {
     ),
     writeFile(
       path.join(projectRoot, "public", "robots.txt"),
-      `User-agent: *\nAllow: /\n\nSitemap: ${siteUrl}/sitemap.xml\n`,
+      `User-agent: *\nAllow: /\n\nSitemap: ${SITE_URL}/sitemap.xml\n`,
       "utf8",
     ),
   ]);

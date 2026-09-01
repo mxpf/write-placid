@@ -1,11 +1,10 @@
 import { readFile, writeFile } from "node:fs/promises";
 import path from "node:path";
 import { pathToFileURL } from "node:url";
+import { SITE_URL } from "../site-config.mjs";
 import { projectRoot, readPosts } from "./content.mjs";
-import siteConfig from "../site.config.json" with { type: "json" };
 
 const API_URL = "https://webmention.io/api/mentions.jf2";
-const SITE_URL = siteConfig.url;
 const cachePath = path.join(projectRoot, "data", "webmentions.json");
 
 function safeHttpUrl(value) {

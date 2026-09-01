@@ -1,6 +1,5 @@
-import type { ReactNode } from "react";
+import { parseContentBlocks, stripInlineMarkdown } from "../lib/markdown.mjs";
 import { InlineText } from "./InlineText";
-import { stripInlineMarkdown } from "./inline-markdown";
 
 function paragraphClassName(paragraph: string) {
   return /^[“‘"']/.test(stripInlineMarkdown(paragraph).trimStart())
@@ -9,64 +8,37 @@ function paragraphClassName(paragraph: string) {
 }
 
 export function ArticleBody({ paragraphs }: { paragraphs: readonly string[] }) {
-  const blocks: ReactNode[] = [];
-
-  for (let index = 0; index < paragraphs.length;) {
-    const paragraph = paragraphs[index];
-    if (/^##\s+/.test(paragraph)) {
-      const heading = paragraph.replace(/^##\s+/, "");
-      blocks.push(<h2 key={`${index}-${heading}`}><InlineText text={heading} /></h2>);
-      index += 1;
-      continue;
+  return parseContentBlocks(paragraphs).map((block) => {
+    if (block.type === "heading") {
+      return <h2 key={`${block.index}-${block.text}`}><InlineText text={block.text} /></h2>;
     }
 
-    if (/^>\s?/.test(paragraph)) {
-      const quote = paragraph.replace(/^>\s?/gm, "");
-      blocks.push(
-        <blockquote key={`${index}-${quote}`}>
-          <p className={paragraphClassName(quote)}><InlineText text={quote} /></p>
-        </blockquote>,
+    if (block.type === "blockquote") {
+      return (
+        <blockquote key={`${block.index}-${block.text}`}>
+          <p className={paragraphClassName(block.text)}><InlineText text={block.text} /></p>
+        </blockquote>
       );
-      index += 1;
-      continue;
     }
 
-    if (/^\s*-\s+/.test(paragraph)) {
-      const listStart = index;
-      const items: ReactNode[] = [];
-      while (index < paragraphs.length && /^\s*-\s+/.test(paragraphs[index])) {
-        const item = paragraphs[index].replace(/^\s*-\s+/, "");
-        items.push(<li key={`${index}-${item}`}><InlineText text={item} /></li>);
-        index += 1;
-      }
-      blocks.push(<ul className="article-list" key={`list-${listStart}`}>{items}</ul>);
-      continue;
-    }
+    if (block.type === "unordered-list" || block.type === "ordered-list") {
+      const items = block.items.map((item, itemIndex) => (
+        <li key={`${block.index + itemIndex}-${item}`}><InlineText text={item} /></li>
+      ));
 
-    if (/^\s*\d+\.\s+/.test(paragraph)) {
-      const listStart = index;
-      const start = Number(paragraph.match(/^\s*(\d+)\./)?.[1] || 1);
-      const items: ReactNode[] = [];
-      while (index < paragraphs.length && /^\s*\d+\.\s+/.test(paragraphs[index])) {
-        const item = paragraphs[index].replace(/^\s*\d+\.\s+/, "");
-        items.push(<li key={`${index}-${item}`}><InlineText text={item} /></li>);
-        index += 1;
-      }
-      blocks.push(
-        <ol className="article-list article-numbered-list" key={`list-${listStart}`} start={start}>
+      return block.type === "ordered-list" ? (
+        <ol className="article-list article-numbered-list" key={`list-${block.index}`} start={block.start}>
           {items}
-        </ol>,
+        </ol>
+      ) : (
+        <ul className="article-list" key={`list-${block.index}`}>{items}</ul>
       );
-      continue;
     }
 
-    blocks.push(
-      <p className={paragraphClassName(paragraph)} key={`${index}-${paragraph}`}>
-        <InlineText text={paragraph} />
-      </p>,
+    return (
+      <p className={paragraphClassName(block.text)} key={`${block.index}-${block.text}`}>
+        <InlineText text={block.text} />
+      </p>
     );
-    index += 1;
-  }
-
-  return blocks;
+  });
 }

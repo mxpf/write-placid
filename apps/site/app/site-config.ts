@@ -1,3 +1,1 @@
-import config from "../site.config.json";
-
-export const siteConfig = config;
+export { siteConfig } from "../site-config.mjs";

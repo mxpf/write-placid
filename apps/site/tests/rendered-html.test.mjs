@@ -2,7 +2,7 @@ import assert from "node:assert/strict";
 import { readFile, stat } from "node:fs/promises";
 import test from "node:test";
 import vm from "node:vm";
-import { parseInlineMarkdown, stripInlineMarkdown } from "../app/inline-markdown.ts";
+import { parseContentBlocks, parseInlineMarkdown, stripInlineMarkdown } from "../lib/markdown.mjs";
 import { calculateReadingTime, parsePost, readNowEntries, readPages, readPosts, serializePost } from "../scripts/content.mjs";
 import { generateRssFeed } from "../scripts/rss.mjs";
 
@@ -49,6 +49,7 @@ test("renders the Write Placid index from published Markdown", async () => {
   assert.match(html, /<link rel="canonical" href="https:\/\/example\.com"/);
   assert.doesNotMatch(html, /data-endpoint=/);
   assert.match(html, /<script[^>]+src="\/author-mode\.js"/);
+  assert.doesNotMatch(html, /class="scroll-progress"/);
   assert.doesNotMatch(html, /Thinkinghaus Studio/);
 });
 
@@ -59,6 +60,15 @@ test("static homepage links point directly to exported article files", async () 
   for (const post of posts) {
     assert.match(index, new RegExp(`href="/${post.slug}\\.html"`));
   }
+});
+
+test("mounts reading progress on published article pages only", async () => {
+  const [post] = await readPosts();
+  const response = await render(`/${post.slug}`);
+  assert.equal(response.status, 200);
+  const html = await response.text();
+  assert.match(html, /class="scroll-progress"/);
+  assert.match(html, /aria-hidden="true"/);
 });
 
 test("can prefix internal links for a GitHub project Pages deployment", async () => {
@@ -194,6 +204,7 @@ test("renders standalone About, AI, and Links pages", async () => {
   assert.match(aboutHtml, /<title>Write Placid - About<\/title>/i);
   assert.match(aboutHtml, /<link rel="canonical" href="https:\/\/example\.com\/about"/);
   assert.ok(aboutHtml.includes(pages.find((page) => page.slug === "about").paragraphs[0]));
+  assert.doesNotMatch(aboutHtml, /class="scroll-progress"/);
 
   const aiResponse = await render("/ai");
   assert.equal(aiResponse.status, 200);
@@ -201,14 +212,13 @@ test("renders standalone About, AI, and Links pages", async () => {
   assert.match(aiHtml, /<title>Write Placid - AI<\/title>/i);
   assert.match(aiHtml, /does not require AI/);
   assert.doesNotMatch(aiHtml, /<nav[^>]*>[\s\S]*?>AI<\/a>/);
+  assert.doesNotMatch(aiHtml, /class="scroll-progress"/);
 
   const linksResponse = await render("/links");
   assert.equal(linksResponse.status, 200);
-  assert.ok(
-    (await linksResponse.text()).includes(
-      pages.find((page) => page.slug === "links").paragraphs[0],
-    ),
-  );
+  const linksHtml = await linksResponse.text();
+  assert.ok(linksHtml.includes(pages.find((page) => page.slug === "links").paragraphs[0]));
+  assert.doesNotMatch(linksHtml, /class="scroll-progress"/);
 });
 
 test("renders only the newest published Now entry on its stable route", async () => {
@@ -218,6 +228,7 @@ test("renders only the newest published Now entry on its stable route", async ()
   const entries = await readNowEntries();
   assert.match(html, /<title>Write Placid - Now<\/title>/i);
   assert.match(html, /<link rel="canonical" href="https:\/\/example\.com\/now"/);
+  assert.doesNotMatch(html, /class="scroll-progress"/);
   if (entries[0]) {
     assert.ok(html.includes(entries[0].paragraphs[0]));
     assert.match(html, /<ul class="article-list"><li>Replacing this sample/);
@@ -239,16 +250,18 @@ test("keeps published writing readable and the visual system intentional", async
   assert.ok(posts.every((post) => post.body.length > 0));
   assert.ok(posts.every((post) => /^[a-z0-9-]+$/.test(post.slug)));
 
-  const [siteStyles, articleBody, articlePage, authorMode] = await Promise.all([
+  const [siteStyles, articleBody, articlePage, authorEditAction, authorMode, scrollProgress] = await Promise.all([
     readFile(new URL("../app/globals.css", import.meta.url), "utf8"),
     readFile(new URL("../app/ArticleBody.tsx", import.meta.url), "utf8"),
     readFile(new URL("../app/[slug]/page.tsx", import.meta.url), "utf8"),
+    readFile(new URL("../app/AuthorEditAction.tsx", import.meta.url), "utf8"),
     readFile(new URL("../public/author-mode.js", import.meta.url), "utf8"),
+    readFile(new URL("../app/ScrollProgress.tsx", import.meta.url), "utf8"),
   ]);
   assert.doesNotMatch(siteStyles, /--step-article-title/);
-  assert.match(siteStyles, /--reading-measure: 56ch/);
+  assert.doesNotMatch(siteStyles, /--reading-measure/);
   assert.match(siteStyles, /\.site\s*\{[^}]*font-size: 16px/s);
-  assert.match(siteStyles, /:root\s*\{[^}]*--blog-background: #1a1814;[^}]*--blog-foreground: #f1ede3;[^}]*color-scheme: dark;/s);
+  assert.match(siteStyles, /:root\s*\{[^}]*--blog-background: #1a1814;[^}]*--blog-foreground: #f1ede3;[^}]*--blog-muted: #9a9285;[^}]*--blog-body: #b3aca2;[^}]*color-scheme: dark;/s);
   assert.doesNotMatch(siteStyles, /prefers-color-scheme/);
   assert.match(siteStyles, /\.letter-cascade\s*\{[^}]*gap: 0;[^}]*letter-spacing: 0;/s);
   assert.match(siteStyles, /font-family: "Instrument Sans";[^}]*InstrumentSans-Variable\.ttf[^}]*font-weight: 100 900/s);
@@ -256,26 +269,56 @@ test("keeps published writing readable and the visual system intentional", async
   assert.match(siteStyles, /\.site\s*\{[^}]*font-size: 16px[^}]*font-weight: 300[^}]*line-height: 24px/s);
   assert.match(siteStyles, /\.article-body em\s*\{[^}]*font-family: "Instrument Sans"[^}]*font-style: italic[^}]*font-weight: 400/s);
   assert.match(siteStyles, /\.site \.desktop-brand\s*\{[^}]*font-weight: 400/s);
-  assert.match(siteStyles, /\.index-frame\s*\{[^}]*font-size: 16px[^}]*font-weight: 400[^}]*line-height: 24px/s);
+  assert.match(siteStyles, /\.scroll-progress\s*\{[^}]*position: fixed[^}]*inset: 0 0 auto[^}]*height: 1px[^}]*background: var\(--blog-body\)[^}]*pointer-events: none[^}]*transform: scaleX\(var\(--scroll-progress\)\)[^}]*transform-origin: left/s);
+  assert.match(siteStyles, /html\s*\{[^}]*scrollbar-width: none/s);
+  assert.match(siteStyles, /html::-webkit-scrollbar\s*\{[^}]*display: none/s);
+  assert.match(siteStyles, /\.index-frame\s*\{[^}]*font-weight: 400/s);
   assert.doesNotMatch(siteStyles, /font-size:\s*15px/);
-  assert.match(siteStyles, /\.site \.index-frame \.desktop-brand\s*\{[^}]*font-weight: 400/s);
+  assert.doesNotMatch(siteStyles, /\.site \.index-frame \.desktop-brand/);
   assert.match(siteStyles, /\.site \.post-list a\s*\{[^}]*font-weight: 400/s);
   assert.match(siteStyles, /\.site \.footer\s*\{[^}]*font-weight: 400/s);
-  assert.match(siteStyles, /\.site \.footer-brand\s*\{[^}]*font-weight: 500/s);
+  assert.match(siteStyles, /\.site \.footer-brand\s*\{[^}]*font-weight: 400/s);
   assert.match(siteStyles, /\.site \.article-header h1\s*\{[^}]*font-size: 16px[^}]*font-weight: 400[^}]*line-height: 24px[^}]*text-wrap: balance/s);
   assert.match(siteStyles, /\.article-body p\s*\{[^}]*hanging-punctuation: first[^}]*text-wrap: pretty/s);
+  assert.match(siteStyles, /\.article-body\s*\{[^}]*color: var\(--blog-body\)[^}]*font-weight: 400/s);
   assert.match(siteStyles, /\.site \.article-body h2\s*\{[^}]*margin: 48px 0 24px[^}]*color: var\(--blog-muted\)[^}]*font-size: 12px[^}]*font-weight: 400[^}]*letter-spacing: 0\.06em[^}]*line-height: 24px[^}]*text-transform: uppercase/s);
   assert.match(siteStyles, /\.article-body blockquote\s*\{[^}]*position: relative[^}]*padding: 0 0 0 24px[^}]*margin: 36px 0/s);
   assert.match(siteStyles, /\.article-body blockquote::before\s*\{[^}]*inset-block: 0[^}]*inset-inline-start: 0[^}]*width: 1px[^}]*background: var\(--blog-muted\)/s);
   assert.match(siteStyles, /\.article-body p\.optical-margin-fallback\s*\{[^}]*text-indent: -0\.42em/s);
+  assert.match(siteStyles, /\.article-body \.article-source,\s*\.site \.article-last-edited\s*\{[^}]*margin-top: 48px/s);
   assert.match(articleBody, /<h2 key=/);
   assert.match(articleBody, /<blockquote key=/);
   assert.match(articleBody, /optical-margin-fallback/);
-  assert.match(articlePage, /className="author-edit-action" hidden/);
+  assert.match(articlePage, /<AuthorEditAction \/>/);
+  assert.match(articlePage, /post \? <ScrollProgress \/> : null/);
+  assert.match(authorEditAction, /className="author-edit-action" hidden/);
+  assert.match(scrollProgress, /window\.requestAnimationFrame\(updateProgress\)/);
+  assert.match(scrollProgress, /window\.addEventListener\("scroll", scheduleUpdate, \{ passive: true \}\)/);
+  assert.match(scrollProgress, /window\.addEventListener\("resize", scheduleUpdate\)/);
+  assert.match(scrollProgress, /Math\.min\(1, Math\.max\(0, root\.scrollTop \/ scrollableHeight\)\)/);
+  assert.match(scrollProgress, /setProperty\("--scroll-progress", String\(progress\)\)/);
   assert.match(authorMode, /write-placid-author-mode/);
   assert.match(authorMode, /location\.hash === "#edit"/);
   assert.match(authorMode, /location\.hash === "#edit-off"/);
   assert.match(authorMode, /dataset\.studioUrl/);
+});
+
+test("interprets article and RSS block structure from one shared parser", () => {
+  assert.deepEqual(parseContentBlocks([
+    "Before.",
+    "## A small heading",
+    "> A useful interruption.",
+    "- First item.",
+    "- Second item.",
+    "3. Third item.",
+    "4. Fourth item.",
+  ]), [
+    { type: "paragraph", index: 0, text: "Before." },
+    { type: "heading", index: 1, text: "A small heading" },
+    { type: "blockquote", index: 2, text: "A useful interruption." },
+    { type: "unordered-list", index: 3, items: ["First item.", "Second item."] },
+    { type: "ordered-list", index: 5, start: 3, items: ["Third item.", "Fourth item."] },
+  ]);
 });
 
 test("supports safe inline italics and links", async () => {
@@ -310,9 +353,21 @@ test("publishes semantic block quotes in articles and RSS", async () => {
     slug: "quote-style-qa",
     date: "2026-08-13",
     publishedAt: "2026-08-13T12:00:00.000Z",
-    paragraphs: ["Before.", "> A useful interruption.", "After."],
+    paragraphs: [
+      "Before.",
+      "## A small heading",
+      "> A useful interruption.",
+      "- First item.",
+      "- Second item.",
+      "3. Third item.",
+      "4. Fourth item.",
+      "After.",
+    ],
   }]);
+  assert.match(feed, /<h2>A small heading<\/h2>/);
   assert.match(feed, /<blockquote><p>A useful interruption\.<\/p><\/blockquote>/);
+  assert.match(feed, /<ul><li>First item\.<\/li><li>Second item\.<\/li><\/ul>/);
+  assert.match(feed, /<ol start="3"><li>Third item\.<\/li><li>Fourth item\.<\/li><\/ol>/);
 });
 
 test("calculates reading time and preserves draft status", () => {

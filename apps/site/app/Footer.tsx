@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 
-import { siteConfig } from "./site-config";
+import { AUTHOR, RSS_PATH, SITE_NAME, TRACKING } from "../site-config.mjs";
 import { sitePath } from "./site-path";
 
 export function Footer({
@@ -46,17 +46,17 @@ export function Footer({
 
   return (
     <footer className={className}>
-      {showBrand ? <a className="footer-brand" href={sitePath("/")}>{siteConfig.name}</a> : null}
+      {showBrand ? <a className="footer-brand" href={sitePath("/")}>{SITE_NAME}</a> : null}
       <nav className="footer-links" aria-label="Site">
         <span className="footer-link-group">
-          {siteConfig.authorUrl ? <a href={siteConfig.authorUrl} rel="me">Work</a> : null}
+          {AUTHOR?.url ? <a href={AUTHOR.url} rel="me">Work</a> : null}
           <a href={sitePath("/about")}>About</a>
           <a href={sitePath("/links")}>Links</a>
           <a href={sitePath("/now")}>Now</a>
         </span>
         <span className="footer-link-group">
-          {siteConfig.statsUrl ? <a href={siteConfig.statsUrl}>Stats</a> : null}
-          <a href={sitePath("/rss.xml")} type="application/rss+xml">RSS</a>
+          {TRACKING.dashboardUrl ? <a href={TRACKING.dashboardUrl}>Stats</a> : null}
+          <a href={sitePath(RSS_PATH)} type="application/rss+xml">RSS</a>
         </span>
       </nav>
     </footer>

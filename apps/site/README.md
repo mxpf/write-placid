@@ -8,6 +8,17 @@ Published revisions may include an optional `updatedAt` frontmatter value. The a
 
 Set `webmentionEndpoint` in `site.config.json` to enable build-time Webmentions. `npm run refresh:webmentions` updates the checked-in cache under `data/`; readers never contact the Webmention provider directly, and a failed refresh leaves the last good cache intact.
 
+```text
+content/posts/   essays and fragments
+content/pages/   About, AI, and Links
+content/now/     current and archived /now entries
+app/             public pages and presentation
+lib/             shared Markdown interpretation
+scripts/         content loading and static publishing
+site.config.json template identity and optional service settings
+site-config.mjs  normalized shared site configuration
+```
+
 ```bash
 npm install
 npm run dev

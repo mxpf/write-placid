@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { parseInlineMarkdown } from "./inline-markdown";
+import { parseInlineMarkdown } from "../lib/markdown.mjs";
 
 const staticExport = process.env.STATIC_EXPORT === "1";
 
