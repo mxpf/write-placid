@@ -3,7 +3,7 @@
   <channel>
     <title>Write Placid</title>
     <link>https://example.com/</link>
-    <description>A quiet place for notes, essays, and the occasional strange thing.</description>
+    <description>A plain place for notes, essays, and the occasional strange thing.</description>
     <language>en-US</language>
     <lastBuildDate>Fri, 14 Aug 2026 12:00:00 GMT</lastBuildDate>
     <atom:link href="https://example.com/rss.xml" rel="self" type="application/rss+xml" />
