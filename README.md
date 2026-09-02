@@ -1,6 +1,6 @@
 # Write Placid
 
-An open-source, self-owned publishing system for quiet writing.
+An open-source, self-owned publishing system for quiet writing. [See the live template](https://maxpfennig.haus/write-placid/).
 
 Write Placid packages the system developed for [Thinkinghaus](https://thinking.haus) without its personal writing, identity, credentials, or licensed typeface. It uses the open-source Instrument Sans family and ships with sample content that is safe to replace.
 
@@ -8,10 +8,10 @@ Write Placid packages the system developed for [Thinkinghaus](https://thinking.h
 
 ## What is included
 
-- **Site** — a fast public home for essays, pages, links, RSS, a single current `/now` entry, revision dates, and optional cached Webmentions.
-- **Studio** — a private, phone-friendly rich-text editor that saves drafts to Cloudflare D1, optionally synchronizes KDrive or Google Docs, and publishes Markdown through GitHub.
-- **Drafts MCP** — an optional private bridge that lets a compatible AI assistant save a complete draft or revision to Studio without permission to publish or delete.
-- **Trackinghaus** — optional, public, aggregate-only weekly analytics for the publication.
+- **[Site](apps/site/README.md)** — a fast public home for essays, pages, links, RSS, a single current `/now` entry, revision dates, and optional cached Webmentions.
+- **[Studio](apps/studio/README.md)** — a private, phone-friendly rich-text editor that saves drafts to Cloudflare D1, optionally synchronizes KDrive or Google Docs, and publishes Markdown through GitHub.
+- **[Drafts MCP](apps/drafts-mcp/README.md)** — an optional private bridge that lets a compatible AI assistant save a complete draft or revision to Studio without permission to publish or delete.
+- **[Trackinghaus](apps/trackinghaus/README.md)** — optional, public, aggregate-only weekly analytics for the publication.
 
 The pieces remain separate on purpose. A static public site has a much smaller failure surface than a CMS. Studio can be unavailable without taking the writing down. Tracking can be omitted entirely.
 
@@ -30,9 +30,9 @@ npm run setup
 npm run dev:site
 ```
 
-Open `http://localhost:3000`. Replace the sample Markdown in `apps/site/content`, then edit `apps/site/site.config.json`.
+Open [localhost:3000](http://localhost:3000). Replace the sample Markdown in [`apps/site/content`](apps/site/content), then edit [`apps/site/site.config.json`](apps/site/site.config.json).
 
-For the private Studio, Trackinghaus, and the optional chat bridge, follow the [operator’s manual](docs/SETUP.md).
+For the private [Studio](apps/studio/README.md), [Trackinghaus](apps/trackinghaus/README.md), and optional [Drafts MCP](apps/drafts-mcp/README.md), follow the [operator’s manual](docs/SETUP.md).
 
 ## Useful commands
 
