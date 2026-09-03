@@ -2,7 +2,7 @@
 
 An open-source, self-owned publishing system for quiet writing. [See the live template](https://maxpfennig.haus/write-placid/).
 
-Write Placid packages the system developed for [Thinkinghaus](https://thinking.haus) without its personal writing, identity, credentials, or licensed typeface. It uses the open-source Instrument Sans family and ships with sample content that is safe to replace.
+Make Placid and Write Placid established a shared publishing foundation later used by [maxpfennig.haus](https://maxpfennig.haus) and [Thinkinghaus](https://thinking.haus). Write Placid uses the open-source Instrument Sans family and ships with sample content that is safe to replace.
 
 ![Write Placid publication](docs/site-desktop.png)
 
@@ -51,4 +51,4 @@ Write Placid is deliberately super normal. It uses a restrained type scale, ordi
 
 The code is available under the [MIT License](LICENSE). Instrument Sans is covered by the [SIL Open Font License](docs/Instrument-Sans-OFL.txt). Your writing remains yours.
 
-Thinkinghaus is Max Pfennighaus’s publication. Write Placid is the reusable system extracted from it.
+Thinkinghaus is Max Pfennighaus’s publication and uses the shared publishing foundation established by Make Placid and Write Placid.
