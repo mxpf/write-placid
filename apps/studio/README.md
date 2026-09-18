@@ -2,9 +2,11 @@
 
 The private, phone-friendly authoring app for a Write Placid publication.
 
+Studio consumes the versioned `@mxpf/write-placid-core` release for the shared editor, identity rules, repository/save orchestration, storage adapters, reconciliation, and publishing contract. Instance wrappers retain authentication, service bindings, credentials, private document mappings, assets, and deployment configuration.
+
 ## How it works
 
-- With KDrive enabled, KDrive folders own editorial content and immutable identity while D1 remains a replaceable cache plus private order, bridge, and recovery state.
+- A basic installation stores writing in D1. With KDrive enabled, KDrive folders instead own editorial content and immutable identity while D1 remains a replaceable cache plus private order, bridge, and recovery state.
 - Studio validates the complete repository and publishes Markdown plus `content/identity-manifest.json` to the configured GitHub root in one non-force Git commit.
 - Drafts can be reordered on desktop without changing public-site ordering.
 - Published revisions receive optional `updatedAt` metadata so the public site can show a quiet “Last edited” note.

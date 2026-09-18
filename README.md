@@ -9,13 +9,13 @@ Make Placid and Write Placid established a shared publishing foundation later us
 ## What is included
 
 - **[Site](apps/site/README.md)** — a fast public home for essays, pages, links, RSS, a single current `/now` entry, revision dates, and optional cached Webmentions.
-- **[Studio](apps/studio/README.md)** — a private, phone-friendly rich-text editor that saves drafts to Cloudflare D1, optionally synchronizes KDrive or Google Docs, and publishes Markdown through GitHub.
+- **[Studio](apps/studio/README.md)** — a private, phone-friendly rich-text editor. A basic setup stores writing in Cloudflare D1; when optional KDrive is enabled, KDrive becomes the canonical editorial source and D1 keeps supporting cache and private state. Studio can also bridge Google Docs and publish validated Markdown snapshots through GitHub.
 - **[Drafts MCP](apps/drafts-mcp/README.md)** — an optional private bridge that lets a compatible AI assistant save a complete draft or revision to Studio without permission to publish or delete.
 - **[Trackinghaus](apps/trackinghaus/README.md)** — optional, public, aggregate-only weekly analytics for the publication.
 
 The pieces remain separate on purpose. A static public site has a much smaller failure surface than a CMS. Studio can be unavailable without taking the writing down. Tracking can be omitted entirely.
 
-The reusable publishing contract is also available as the versioned `@mxpf/write-placid-core` package. Installations pin an immutable release while keeping their own content, brand, fonts, service bindings, and deployment identity. See [Write Placid Core](docs/CORE.md) and the [parity ledger](docs/PARITY.md).
+Write Placid owns the reusable publishing foundation as the versioned `@mxpf/write-placid-core` package. Downstream installations pin an immutable release while keeping their own content, brand, fonts, service bindings, and deployment identity. This preserves the project’s chronology: Make Placid and Write Placid preceded the later sites that use the foundation, including Thinkinghaus. See [Write Placid Core](docs/CORE.md) and the [parity ledger](docs/PARITY.md).
 
 | Private Studio | Aggregate-only Trackinghaus |
 | --- | --- |
@@ -32,7 +32,7 @@ npm run setup
 npm run dev:site
 ```
 
-Open [localhost:3000](http://localhost:3000). Replace the sample Markdown in [`apps/site/content`](apps/site/content), then edit [`apps/site/site.config.json`](apps/site/site.config.json).
+Open [localhost:3000](http://localhost:3000). Follow the [site content contract](apps/site/docs/content-contract.md) when replacing the sample Markdown in [`apps/site/content`](apps/site/content), then edit [`apps/site/site.config.json`](apps/site/site.config.json).
 
 For the private [Studio](apps/studio/README.md), [Trackinghaus](apps/trackinghaus/README.md), and optional [Drafts MCP](apps/drafts-mcp/README.md), follow the [operator’s manual](docs/SETUP.md).
 
