@@ -1,5 +1,7 @@
 const selectColumns = "id,path,type,slug,editorial_json,title,date,status,published_at,public_updated_at,body,source_label,source_href,remote_sha,published_source,updated_at,sort_order,google_doc_id,drive_revision,drive_synced_body";
 const insertSql = `INSERT INTO documents (${selectColumns}) VALUES (${Array(20).fill("?").join(",")}) ON CONFLICT(id) DO UPDATE SET path=excluded.path,type=excluded.type,slug=excluded.slug,editorial_json=excluded.editorial_json,title=excluded.title,date=excluded.date,status=excluded.status,published_at=excluded.published_at,public_updated_at=excluded.public_updated_at,body=excluded.body,source_label=excluded.source_label,source_href=excluded.source_href,remote_sha=excluded.remote_sha,published_source=excluded.published_source,updated_at=excluded.updated_at,google_doc_id=excluded.google_doc_id,drive_revision=excluded.drive_revision,drive_synced_body=excluded.drive_synced_body`;
+const insertDoNothingSql = `INSERT INTO documents (${selectColumns}) VALUES (${Array(20).fill("?").join(",")}) ON CONFLICT(id) DO NOTHING`;
+const replaceSql = `${insertSql},sort_order=excluded.sort_order`;
 /** D1 persistence with request-time binding lookup and injected private document mapping. */
 export function createD1Store(options) {
     const mapGoogleDoc = options.mappedGoogleDocId || (() => "");
@@ -38,15 +40,12 @@ export function createD1Store(options) {
     async function saveDocument(document, sortOrder = 0) { await ensureSchema(); await getD1().prepare(insertSql).bind(...values(document, sortOrder)).run(); return document; }
     async function cacheDocuments(items) { if (!items.length)
         return; await ensureSchema(); await getD1().batch(items.map((document) => getD1().prepare(insertSql).bind(...values(document)))); }
-    async function replaceDocument(previousId, document, sortOrder = 0) { await ensureSchema(); const current = await getD1().prepare("SELECT sort_order FROM documents WHERE id=? LIMIT 1").bind(previousId).first(); await getD1().batch([getD1().prepare("DELETE FROM documents WHERE id=?").bind(previousId), getD1().prepare(insertSql).bind(...values(document, current?.sort_order ?? sortOrder))]); return document; }
+    async function replaceDocument(previousId, document, sortOrder = 0) { await ensureSchema(); const current = await getD1().prepare("SELECT sort_order FROM documents WHERE id=? LIMIT 1").bind(previousId).first(); await getD1().batch([getD1().prepare("DELETE FROM documents WHERE id=?").bind(previousId), getD1().prepare(replaceSql).bind(...values(document, current?.sort_order ?? sortOrder))]); return document; }
     async function reorderDraftDocuments(ids) { await ensureSchema(); const rows = await getD1().prepare("SELECT id,type,status FROM documents").all(); const draftIds = (rows.results || []).filter((row) => row.type === "post" && row.status === "draft").map((row) => row.id); const unique = new Set(ids); if (unique.size !== ids.length || ids.length !== draftIds.length || draftIds.some((id) => !unique.has(id)))
         throw new Error("The draft list changed. Reload Studio and try again."); if (ids.length)
         await getD1().batch(ids.map((id, order) => getD1().prepare("UPDATE documents SET sort_order=? WHERE id=?").bind(order, id))); }
-    async function seedDocuments(items) { await ensureSchema(); for (const [index, document] of items.entries()) {
-        const existing = await findDocument(document.id);
-        if (!existing)
-            await saveDocument(document, index);
-    } }
+    async function seedDocuments(items) { await ensureSchema(); if (items.length)
+        await getD1().batch(items.map((document, index) => getD1().prepare(insertDoNothingSql).bind(...values(document, index)))); }
     async function deleteDocument(id) { const document = await findDocument(id); if (!document)
         return; const deletedAt = now(); await getD1().batch([getD1().prepare("INSERT INTO deleted_documents (id,document_json,deleted_at) VALUES (?,?,?)").bind(`${deletedAt}:${document.id}`, JSON.stringify(document), deletedAt), getD1().prepare("DELETE FROM documents WHERE id=?").bind(document.id)]); return document; }
     async function getSyncCursor(key) { await ensureSchema(); const result = await getD1().prepare("SELECT value FROM sync_state WHERE key=?").bind(key).first(); const cursor = Number.parseInt(result?.value || "0", 10); return Number.isSafeInteger(cursor) && cursor >= 0 ? cursor : 0; }

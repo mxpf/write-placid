@@ -4,7 +4,7 @@ Write Placid is the canonical owner of the reusable publishing foundation. Insta
 
 ## Version and contract
 
-The package is `@mxpf/write-placid-core`. Version `1.2.0` implements public snapshot contract `1`; both values are exported from the package root. `npm run pack:core` produces a self-contained artifact with ESM JavaScript, declarations, CSS, and source maps. It requires no build or sibling checkout when installed.
+The package is `@mxpf/write-placid-core`. Version `1.2.1` implements public snapshot contract `1`; both values are exported from the package root. `npm run pack:core` produces a self-contained artifact with ESM JavaScript, declarations, CSS, and source maps. It requires no build or sibling checkout when installed.
 
 Until a permanent release channel is selected, downstream repositories should pin the full Write Placid commit SHA and commit the resulting lockfile. Never use a branch or mutable tag in production. If CI cannot read the repository, attach the verified package artifact to an immutable GitHub release and pin its URL and lockfile integrity.
 

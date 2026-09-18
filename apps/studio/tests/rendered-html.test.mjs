@@ -497,6 +497,8 @@ test("reorders drafts without disturbing the rest of the library", async () => {
   assert.match(storage, /unique\.size !== ids\.length/);
   assert.match(storage, /ORDER BY type ASC,sort_order ASC,date DESC/);
   assert.match(storage, /ON CONFLICT\(id\) DO UPDATE/);
+  assert.match(storage, /ON CONFLICT\(id\) DO NOTHING/);
+  assert.match(storage, /sort_order=excluded\.sort_order/);
 });
 
 
