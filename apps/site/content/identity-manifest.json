@@ -1,0 +1,11 @@
+{
+  "version": 1,
+  "documents": [
+    { "id": "0f62447e-2f77-40c4-98ac-1cd14a443ef5", "type": "post", "slug": "a-small-note", "path": "content/posts/a-small-note.md", "url": "/a-small-note.html", "aliases": [] },
+    { "id": "2ffef968-a293-4f04-b3c6-1ec237f5a24b", "type": "now", "slug": "now-20260814", "path": "content/now/now-20260814.md", "url": "/now.html", "aliases": [] },
+    { "id": "40db3ab2-e0f8-4c6d-b80b-b16ddbf68ef3", "type": "page", "slug": "about", "path": "content/pages/about.md", "url": "/about.html", "aliases": [] },
+    { "id": "91cc16df-acf5-49e0-8afe-44683466ec57", "type": "page", "slug": "ai", "path": "content/pages/ai.md", "url": "/ai.html", "aliases": [] },
+    { "id": "f405d501-5d52-4454-a0a2-d6a70941b1b0", "type": "page", "slug": "links", "path": "content/pages/links.md", "url": "/links.html", "aliases": [] }
+  ],
+  "redirects": {}
+}

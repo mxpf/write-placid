@@ -60,9 +60,13 @@ Follow `apps/studio/google-apps-script/README.md`. The bridge secret belongs in 
 
 ### Optional KDrive repository
 
-Create `Drafts` and `Published` folders under a private KDrive root. Configure `WRITE_PLACID_KDRIVE_WEBDAV_URL`, `WRITE_PLACID_KDRIVE_USERNAME`, and `WRITE_PLACID_KDRIVE_ROOT` as Worker variables, then add the KDrive application password as the `WRITE_PLACID_KDRIVE_APP_PASSWORD` Worker secret. Do not commit a live username, URL, password, or private path.
+Create `Drafts`, `Published`, `Pages`, `Now/Drafts`, `Now/Published`, and `Images` folders under a private KDrive root. Configure `WRITE_PLACID_KDRIVE_WEBDAV_URL`, `WRITE_PLACID_KDRIVE_USERNAME`, and `WRITE_PLACID_KDRIVE_ROOT` as Worker variables, then add the KDrive application password as the `WRITE_PLACID_KDRIVE_APP_PASSWORD` Worker secret. Do not commit a live username, URL, password, or private path.
 
-When all four KDrive values are present, Studio saves post Markdown there and the Worker reconciles up to five remote files every five minutes. Files moved into `Published` are published through GitHub; files moved back into `Drafts` are removed from the public content tree. Pages and `/now` entries remain in D1/GitHub. Leave the KDrive values empty to keep D1 as the private canonical library.
+When all four KDrive values are present, KDrive becomes the editorial source of truth and D1 supports caching, ordering, bridge state, and recoverable deletion. Reconciliation always starts from a fresh inventory and reuses cached bodies only for an exact path/type/status/strong-ETag match. It never falls back to stale cached writing after an inventory failure.
+
+For a new empty installation, enable public snapshot contract version `1` after both Site and Studio are deployed. For an existing installation, follow `apps/studio/docs/editorial-contract.md`: back up D1/KDrive/Git, enable migration mode, review the dry-run digest and mapping, apply conditionally, verify readback and the snapshot, then enable the contract.
+
+`WRITE_PLACID_AUTO_PUBLISH=0` preserves manual publication. Set it to `1` only if scheduled saves in Published should go live automatically. The schedule still records started/completed/failed/skipped lifecycle evidence when automatic publication is off.
 
 ## 4. Add Trackinghaus
 

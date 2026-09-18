@@ -1,15 +1,14 @@
+import { serializeWritingDocument as serializeCanonical } from "./content.ts";
+import { buildPublicSnapshot } from "./editorial.ts";
 import {
   parseWritingDocument,
-  serializeWritingDocument,
   type WritingDocument,
-} from "./content";
+} from "./content.ts";
 
 const owner = process.env.WRITE_PLACID_GITHUB_OWNER || "your-github-name";
 const repository = process.env.WRITE_PLACID_GITHUB_REPO || "write-placid";
 const branch = process.env.WRITE_PLACID_GITHUB_BRANCH || "main";
-const contentRoot = (process.env.WRITE_PLACID_GITHUB_CONTENT_ROOT || "apps/site")
-  .trim()
-  .replace(/^\/+|\/+$/g, "");
+const contentRoot = (process.env.WRITE_PLACID_GITHUB_CONTENT_ROOT || "apps/site").trim().replace(/^\/+|\/+$/g, "");
 const apiRoot = `https://api.github.com/repos/${owner}/${repository}`;
 
 function repositoryPath(pathname: string) {
@@ -90,8 +89,7 @@ function decodeBase64(value: string) {
   return new TextDecoder().decode(bytes);
 }
 
-function encodeBase64(value: string) {
-  const bytes = new TextEncoder().encode(value);
+function encodeBytesBase64(bytes: Uint8Array) {
   let binary = "";
   for (let index = 0; index < bytes.length; index += 0x8000) {
     binary += String.fromCharCode(...bytes.subarray(index, index + 0x8000));
@@ -100,8 +98,9 @@ function encodeBase64(value: string) {
 }
 
 async function readGithubFile(pathname: string) {
+  const target = repositoryPath(pathname);
   const file = await githubFetch<GithubFile>(
-    `/contents/${encodePath(pathname)}?ref=${encodeURIComponent(branch)}`,
+    `/contents/${encodePath(target)}?ref=${encodeURIComponent(branch)}`,
   );
   if (!file?.content) throw new Error(`Could not read ${pathname}.`);
   return {
@@ -111,8 +110,9 @@ async function readGithubFile(pathname: string) {
 }
 
 async function listGithubDirectory(pathname: string) {
+  const target = repositoryPath(pathname);
   const result = await githubFetch<GithubDirectoryEntry[]>(
-    `/contents/${encodePath(pathname)}?ref=${encodeURIComponent(branch)}`,
+    `/contents/${encodePath(target)}?ref=${encodeURIComponent(branch)}`,
     {},
     { allowNotFound: true },
   );
@@ -123,147 +123,85 @@ async function listGithubDirectory(pathname: string) {
 
 export async function loadPublishedDocuments() {
   const [postEntries, pageEntries, nowEntries] = await Promise.all([
-    listGithubDirectory(repositoryPath("content/posts")),
-    listGithubDirectory(repositoryPath("content/pages")),
-    listGithubDirectory(repositoryPath("content/now")),
+    listGithubDirectory("content/posts"),
+    listGithubDirectory("content/pages"),
+    listGithubDirectory("content/now"),
   ]);
   const entries = [...pageEntries, ...nowEntries, ...postEntries];
   return Promise.all(
     entries.map(async (entry) => {
-      const file = await readGithubFile(entry.path);
-      return parseWritingDocument(file.source, documentPath(entry.path), file.sha);
+      const path = documentPath(entry.path);
+      const file = await readGithubFile(path);
+      return parseWritingDocument(file.source, path, file.sha);
     }),
   );
 }
 
-export async function publishDocument(document: WritingDocument) {
-  const source = serializeWritingDocument(document);
-  const previousPath =
-    document.id.startsWith("content/") && document.id !== document.path
-      ? document.id
-      : document.path;
-  const currentRepositoryPath = repositoryPath(document.path);
-  const previousRepositoryPath = repositoryPath(previousPath);
+export function assertPublicContract() {
+  if (String(process.env.WRITE_PLACID_PUBLIC_CONTRACT_VERSION) !== "1") {
+    throw new Error("Public snapshot contract v1 must be deployed and enabled before publishing.");
+  }
+}
+
+/** One Git commit is the handoff boundary; no public runtime KDrive access. */
+export async function publishEditorialSnapshot(documents: WritingDocument[]) {
+  assertPublicContract();
+  const snapshot = buildPublicSnapshot(documents);
+  const ref = await githubFetch<{ object: { sha: string } }>(`/git/ref/heads/${encodeURIComponent(branch)}`, {}, { write: true });
+  if (!ref) throw new Error("Could not read the public branch.");
+  const commit = await githubFetch<{ tree: { sha: string } }>(`/git/commits/${ref.object.sha}`, {}, { write: true });
+  const tree = await githubFetch<{ tree: { path: string; type: string; sha: string }[]; truncated: boolean }>(`/git/trees/${commit!.tree.sha}?recursive=1`, {}, { write: true });
+  if (!tree || tree.truncated) throw new Error("Could not inspect the complete public snapshot.");
+  const entries: { path: string; mode: string; type: string; content?: string; sha?: null }[] = Object.entries(snapshot.files).map(([path, content]) => ({ path: repositoryPath(path), mode: "100644", type: "blob", content }));
+  for (const entry of tree.tree) {
+    const path = documentPath(entry.path);
+    if (/^content\/(posts|pages|now)\/[^/]+\.md$/.test(path) && !(path in snapshot.files)) {
+      if (!documents.some((document) => document.path === path)) throw new Error(`Public file has no canonical KDrive identity: ${path}. Complete migration or restore it to Drafts.`);
+      entries.push({ path: entry.path, mode: "100644", type: "blob", sha: null });
+    }
+  }
+  const nextTree = await githubFetch<{ sha: string }>("/git/trees", { method: "POST", body: JSON.stringify({ base_tree: commit!.tree.sha, tree: entries }) }, { write: true });
+  if (nextTree!.sha === commit!.tree.sha) {
+    for (const document of documents) {
+      document.publishedSource = document.status === "published" ? serializeCanonical(document) : "";
+      document.remoteSha = document.status === "published" ? ref.object.sha : "";
+    }
+    return { commit: ref.object.sha, manifest: snapshot.manifest };
+  }
+  const nextCommit = await githubFetch<{ sha: string }>("/git/commits", { method: "POST", body: JSON.stringify({ message: "Publish validated Write Placid editorial snapshot", tree: nextTree!.sha, parents: [ref.object.sha] }) }, { write: true });
+  await githubFetch(`/git/refs/heads/${encodeURIComponent(branch)}`, { method: "PATCH", body: JSON.stringify({ sha: nextCommit!.sha, force: false }) }, { write: true });
+  for (const document of documents) {
+    // The comparison baseline retains ID links, while public files contain resolved URLs.
+    document.publishedSource = document.status === "published" ? serializeCanonical(document) : "";
+    document.remoteSha = document.status === "published" ? nextCommit!.sha : "";
+  }
+  return { commit: nextCommit!.sha, manifest: snapshot.manifest };
+}
+
+export async function publishImageAsset(name: string, bytes: Uint8Array) {
+  if (!/^[a-z0-9][a-z0-9._-]*\.(?:jpe?g|png|webp|gif)$/i.test(name)) {
+    throw new Error("That image name is invalid.");
+  }
+  const path = repositoryPath(`public/images/${name}`);
   const current = await githubFetch<GithubFile>(
-    `/contents/${encodePath(currentRepositoryPath)}?ref=${encodeURIComponent(branch)}`,
+    `/contents/${encodePath(path)}?ref=${encodeURIComponent(branch)}`,
     {},
     { allowNotFound: true, write: true },
   );
-  const previous =
-    previousPath === document.path
-      ? current
-      : await githubFetch<GithubFile>(
-          `/contents/${encodePath(previousRepositoryPath)}?ref=${encodeURIComponent(branch)}`,
-          {},
-          { allowNotFound: true, write: true },
-        );
-
-  if (document.type !== "page" && document.status === "draft") {
-    const publishedFiles = [
-      ...(current ? [{ path: currentRepositoryPath, file: current }] : []),
-      ...(previousPath !== document.path && previous
-        ? [{ path: previousRepositoryPath, file: previous }]
-        : []),
-    ];
-    for (const publishedFile of publishedFiles) {
-      await githubFetch(
-        `/contents/${encodePath(publishedFile.path)}`,
-        {
-          method: "DELETE",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            message: `Move ${document.title} to drafts`,
-            sha: publishedFile.file.sha,
-            branch,
-          }),
-        },
-        { write: true },
-      );
-    }
-    return {
-      ...document,
-      id: document.path,
-      publishedSource: "",
-      remoteSha: "",
-      updatedAt: new Date().toISOString(),
-    };
-  }
-
-  const result = await githubFetch<{ content: { sha: string } }>(
-    `/contents/${encodePath(currentRepositoryPath)}`,
+  const content = encodeBytesBase64(bytes);
+  if (current?.content?.replace(/\s/g, "") === content) return;
+  await githubFetch(
+    `/contents/${encodePath(path)}`,
     {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        message:
-          document.type === "page"
-            ? `Publish Write Placid ${document.title}`
-            : document.status === "draft"
-              ? `Move ${document.title} to drafts`
-              : `Publish ${document.title}`,
-        content: encodeBase64(source),
+        message: `Add article image ${name}`,
+        content,
         branch,
         ...(current?.sha ? { sha: current.sha } : {}),
       }),
     },
     { write: true },
   );
-
-  if (!result) throw new Error("GitHub did not return the published file.");
-  if (previousPath !== document.path && previous) {
-    await githubFetch(
-      `/contents/${encodePath(previousRepositoryPath)}`,
-      {
-        method: "DELETE",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          message: `Move ${document.title} to its new address`,
-          sha: previous.sha,
-          branch,
-        }),
-      },
-      { write: true },
-    );
-  }
-  return {
-    ...document,
-    id: document.path,
-    remoteSha: result.content.sha,
-    publishedSource: source.trim(),
-    updatedAt: new Date().toISOString(),
-  };
-}
-
-export async function deleteGithubDocument(document: WritingDocument) {
-  const paths = [
-    ...new Set(
-      [document.path, document.id].filter((path) => path.startsWith("content/")),
-    ),
-  ];
-  let removed = false;
-  for (const path of paths) {
-    const repositoryDocumentPath = repositoryPath(path);
-    const current = await githubFetch<GithubFile>(
-      `/contents/${encodePath(repositoryDocumentPath)}?ref=${encodeURIComponent(branch)}`,
-      {},
-      { allowNotFound: true },
-    );
-    if (!current) continue;
-
-    await githubFetch(
-      `/contents/${encodePath(repositoryDocumentPath)}`,
-      {
-        method: "DELETE",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          message: `Delete ${document.title}`,
-          sha: current.sha,
-          branch,
-        }),
-      },
-      { write: true },
-    );
-    removed = true;
-  }
-  return removed;
 }

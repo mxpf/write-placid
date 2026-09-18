@@ -3,7 +3,7 @@
 ```text
 AI assistant (optional) ──save only──▶ Drafts MCP
                                          │ service binding + internal token
-KDrive (optional) ◀────canonical sync──▶ Studio + D1 ◀────sync────▶ Google Docs (optional)
+KDrive (optional) ◀──canonical content──▶ Studio + D1 cache ◀──sync──▶ Google Docs (optional)
                                          │ GitHub Contents API
                                          ▼
                               apps/site/content on main
@@ -15,9 +15,9 @@ KDrive (optional) ◀────canonical sync──▶ Studio + D1 ◀──�
                                Trackinghaus + Neon
 ```
 
-The Git repository is the public publication record. D1 is the default private working library and retains Studio metadata. A publish action writes Markdown under `apps/site/content`; the public workflow builds only documents whose frontmatter says `status: published`.
+The Git repository is the public publication record. A publish action atomically writes validated Markdown and `content/identity-manifest.json`; the public workflow validates immutable UUID identities, stable filenames/slugs, aliases, and document-ID links before building.
 
-KDrive is optional. When configured, its `Drafts` and `Published` folders become the canonical post repository while D1 keeps ordering and synchronization state. A five-minute Worker schedule reconciles bounded batches. Google Docs is a separate optional bridge and does not imply KDrive.
+KDrive is optional. When configured, its editorial folders become canonical for posts, pages, Now entries, and image sources while D1 keeps replaceable cache plus ordering, bridge, and recovery state. Reconciliation uses a fresh inventory, bounded file fanout, and exact strong-ETag cache reuse. Saving never implies publishing; scheduled publication is an explicit configuration choice. Google Docs is a separate optional bridge and does not imply KDrive.
 
 Webmentions are refreshed by the publication workflow and stored in `apps/site/data/webmentions.json`. Rendering uses that local cache, so neither readers nor page requests depend on the external provider.
 

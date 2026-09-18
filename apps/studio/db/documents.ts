@@ -2,11 +2,13 @@ import { asc, desc, eq } from "drizzle-orm";
 import type { WritingDocument } from "../app/content";
 import { getD1, getDb, ensureSchema } from ".";
 import { documents } from "./schema";
+import { mappedGoogleDocId } from "../app/drive-document-map";
 
 type DocumentRow = typeof documents.$inferSelect;
 
 function fromRow(row: DocumentRow): WritingDocument {
   return {
+    ...JSON.parse(row.editorialJson || "{}"),
     id: row.id,
     path: row.path,
     type: row.type,
@@ -24,7 +26,7 @@ function fromRow(row: DocumentRow): WritingDocument {
     remoteSha: row.remoteSha,
     publishedSource: row.publishedSource,
     updatedAt: row.updatedAt,
-    googleDocId: row.googleDocId,
+    googleDocId: row.googleDocId || mappedGoogleDocId(row.path),
     driveRevision: row.driveRevision,
     driveSyncedBody: row.driveSyncedBody,
   };
@@ -33,6 +35,7 @@ function fromRow(row: DocumentRow): WritingDocument {
 function toRow(document: WritingDocument, sortOrder = 0) {
   return {
     id: document.id,
+    editorialJson: JSON.stringify({ publicPath: document.publicPath, legacyIds: document.legacyIds || [], aliases: document.aliases || [], kdrivePath: document.kdrivePath, kdriveEtag: document.kdriveEtag, identityPersisted: document.identityPersisted, metadata: document.metadata }),
     path: document.path,
     type: document.type,
     slug: document.slug,
@@ -48,7 +51,7 @@ function toRow(document: WritingDocument, sortOrder = 0) {
     publishedSource: document.publishedSource,
     updatedAt: document.updatedAt,
     sortOrder,
-    googleDocId: document.googleDocId,
+    googleDocId: document.googleDocId || mappedGoogleDocId(document.path),
     driveRevision: document.driveRevision,
     driveSyncedBody: document.driveSyncedBody,
   };
@@ -76,7 +79,10 @@ export async function findDocument(id: string) {
     .from(documents)
     .where(eq(documents.id, id))
     .limit(1);
-  return row ? fromRow(row) : undefined;
+  if (row) return fromRow(row);
+  const aliases = (await getDb().select().from(documents)).map(fromRow).filter((document) => document.legacyIds?.includes(id));
+  if (aliases.length > 1) throw new Error(`Legacy identity collision: ${id}`);
+  return aliases[0];
 }
 
 export async function findDocumentByPath(path: string) {
@@ -100,6 +106,17 @@ export async function saveDocument(document: WritingDocument, sortOrder = 0) {
       set: rowUpdates(row),
     });
   return document;
+}
+
+export async function cacheDocuments(items: WritingDocument[]) {
+  if (!items.length) return;
+  await ensureSchema();
+  const db = getDb();
+  const statements = items.map((document) => {
+    const row = toRow(document);
+    return db.insert(documents).values(row).onConflictDoUpdate({ target: documents.id, set: rowUpdates(row) });
+  });
+  await db.batch(statements as [typeof statements[number], ...typeof statements[number][]]);
 }
 
 export async function replaceDocument(

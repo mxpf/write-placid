@@ -1,6 +1,9 @@
 ---
 title: "About"
+id: 40db3ab2-e0f8-4c6d-b80b-b16ddbf68ef3
+publicPath: about.md
 slug: about
+aliases: []
 ---
 
 Write Placid is a quiet, self-owned publishing system for essays, notes, links, and a small `/now` page.

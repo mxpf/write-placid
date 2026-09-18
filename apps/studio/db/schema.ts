@@ -7,6 +7,7 @@ export const documents = sqliteTable(
     path: text("path").notNull().unique(),
     type: text("type", { enum: ["post", "page", "now"] }).notNull(),
     slug: text("slug").notNull(),
+    editorialJson: text("editorial_json").notNull().default("{}"),
     title: text("title").notNull(),
     date: text("date").notNull().default(""),
     status: text("status", { enum: ["draft", "published"] }).notNull(),

@@ -1,3 +1,4 @@
+import { readEditorialRepository, saveEditorialDocument } from "../../../editorial-repository";
 import { isDocumentDirty, normalizeIncomingDocument } from "../../../content";
 import {
   isDriveConfigured,
@@ -9,8 +10,6 @@ import {
 import { authorizeStudioRequest } from "../../../server-auth";
 import {
   findDocument,
-  listDocuments,
-  saveDocument,
 } from "../../../../db/documents";
 
 type DriveRequest = {
@@ -34,12 +33,12 @@ export async function POST(request: Request) {
     if (input.action === "discover") return discoverDocuments();
     if (input.action === "syncAll") return synchronizeAll();
 
-    const document = input.id ? await findDocument(input.id) : undefined;
+    const document = (await readEditorialRepository()).find((item) => item.id === input.id);
     if (!document) {
       return Response.json({ error: "That draft could not be found." }, { status: 404 });
     }
     const result = await syncDocument(document, input.resolution || "auto");
-    if (result.state !== "conflict") await saveDocument(result.document);
+    if (result.state !== "conflict") await saveEditorialDocument(result.document, document);
     return Response.json(result, { status: result.state === "conflict" ? 409 : 200 });
   } catch (error) {
     return Response.json(
@@ -51,7 +50,7 @@ export async function POST(request: Request) {
 
 async function discoverDocuments() {
   const [localDocuments, remoteDocuments] = await Promise.all([
-    listDocuments(),
+    readEditorialRepository(),
     listDriveDocuments(),
   ]);
   const localByGoogleId = new Map(
@@ -74,21 +73,21 @@ async function discoverDocuments() {
       imported.driveRevision = completeRemote.revision;
       imported.driveSyncedBody = completeRemote.body.trim();
       if (!collision) imported.body = completeRemote.body.trim();
-      await saveDocument(imported);
+      await saveEditorialDocument(imported);
       continue;
     }
 
     if (!local.driveSyncedBody) {
-      await saveDocument({
+      await saveEditorialDocument({
         ...local,
         driveRevision: remote.revision,
         driveSyncedBody: local.body.trim(),
-      });
+      }, local);
     }
   }
 
   return Response.json({
-    documents: (await listDocuments()).map((document) => ({
+    documents: (await readEditorialRepository()).map((document) => ({
       ...document,
       isDirty: isDocumentDirty(document),
     })),
@@ -97,7 +96,7 @@ async function discoverDocuments() {
 
 async function synchronizeAll() {
   const [localDocuments, remoteSummaries] = await Promise.all([
-    listDocuments(),
+    readEditorialRepository(),
     listDriveDocuments(),
   ]);
   const remoteDocuments = await Promise.all(
@@ -123,19 +122,19 @@ async function synchronizeAll() {
       local.driveRevision = remote.revision;
       local.driveSyncedBody = remote.body.trim();
       if (!collision) local.body = remote.body.trim();
-      await saveDocument(local);
+      await saveEditorialDocument(local);
       results.push({ state: collision ? "synced" : "created", document: local });
       continue;
     }
 
     const result = await syncDocumentWithRemote(local, remote);
-    if (result.state !== "conflict") await saveDocument(result.document);
+    if (result.state !== "conflict") await saveEditorialDocument(result.document, local);
     results.push(result);
   }
 
   return Response.json({
     results,
-    documents: (await listDocuments()).map((document) => ({
+    documents: (await readEditorialRepository()).map((document) => ({
       ...document,
       isDirty: isDocumentDirty(document),
     })),

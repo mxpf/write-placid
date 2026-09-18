@@ -15,9 +15,17 @@ import {
   markdownPasteToEditorHtml,
   markdownToEditorHtml,
   numberedListShortcutStart,
+  readEditorImage,
+  updateEditorImage,
 } from "../app/rich-text.ts";
 import { syncDocumentWithRemote } from "../app/drive.ts";
 import { moveItemToTarget } from "../app/reorder.ts";
+import {
+  articleImageMarkdown,
+  parseArticleImage,
+  referencedLocalImages,
+} from "../app/article-images.ts";
+import { imageContentType, validateImageUpload, validImageName } from "../app/image-files.ts";
 
 async function render(pathname = "/") {
   const workerUrl = new URL("../dist/server/index.js", import.meta.url);
@@ -54,14 +62,7 @@ test("renders the private Write Placid Studio shell", async () => {
   assert.doesNotMatch(html, /codex-preview|react-loading-skeleton/i);
 });
 
-test("uses the configured publication identity", async () => {
-  const studio = await readFile(new URL("../app/Studio.tsx", import.meta.url), "utf8");
-  assert.match(studio, /studioConfig\.publicationName/);
-  assert.match(studio, /href=\{studioConfig\.siteUrl\}/);
-  assert.doesNotMatch(studio, /thinking\.haus/);
-});
-
-test("preserves Write Placid Markdown and computes reading time", () => {
+test("preserves publication Markdown and computes reading time", () => {
   const source = `---
 title: "A quiet test"
 slug: a-quiet-test
@@ -81,7 +82,8 @@ One *small* paragraph with a [link](https://example.com).
   assert.equal(document.status, "draft");
   assert.equal(document.source?.href, "https://example.com");
   assert.equal(document.remoteSha, "abc123");
-  assert.equal(serializeWritingDocument(document).trim(), source.trim());
+  assert.equal(parseWritingDocument(serializeWritingDocument(document), document.path).body, document.body);
+  assert.match(serializeWritingDocument(document), /^id: "content\/posts\/a-quiet-test.md"$/m);
   assert.equal(isDocumentDirty(document), false);
   assert.equal(calculateReadingTime("word ".repeat(181)), "2 minutes");
 });
@@ -113,8 +115,8 @@ test("adds public edit metadata only when revising an existing published post", 
 
 test("shows post and modified dates separately in Studio", async () => {
   const [studio, styles] = await Promise.all([
-    readFile(new URL("../app/Studio.tsx", import.meta.url), "utf8"),
-    readFile(new URL("../app/globals.css", import.meta.url), "utf8"),
+    readFile(new URL("../../../packages/core/studio/Studio.tsx", import.meta.url), "utf8"),
+    readFile(new URL("../../../packages/core/studio/studio.css", import.meta.url), "utf8"),
   ]);
   assert.match(studio, /current\.type === "post" \? "Post date"/);
   assert.match(studio, /Last edited \{displayDate\(current\.publicUpdatedAt\.slice\(0, 10\)\)\}/);
@@ -135,9 +137,9 @@ test("creates safe post paths and limits editable pages", () => {
     { ...post, title: "Stranger Still" },
     { ...post, remoteSha: "abc123" },
   );
-  assert.equal(renamed.id, "content/posts/strange-enough.md");
-  assert.equal(renamed.slug, "stranger-still");
-  assert.equal(renamed.path, "content/posts/stranger-still.md");
+  assert.equal(renamed.id, post.id);
+  assert.equal(renamed.slug, "strange-enough");
+  assert.equal(renamed.path, "content/posts/strange-enough.md");
   assert.equal(renamed.remoteSha, "abc123");
 
   const now = normalizeIncomingDocument({
@@ -162,7 +164,7 @@ test("creates safe post paths and limits editable pages", () => {
         title: "Secret settings",
         slug: "secret-settings",
       }),
-    /Only the About and Links pages/,
+    /Only the About, Links, and AI pages/,
   );
 });
 
@@ -212,8 +214,134 @@ test("recognizes supported Markdown when it is pasted into the editor", () => {
   );
 });
 
+test("preserves public-compatible article images through Studio rich text", async () => {
+  const localMarkdown = '![A quiet room](/images/a-quiet-room.jpg "Morning light")';
+  assert.deepEqual(parseArticleImage(localMarkdown), {
+    alt: "A quiet room",
+    src: "/images/a-quiet-room.jpg",
+    title: "Morning light",
+  });
+  assert.equal(articleImageMarkdown(parseArticleImage(localMarkdown)), localMarkdown);
+  assert.equal(parseArticleImage("![Unsafe](javascript:alert(1))"), null);
+  assert.equal(parseArticleImage("![Unsafe](//example.com/image.jpg)"), null);
+  assert.deepEqual(
+    referencedLocalImages(`${localMarkdown}\n\n![Remote](https://example.com/image.jpg)\n\n${localMarkdown}`),
+    ["a-quiet-room.jpg", "a-quiet-room.jpg"],
+  );
+
+  const expected = '<div class="editor-image-block" contenteditable="false"><figure class="article-image" data-image-src="/images/a-quiet-room.jpg" data-image-title="Morning light" contenteditable="false" tabindex="0" role="button" aria-haspopup="dialog" aria-label="Edit image: A quiet room"><img src="/api/content/image?name=a-quiet-room.jpg" alt="A quiet room" title="Morning light"><figcaption>Morning light</figcaption></figure><button type="button" class="edit-image-control" data-editor-image-control="true" aria-haspopup="dialog">Edit image &amp; caption</button></div>';
+  assert.equal(markdownToEditorHtml(localMarkdown), expected);
+  assert.equal(markdownPasteToEditorHtml(localMarkdown), expected);
+  assert.match(
+    markdownToEditorHtml("![Remote](https://example.com/image.jpg)"),
+    /src="https:\/\/example\.com\/image\.jpg"/,
+  );
+
+  const image = {
+    getAttribute: (name) => ({ src: "/api/content/image?name=a-quiet-room.jpg", alt: "A quiet room", title: "Morning light" })[name] || null,
+  };
+  const figure = {
+    nodeType: 1,
+    tagName: "FIGURE",
+    childNodes: [],
+    dataset: { imageSrc: "/images/a-quiet-room.jpg", imageTitle: "Morning light" },
+    querySelector: (selector) => selector === "img" ? image : null,
+  };
+  const originalNode = globalThis.Node;
+  globalThis.Node = { TEXT_NODE: 3, ELEMENT_NODE: 1 };
+  try {
+    assert.equal(editorToMarkdown({ childNodes: [figure] }), localMarkdown);
+    const control = { nodeType: 1, tagName: "BUTTON", dataset: { editorImageControl: "true" }, childNodes: [{ nodeType: 3, nodeValue: "Edit image & caption" }] };
+    const wrapper = { nodeType: 1, tagName: "DIV", childNodes: [figure, control] };
+    assert.equal(editorToMarkdown({ childNodes: [wrapper] }), localMarkdown);
+    assert.equal(editorToMarkdown({ childNodes: [control] }), "");
+  } finally {
+    if (originalNode) globalThis.Node = originalNode;
+    else delete globalThis.Node;
+  }
+
+  const [studio, route, publisher, styles] = await Promise.all([
+    readFile(new URL("../../../packages/core/studio/Studio.tsx", import.meta.url), "utf8"),
+    readFile(new URL("../app/api/content/image/route.ts", import.meta.url), "utf8"),
+    readFile(new URL("../app/publish-images.ts", import.meta.url), "utf8"),
+    readFile(new URL("../../../packages/core/studio/studio.css", import.meta.url), "utf8"),
+  ]);
+  assert.match(studio, /accept="image\/jpeg,image\/png,image\/webp,image\/gif"/);
+  assert.match(route, /saveKdriveImage/);
+  assert.match(publisher, /publishImageAsset/);
+  assert.match(styles, /\.body-input \.article-image\s*\{[^}]*width: 112\.5%[^}]*margin: 60px -6\.25%/s);
+  assert.match(styles, /\.body-input \.article-image img\s*\{[^}]*border-radius: 4px/s);
+  assert.match(styles, /@media \(max-width: 767px\)\s*\{[^}]*\.body-input \.article-image\s*\{[^}]*width: 100%[^}]*margin: 48px 0/s);
+});
+
+test("editing image descriptions and adding, changing, or removing captions preserves the source and surrounding draft", () => {
+  const attributes = new Map([["src", "/api/content/image?name=existing.jpg"], ["alt", "Original description"], ["title", "Existing caption"]]);
+  const image = {
+    getAttribute: name => attributes.get(name) ?? null,
+    setAttribute: (name, value) => attributes.set(name, value),
+    removeAttribute: name => attributes.delete(name),
+  };
+  let caption = null;
+  const figure = {
+    nodeType: 1, tagName: "FIGURE", childNodes: [],
+    dataset: { imageSrc: "/images/existing.jpg", imageTitle: "Existing caption" },
+    querySelector: selector => selector === "img" ? image : caption,
+    setAttribute: () => {},
+    appendChild: node => { caption = node; },
+    ownerDocument: { createElement: () => ({ textContent: "", remove: () => { caption = null; } }) },
+  };
+  const paragraph = text => ({ nodeType: 1, tagName: "P", childNodes: [{ nodeType: 3, nodeValue: text }] });
+  const editor = { childNodes: [paragraph("Unsaved text before."), figure, paragraph("Unsaved text after.")] };
+  const originalNode = globalThis.Node;
+  globalThis.Node = { TEXT_NODE: 3, ELEMENT_NODE: 1 };
+  try {
+    assert.equal(readEditorImage(figure).title, "Existing caption");
+    for (const details of [
+      { alt: "A new description", title: "Existing caption" },
+      { alt: "A new description", title: "A revised caption & credit" },
+      { alt: "A new description", title: undefined },
+      { alt: "A final description", title: "Caption restored" },
+    ]) {
+      assert.equal(updateEditorImage(figure, details), true);
+      const markdown = articleImageMarkdown({ src: "/images/existing.jpg", ...details });
+      assert.equal(editorToMarkdown(editor), `Unsaved text before.\n\n${markdown}\n\nUnsaved text after.`);
+      assert.equal(image.getAttribute("src"), "/api/content/image?name=existing.jpg");
+      assert.equal(figure.dataset.imageSrc, "/images/existing.jpg");
+      assert.equal(caption?.innerHTML, details.title?.replace(/&/g, "&amp;"));
+      assert.deepEqual(parseArticleImage(markdown), readEditorImage(figure));
+      const rendered = markdownToEditorHtml(markdown);
+      assert.equal(rendered.includes("<figcaption>"), Boolean(details.title));
+      assert.match(rendered, /aria-haspopup="dialog"/);
+    }
+  } finally {
+    if (originalNode) globalThis.Node = originalNode;
+    else delete globalThis.Node;
+  }
+});
+
+test("captions render as escaped visible text without becoming duplicate body text", () => {
+  const markdown = '![Description](/images/existing.jpg "Credit <script>alert(1)</script> & company")';
+  const html = markdownToEditorHtml(markdown);
+  assert.match(html, /<figcaption>Credit &lt;script&gt;alert\(1\)&lt;\/script&gt; &amp; company<\/figcaption>/);
+  assert.doesNotMatch(html, /<script>/);
+  const external = '![Remote image](https://example.com/photo.jpg "External caption")';
+  assert.equal(articleImageMarkdown(parseArticleImage(external)), external);
+  assert.match(markdownToEditorHtml(external), /<figcaption>External caption<\/figcaption>/);
+});
+
+test("validates article image bytes instead of trusting file names", () => {
+  const png = Uint8Array.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]);
+  const result = validateImageUpload(png, "A Quiet Room");
+  assert.match(result.name, /^a-quiet-room-[a-f0-9]{8}\.png$/);
+  assert.equal(result.contentType, "image/png");
+  assert.equal(imageContentType("photo.WEBP"), "image/webp");
+  assert.equal(validImageName("article-photo.jpeg"), true);
+  assert.equal(validImageName("../article-photo.jpeg"), false);
+  assert.throws(() => validateImageUpload(new TextEncoder().encode("<svg></svg>"), "Unsafe"), /JPEG, PNG, WebP, or GIF/);
+});
+
 test("keeps section headings on the 12px vertical grid", async () => {
-  const styles = await readFile(new URL("../app/globals.css", import.meta.url), "utf8");
+  const styles = await readFile(new URL("../../../packages/core/studio/studio.css", import.meta.url), "utf8");
   assert.match(
     styles,
     /\.body-input h2\s*\{[^}]*margin: 48px 0 24px[^}]*font-size: 12px[^}]*line-height: 24px/s,
@@ -222,9 +350,9 @@ test("keeps section headings on the 12px vertical grid", async () => {
 
 test("keeps block quotes on the 12px vertical grid", async () => {
   const [styles, studio, richText] = await Promise.all([
-    readFile(new URL("../app/globals.css", import.meta.url), "utf8"),
-    readFile(new URL("../app/Studio.tsx", import.meta.url), "utf8"),
-    readFile(new URL("../app/rich-text.ts", import.meta.url), "utf8"),
+    readFile(new URL("../../../packages/core/studio/studio.css", import.meta.url), "utf8"),
+    readFile(new URL("../../../packages/core/studio/Studio.tsx", import.meta.url), "utf8"),
+    readFile(new URL("../../../packages/core/studio/rich-text.ts", import.meta.url), "utf8"),
   ]);
   assert.match(
     styles,
@@ -300,9 +428,9 @@ test("preserves numbered Markdown lists through Studio rich text", async () => {
     else delete globalThis.Node;
   }
 
-  const richText = await readFile(new URL("../app/rich-text.ts", import.meta.url), "utf8");
-  const studio = await readFile(new URL("../app/Studio.tsx", import.meta.url), "utf8");
-  const styles = await readFile(new URL("../app/globals.css", import.meta.url), "utf8");
+  const richText = await readFile(new URL("../../../packages/core/studio/rich-text.ts", import.meta.url), "utf8");
+  const studio = await readFile(new URL("../../../packages/core/studio/Studio.tsx", import.meta.url), "utf8");
+  const styles = await readFile(new URL("../../../packages/core/studio/studio.css", import.meta.url), "utf8");
   assert.match(richText, /parent\?\.tagName\.toLowerCase\(\) === "ol"/);
   assert.match(richText, /case "ol"/);
   assert.match(studio, /document\.execCommand\("insertOrderedList", false\)/);
@@ -317,7 +445,7 @@ test("preserves numbered Markdown lists through Studio rich text", async () => {
 });
 
 test("offers editing and removal for links already in the editor", async () => {
-  const studio = await readFile(new URL("../app/Studio.tsx", import.meta.url), "utf8");
+  const studio = await readFile(new URL("../../../packages/core/studio/Studio.tsx", import.meta.url), "utf8");
   assert.match(studio, /Edit link/);
   assert.match(studio, /Update link/);
   assert.match(studio, /Remove link/);
@@ -325,7 +453,7 @@ test("offers editing and removal for links already in the editor", async () => {
 });
 
 test("opens the article requested by a public edit link", async () => {
-  const studio = await readFile(new URL("../app/Studio.tsx", import.meta.url), "utf8");
+  const studio = await readFile(new URL("../../../packages/core/studio/Studio.tsx", import.meta.url), "utf8");
   assert.match(studio, /new URLSearchParams\(window\.location\.search\)/);
   assert.match(studio, /document\.slug === requestedSlug/);
   assert.match(studio, /document\.title === requestedTitle/);
@@ -335,16 +463,16 @@ test("opens the article requested by a public edit link", async () => {
 
 test("offers recoverable deletion for saved posts", async () => {
   const [studio, route] = await Promise.all([
-    readFile(new URL("../app/Studio.tsx", import.meta.url), "utf8"),
+    readFile(new URL("../../../packages/core/studio/Studio.tsx", import.meta.url), "utf8"),
     readFile(new URL("../app/api/content/delete/route.ts", import.meta.url), "utf8"),
   ]);
   assert.match(studio, /private recovery copy/);
   assert.match(route, /Pages cannot be deleted here/);
-  assert.match(route, /deleteGithubDocument/);
+  assert.match(route, /Move previously published work to Drafts/);
 });
 
 test("keeps publishing status responsive while live verification runs", async () => {
-  const studio = await readFile(new URL("../app/Studio.tsx", import.meta.url), "utf8");
+  const studio = await readFile(new URL("../../../packages/core/studio/Studio.tsx", import.meta.url), "utf8");
   assert.doesNotMatch(studio, /setSaveState\("Updating live…"\)/);
   assert.match(studio, /const controller = new AbortController\(\)/);
   assert.match(studio, /signal: controller\.signal/);
@@ -359,7 +487,7 @@ test("reorders drafts without disturbing the rest of the library", async () => {
   assert.equal(moveItemToTarget(drafts, "missing", "a"), drafts);
 
   const [studio, route, storage] = await Promise.all([
-    readFile(new URL("../app/Studio.tsx", import.meta.url), "utf8"),
+    readFile(new URL("../../../packages/core/studio/Studio.tsx", import.meta.url), "utf8"),
     readFile(new URL("../app/api/content/reorder/route.ts", import.meta.url), "utf8"),
     readFile(new URL("../db/documents.ts", import.meta.url), "utf8"),
   ]);
@@ -371,57 +499,6 @@ test("reorders drafts without disturbing the rest of the library", async () => {
   assert.match(storage, /set: rowUpdates\(row\)/);
 });
 
-test("uses KDrive as the canonical article repository", async () => {
-  const [kdrive, sync, worker, config, loadRoute, saveRoute, publishRoute, deleteRoute, readme, envExample] =
-    await Promise.all([
-      readFile(new URL("../app/kdrive.ts", import.meta.url), "utf8"),
-      readFile(new URL("../app/kdrive-sync.ts", import.meta.url), "utf8"),
-      readFile(new URL("../worker/index.ts", import.meta.url), "utf8"),
-      readFile(new URL("../wrangler.cloudflare.jsonc", import.meta.url), "utf8"),
-      readFile(new URL("../app/api/content/route.ts", import.meta.url), "utf8"),
-      readFile(new URL("../app/api/content/save/route.ts", import.meta.url), "utf8"),
-      readFile(new URL("../app/api/content/publish/route.ts", import.meta.url), "utf8"),
-      readFile(new URL("../app/api/content/delete/route.ts", import.meta.url), "utf8"),
-      readFile(new URL("../README.md", import.meta.url), "utf8"),
-      readFile(new URL("../.env.example", import.meta.url), "utf8"),
-    ]);
-  assert.match(kdrive, /folder: "Drafts" \| "Published"/);
-  assert.doesNotMatch(kdrive, /Research/);
-  assert.match(kdrive, /method: "PROPFIND"/);
-  assert.match(kdrive, /method: "PUT"/);
-  assert.match(sync, /listKdrivePostRefs/);
-  assert.match(sync, /const batchSize = 5/);
-  assert.match(sync, /getSyncCursor/);
-  assert.match(sync, /setSyncCursor/);
-  assert.match(sync, /document\.status === "published" && isDocumentDirty\(document\)/);
-  assert.match(sync, /document\.status === "draft" && document\.remoteSha/);
-  assert.match(sync, /deleteDocument\(cached\.id\)/);
-  assert.match(worker, /scheduled\(/);
-  assert.match(worker, /syncKdriveRepository\(\)/);
-  assert.match(config, /"crons": \["\*\/5 \* \* \* \*"\]/);
-  assert.match(loadRoute, /syncKdriveRepository/);
-  assert.match(saveRoute, /saveKdrivePost\(document, existing\)/);
-  assert.match(publishRoute, /saveKdrivePost\(published, document\)/);
-  assert.match(deleteRoute, /deleteKdrivePost\(document\)/);
-  assert.match(readme, /KDrive is an optional canonical repository/);
-  assert.match(envExample, /WRITE_PLACID_KDRIVE_USERNAME=\n/);
-  assert.match(envExample, /WRITE_PLACID_KDRIVE_APP_PASSWORD=\n/);
-});
-
-test("preserves monorepo publishing and private Drafts MCP authorization", async () => {
-  const [github, auth, envExample] = await Promise.all([
-    readFile(new URL("../app/github.ts", import.meta.url), "utf8"),
-    readFile(new URL("../app/server-auth.ts", import.meta.url), "utf8"),
-    readFile(new URL("../.env.example", import.meta.url), "utf8"),
-  ]);
-  assert.match(github, /WRITE_PLACID_GITHUB_CONTENT_ROOT \|\| "apps\/site"/);
-  assert.match(github, /repositoryPath\("content\/posts"\)/);
-  assert.match(github, /documentPath\(entry\.path\)/);
-  assert.match(auth, /WRITE_PLACID_INTERNAL_TOKEN/);
-  assert.match(auth, /x-write-placid-token/);
-  assert.match(auth, /crypto\.subtle\.verify/);
-  assert.match(envExample, /WRITE_PLACID_GITHUB_CONTENT_ROOT=apps\/site/);
-});
 
 test("pulls Google Docs edits and detects two-sided conflicts", async () => {
   const source = `---

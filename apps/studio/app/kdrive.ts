@@ -2,12 +2,15 @@ import {
   parseWritingDocument,
   serializeWritingDocument,
   type WritingDocument,
-} from "./content";
+} from "./content.ts";
+import { imageContentType, validImageName } from "./image-files.ts";
 
 const defaultRoot = "/Writing/Write Placid";
 
 export type KdrivePostRef = {
-  folder: "Drafts" | "Published";
+  folder: string;
+  type: WritingDocument["type"];
+  status: WritingDocument["status"];
   name: string;
   etag: string;
 };
@@ -57,6 +60,19 @@ async function kdriveFetch(pathname: string, init: RequestInit, allowNotFound = 
   return response;
 }
 
+async function ensureImagesFolder() {
+  const config = configuration();
+  if (!config) throw new Error("Write Placid KDrive is not configured.");
+  const response = await fetch(requestUrl(`${config.root}/Images`), {
+    method: "MKCOL",
+    headers: headers(),
+    cache: "no-store",
+  });
+  if (![201, 405].includes(response.status)) {
+    throw new Error(`KDrive returned ${response.status} while preparing article images.`);
+  }
+}
+
 function decodeXml(value: string) {
   return value
     .replace(/&amp;/g, "&")
@@ -66,24 +82,50 @@ function decodeXml(value: string) {
     .replace(/&#39;/g, "'");
 }
 
-async function listFolder(folder: "Drafts" | "Published") {
+function safeRelativePath(path: string) {
+  if (!path || path.startsWith("/") || path.split("/").some((part) => !part || part === "." || part === ".." || (part.includes("\\") || [...part].some((character) => character.charCodeAt(0) < 32)))) {
+    throw new Error("Invalid KDrive editorial path.");
+  }
+  return path;
+}
+
+const editorialFolders = [
+  { folder: "Drafts", type: "post", status: "draft" },
+  { folder: "Published", type: "post", status: "published" },
+  { folder: "Pages", type: "page", status: "published" },
+  { folder: "Now/Drafts", type: "now", status: "draft" },
+  { folder: "Now/Published", type: "now", status: "published" },
+] as const;
+
+async function listFolder(root: typeof editorialFolders[number], folder: string = root.folder): Promise<KdrivePostRef[]> {
   const config = configuration();
   if (!config) return [];
-  const path = `${config.root}/${folder}`;
-  const response = await kdriveFetch(path, {
+  const response = await kdriveFetch(`${config.root}/${safeRelativePath(folder)}`, {
     method: "PROPFIND",
     headers: { Depth: "1", "Content-Type": "application/xml" },
     body: `<?xml version="1.0"?><propfind xmlns="DAV:"><prop><displayname/><getetag/><resourcetype/></prop></propfind>`,
-  });
+  }, true);
   if (!response) return [];
   const xml = await response.text();
-  const entries: Omit<KdrivePostRef, "folder">[] = [];
+  if (!/<(?:[^:>]+:)?multistatus\b/i.test(xml)) throw new Error("KDrive did not return a complete directory inventory.");
+  const entries: KdrivePostRef[] = [];
   for (const block of xml.match(/<(?:[^:>]+:)?response\b[\s\S]*?<\/(?:[^:>]+:)?response>/gi) || []) {
-    if (/<(?:[^:>]+:)?collection\s*\/?\s*>/i.test(block)) continue;
-    const name = block.match(/<(?:[^:>]+:)?displayname>([\s\S]*?)<\/(?:[^:>]+:)?displayname>/i)?.[1];
-    if (!name || !name.toLowerCase().endsWith(".md")) continue;
-    const etag = block.match(/<(?:[^:>]+:)?getetag>([\s\S]*?)<\/(?:[^:>]+:)?getetag>/i)?.[1] || "";
-    entries.push({ name: decodeXml(name), etag: decodeXml(etag).replace(/^W\//, "").replace(/^"|"$/g, "") });
+    const href = block.match(/<(?:[^:>]+:)?href>([\s\S]*?)<\/(?:[^:>]+:)?href>/i)?.[1];
+    if (!href) throw new Error("KDrive returned an entry without a path.");
+    const pathname = decodeURIComponent(new URL(decodeXml(href), config.url).pathname).replace(/\/+$/, "");
+    const parent = `${config.root}/${folder}`;
+    if (pathname === parent) continue;
+    if (!pathname.startsWith(`${parent}/`)) throw new Error("KDrive returned a path outside the requested folder.");
+    const name = pathname.slice(parent.length + 1);
+    if (name.includes("/")) throw new Error("KDrive returned an unexpected nested entry.");
+    safeRelativePath(name);
+    if (/<(?:[^:>]+:)?collection\s*\/?\s*>/i.test(block)) {
+      entries.push(...await listFolder(root, `${folder}/${name}`));
+    } else if (name.toLowerCase().endsWith(".md")) {
+      const etag = block.match(/<(?:[^:>]+:)?getetag>([\s\S]*?)<\/(?:[^:>]+:)?getetag>/i)?.[1] || "";
+      if (!etag || decodeXml(etag).startsWith("W/")) throw new Error(`KDrive must provide a strong revision for ${folder}/${name}.`);
+      entries.push({ ...root, folder, name, etag: decodeXml(etag) });
+    }
   }
   return entries;
 }
@@ -113,61 +155,131 @@ function plainDraft(source: string, name: string, etag: string): WritingDocument
 }
 
 export async function listKdrivePostRefs() {
+  const folders = await Promise.all(editorialFolders.map((root) => listFolder(root)));
+  return folders.flat().sort((a, b) => `${a.folder}/${a.name}`.localeCompare(`${b.folder}/${b.name}`));
+}
+
+export async function readKdriveSource(ref: KdrivePostRef) {
   const config = configuration();
-  if (!config) return [];
-  const folders = await Promise.all([listFolder("Drafts"), listFolder("Published")]);
-  return folders
-    .flatMap((entries, index) => entries.map((entry) => ({
-      ...entry,
-      folder: index === 0 ? "Drafts" as const : "Published" as const,
-    })))
-    .sort((left, right) =>
-      `${left.folder}/${left.name}`.localeCompare(`${right.folder}/${right.name}`),
-    );
+  if (!config) throw new Error("Write Placid KDrive is not configured.");
+  const response = await kdriveFetch(`${config.root}/${safeRelativePath(`${ref.folder}/${ref.name}`)}`, { method: "GET", headers: { "If-Match": ref.etag } });
+  return response!.text();
 }
 
 export async function loadKdrivePost(ref: KdrivePostRef) {
-  const config = configuration();
-  if (!config) throw new Error("Write Placid KDrive is not configured.");
-  const response = await kdriveFetch(`${config.root}/${ref.folder}/${ref.name}`, { method: "GET" });
-  const source = await response!.text();
+  const source = await readKdriveSource(ref);
+  let document: WritingDocument;
   try {
-    const document = parseWritingDocument(source, `content/posts/${ref.name}`, ref.etag);
-    return { ...document, status: ref.folder === "Drafts" ? "draft" as const : "published" as const };
+    document = parseWritingDocument(source, `content/${ref.type === "post" ? "posts" : ref.type === "page" ? "pages" : "now"}/${ref.name}`);
   } catch (error) {
     if (source.trimStart().startsWith("---")) throw error;
-    return plainDraft(source, ref.name, ref.etag);
+    document = plainDraft(source, ref.name, "");
+  }
+  return { ...document, type: ref.type, status: ref.status, aliases: document.aliases || [],
+    kdrivePath: `${ref.folder}/${ref.name}`, kdriveEtag: ref.etag,
+    remoteSha: "", publishedSource: "" };
+}
+
+export async function loadKdrivePosts(cached: WritingDocument[] = []) {
+  const refs = await listKdrivePostRefs();
+  const byPath = new Map(cached.map((document) => [document.kdrivePath, document]));
+  const loadRevision = (ref: KdrivePostRef) => {
+    const previous = byPath.get(`${ref.folder}/${ref.name}`);
+    // A fresh, strong WebDAV revision verifies cached content. Never use the
+    // cache when inventory fails, a file moves, or any revision changes.
+    if (previous?.identityPersisted && previous.kdriveEtag === ref.etag && previous.type === ref.type && previous.status === ref.status) {
+      return Promise.resolve({ ...previous });
+    }
+    return loadKdrivePost(ref);
+  };
+  const documents: WritingDocument[] = [];
+  // Limit WebDAV concurrency; validate the entire graph before any mutations.
+  for (let offset = 0; offset < refs.length; offset += 5) {
+    documents.push(...await Promise.all(refs.slice(offset, offset + 5).map(loadRevision)));
+  }
+  return documents;
+}
+
+export function editorialLocation(document: WritingDocument) {
+  const root = editorialFolders.find((folder) => folder.type === document.type && folder.status === document.status)!;
+  if (document.kdrivePath) {
+    const oldRoot = editorialFolders.find((folder) => document.kdrivePath!.startsWith(`${folder.folder}/`));
+    if (!oldRoot || oldRoot.type !== document.type) throw new Error("Invalid editorial folder for document type.");
+    return safeRelativePath(`${root.folder}/${document.kdrivePath.slice(oldRoot.folder.length + 1)}`);
+  }
+  return `${root.folder}/${document.slug}.md`;
+}
+
+async function ensureEditorialParent(relativePath: string) {
+  const config = configuration()!;
+  const parts = safeRelativePath(relativePath).split("/").slice(0, -1);
+  for (let index = 1; index <= parts.length; index++) {
+    const response = await fetch(requestUrl(`${config.root}/${parts.slice(0, index).join("/")}`), { method: "MKCOL", headers: headers() });
+    if (![201, 405].includes(response.status)) throw new Error(`Could not prepare editorial folder (${response.status}).`);
   }
 }
 
-export async function loadKdrivePosts() {
-  const refs = await listKdrivePostRefs();
-  return Promise.all(refs.map(loadKdrivePost));
-}
-
-function location(document: WritingDocument) {
-  const config = configuration();
-  if (!config) throw new Error("Write Placid KDrive is not configured.");
-  const folder = document.status === "published" ? "Published" : "Drafts";
-  return `${config.root}/${folder}/${document.slug}.md`;
-}
-
 export async function saveKdrivePost(document: WritingDocument, previous?: WritingDocument) {
-  if (document.type !== "post" || !configuration()) return;
-  const destination = location(document);
-  await kdriveFetch(destination, {
+  const config = configuration();
+  if (!config) throw new Error("KDrive must be connected before saving editorial content.");
+  const destination = editorialLocation(document);
+  const prior = previous?.kdrivePath;
+  if (previous && prior && !previous.kdriveEtag) throw new Error("Reload this piece before saving: its KDrive revision is missing.");
+  await ensureEditorialParent(destination);
+  // Conditional MOVE keeps identity and prevents overwriting another document.
+  let revision = previous?.kdriveEtag;
+  if (prior && prior !== destination) {
+    const beforeMove = await kdriveFetch(`${config.root}/${safeRelativePath(prior)}`, { method: "GET", headers: { "If-Match": revision! } });
+    const originalSource = await beforeMove!.text();
+    await kdriveFetch(`${config.root}/${safeRelativePath(prior)}`, {
+      method: "MOVE", headers: { Destination: requestUrl(`${config.root}/${destination}`), Overwrite: "F", "If-Match": previous!.kdriveEtag! },
+    });
+    const moved = await kdriveFetch(`${config.root}/${destination}`, { method: "GET" });
+    if (await moved!.text() !== originalSource) throw new Error("The moved file changed in KDrive. Reload before saving.");
+    revision = moved!.headers.get("ETag") || "";
+    if (!revision) throw new Error("The folder move succeeded. Reload before editing because KDrive omitted its revision.");
+  }
+  const response = await kdriveFetch(`${config.root}/${destination}`, {
     method: "PUT",
-    headers: { "Content-Type": "text/markdown; charset=utf-8" },
+    headers: { "Content-Type": "text/markdown; charset=utf-8", ...(prior ? { "If-Match": revision! } : { "If-None-Match": "*" }) },
     body: serializeWritingDocument(document),
   });
-  if (previous) {
-    const prior = location(previous);
-    if (prior !== destination) await kdriveFetch(prior, { method: "DELETE" }, true);
+  document.kdrivePath = destination;
+  document.kdriveEtag = response!.headers.get("ETag") || "";
+  document.identityPersisted = true;
+  // Some WebDAV servers omit ETag on PUT. Read the authoritative new revision.
+  if (!document.kdriveEtag) {
+    const updated = await kdriveFetch(`${config.root}/${destination}`, { method: "GET" });
+    if (await updated!.text() !== serializeWritingDocument(document)) throw new Error("The saved file changed in KDrive. Reload before editing.");
+    document.kdriveEtag = updated!.headers.get("ETag") || "";
   }
 }
 
 export async function deleteKdrivePost(document: WritingDocument) {
-  if (document.type !== "post" || !configuration()) return false;
-  const response = await kdriveFetch(location(document), { method: "DELETE" }, true);
+  const config = configuration();
+  if (!config || !document.kdrivePath || !document.kdriveEtag) throw new Error("Reload this piece before deleting it from KDrive.");
+  const response = await kdriveFetch(`${config.root}/${safeRelativePath(document.kdrivePath)}`, { method: "DELETE", headers: { "If-Match": document.kdriveEtag } });
   return Boolean(response);
+}
+
+export async function saveKdriveImage(name: string, bytes: Uint8Array, contentType: string) {
+  const config = configuration();
+  if (!config || !validImageName(name)) throw new Error("That image name is invalid.");
+  await ensureImagesFolder();
+  await kdriveFetch(`${config.root}/Images/${name}`, {
+    method: "PUT",
+    headers: { "Content-Type": contentType },
+    body: new Uint8Array(bytes).buffer,
+  });
+}
+
+export async function loadKdriveImage(name: string) {
+  const config = configuration();
+  if (!config || !validImageName(name)) return null;
+  const response = await kdriveFetch(`${config.root}/Images/${name}`, { method: "GET" }, true);
+  if (!response) return null;
+  return {
+    bytes: new Uint8Array(await response.arrayBuffer()),
+    contentType: response.headers.get("Content-Type") || imageContentType(name),
+  };
 }

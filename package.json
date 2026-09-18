@@ -1,8 +1,78 @@
 {
-  "name": "write-placid",
-  "version": "1.0.0",
+  "name": "@mxpf/write-placid-core",
+  "version": "1.1.0",
   "private": true,
   "type": "module",
+  "files": [
+    "packages/core/index.mjs",
+    "packages/core/site/*.mjs",
+    "packages/core/site/*.d.ts",
+    "packages/core/studio/studio.css",
+    "packages/core/studio/*.ts",
+    "packages/core/studio/*.tsx",
+    "packages/core/dist"
+  ],
+  "exports": {
+    ".": "./packages/core/index.mjs",
+    "./markdown": {
+      "types": "./packages/core/site/markdown.d.ts",
+      "default": "./packages/core/site/markdown.mjs"
+    },
+    "./content": {
+      "types": "./packages/core/site/content.d.ts",
+      "default": "./packages/core/site/content.mjs"
+    },
+    "./site": {
+      "types": "./packages/core/site/site.d.ts",
+      "default": "./packages/core/site/site.mjs"
+    },
+    "./studio/client": {
+      "types": "./packages/core/dist/studio/Studio.d.ts",
+      "default": "./packages/core/dist/studio/Studio.js"
+    },
+    "./studio.css": "./packages/core/studio/studio.css",
+    "./studio/content": {
+      "types": "./packages/core/dist/studio/content.d.ts",
+      "default": "./packages/core/dist/studio/content.js"
+    },
+    "./studio/editorial": {
+      "types": "./packages/core/dist/studio/editorial.d.ts",
+      "default": "./packages/core/dist/studio/editorial.js"
+    },
+    "./studio/save-state": {
+      "types": "./packages/core/dist/studio/save-state.d.ts",
+      "default": "./packages/core/dist/studio/save-state.js"
+    },
+    "./studio/save-queue": {
+      "types": "./packages/core/dist/studio/save-queue.d.ts",
+      "default": "./packages/core/dist/studio/save-queue.js"
+    },
+    "./studio/editor-recovery": {
+      "types": "./packages/core/dist/studio/editor-recovery.d.ts",
+      "default": "./packages/core/dist/studio/editor-recovery.js"
+    },
+    "./studio/caption-inline": {
+      "types": "./packages/core/dist/studio/caption-inline.d.ts",
+      "default": "./packages/core/dist/studio/caption-inline.js"
+    },
+    "./studio/article-images": {
+      "types": "./packages/core/dist/studio/article-images.d.ts",
+      "default": "./packages/core/dist/studio/article-images.js"
+    },
+    "./studio/rich-text": {
+      "types": "./packages/core/dist/studio/rich-text.d.ts",
+      "default": "./packages/core/dist/studio/rich-text.js"
+    },
+    "./studio/caption-editor": {
+      "types": "./packages/core/dist/studio/CaptionEditor.d.ts",
+      "default": "./packages/core/dist/studio/CaptionEditor.js"
+    }
+  },
+  "peerDependencies": {
+    "lucide-react": ">=0.468.0 <1",
+    "react": ">=19.2.0 <20",
+    "react-dom": ">=19.2.0 <20"
+  },
   "engines": {
     "node": ">=22.13.0"
   },
@@ -16,6 +86,20 @@
     "check:studio": "npm test --prefix apps/studio",
     "check:tracking": "npm test --prefix apps/trackinghaus",
     "check:mcp": "npm run type-check --prefix apps/drafts-mcp",
-    "check": "npm run check:config && npm run check:site && npm run check:studio && npm run check:tracking && npm run check:mcp"
-  }
+    "build:core": "apps/studio/node_modules/.bin/tsc -p packages/core/tsconfig.json",
+    "check:core": "npm run build:core && node --test packages/core/tests/*.test.mjs",
+    "pack:core": "npm pack --pack-destination artifacts/core",
+    "check": "npm run check:core && npm run check:config && npm run check:site && npm run check:studio && npm run check:tracking && npm run check:mcp"
+  },
+  "description": "The reusable publishing, content identity, rendering, and authoring core for Write Placid installations.",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/mxpf/write-placid.git"
+  },
+  "keywords": ["publishing", "writing", "static-site", "editor"],
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/mxpf/write-placid/issues"
+  },
+  "homepage": "https://github.com/mxpf/write-placid#readme"
 }

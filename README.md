@@ -15,6 +15,8 @@ Make Placid and Write Placid established a shared publishing foundation later us
 
 The pieces remain separate on purpose. A static public site has a much smaller failure surface than a CMS. Studio can be unavailable without taking the writing down. Tracking can be omitted entirely.
 
+The reusable publishing contract is also available as the versioned `@mxpf/write-placid-core` package. Installations pin an immutable release while keeping their own content, brand, fonts, service bindings, and deployment identity. See [Write Placid Core](docs/CORE.md) and the [parity ledger](docs/PARITY.md).
+
 | Private Studio | Aggregate-only Trackinghaus |
 | --- | --- |
 | ![Write Placid Studio](docs/studio-editor.png) | ![Trackinghaus weekly reading](docs/trackinghaus-desktop.png) |

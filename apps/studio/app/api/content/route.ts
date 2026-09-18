@@ -1,26 +1,18 @@
 import { isDocumentDirty } from "../../content";
-import { loadPublishedDocuments } from "../../github";
-import { kdriveConfigured } from "../../kdrive";
+import { withEditBase } from "../../save-state";
 import { syncKdriveRepository } from "../../kdrive-sync";
 import { authorizeStudioRequest } from "../../server-auth";
-import { listDocuments, seedDocuments } from "../../../db/documents";
+import { listDocuments } from "../../../db/documents";
 
 export async function GET(request: Request) {
   const unauthorized = await authorizeStudioRequest(request);
   if (unauthorized) return unauthorized;
 
   try {
-    let items = await listDocuments();
-    if (!items.length) {
-      const published = await loadPublishedDocuments();
-      await seedDocuments(published);
-    }
-    if (kdriveConfigured()) {
-      await syncKdriveRepository();
-    }
-    items = await listDocuments();
+    await syncKdriveRepository();
+    const items = await listDocuments();
     return Response.json({
-      documents: items.map((document) => ({
+      documents: items.map((document) => withEditBase({
         ...document,
         isDirty: isDocumentDirty(document),
       })),

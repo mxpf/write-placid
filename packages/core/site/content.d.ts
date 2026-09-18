@@ -1,0 +1,13 @@
+export type ContentDocument = { type: "post" | "page" | "now"; id: string; publicPath: string; sourcePath: string; title: string; slug: string; aliases: string[]; body: string; paragraphs: string[]; date?: string; status?: "draft" | "published"; publishedAt?: string; updatedAt?: string; source?: { label: string; href: string } };
+export function calculateReadingTime(body: string): string;
+export function displayDate(value: string): string;
+export function comparePostsByDate(a: ContentDocument, b: ContentDocument): number;
+export function parsePost(source: string, filename?: string): ContentDocument;
+export function parseNowEntry(source: string, filename?: string): ContentDocument;
+export function parsePage(source: string, filename?: string): ContentDocument;
+export function serializePost(post: ContentDocument): string;
+export function validateContentGraph(documents: ContentDocument[]): unknown;
+export function validateManifestShape(manifest: unknown): unknown;
+export function validateIdentityManifest(documents: ContentDocument[], manifest: unknown): unknown;
+export function resolveDocumentLinks(body: string, documents: ContentDocument[]): string;
+export function createContentRepository(options?: { projectRoot?: string; postsDirectory?: string; pagesDirectory?: string; nowDirectory?: string; manifestPath?: string }): { projectRoot: string; readContentRepository(): Promise<ContentDocument[]>; readIdentityManifest(): Promise<unknown>; readPosts(options?: { includeDrafts?: boolean }): Promise<ContentDocument[]>; readNowEntries(options?: { includeDrafts?: boolean }): Promise<ContentDocument[]>; readPages(): Promise<ContentDocument[]> };

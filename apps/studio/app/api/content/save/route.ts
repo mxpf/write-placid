@@ -1,15 +1,10 @@
+import { withEditBase } from "../../../save-state";
 import {
   isDocumentDirty,
-  normalizeIncomingDocument,
   type WritingDocument,
 } from "../../../content";
 import { authorizeStudioRequest } from "../../../server-auth";
-import { saveKdrivePost } from "../../../kdrive";
-import {
-  findDocument,
-  findDocumentByPath,
-  saveDocument,
-} from "../../../../db/documents";
+import { EditorialConflictError, saveIncomingEditorialDocument } from "../../../editorial-repository";
 
 export async function POST(request: Request) {
   const unauthorized = await authorizeStudioRequest(request);
@@ -21,19 +16,9 @@ export async function POST(request: Request) {
       return Response.json({ error: "That draft is too large to save." }, { status: 413 });
     }
     const input = JSON.parse(raw || "{}") as Partial<WritingDocument>;
-    const existing = input.id ? await findDocument(String(input.id)) : undefined;
-    const document = normalizeIncomingDocument(input, existing);
-    const collision = await findDocumentByPath(document.path);
-    if (collision && collision.id !== existing?.id) {
-      return Response.json(
-        { error: "A piece with that title already exists." },
-        { status: 409 },
-      );
-    }
-    await saveKdrivePost(document, existing);
-    await saveDocument(document);
+    const document = await saveIncomingEditorialDocument(input);
     return Response.json({
-      document: { ...document, isDirty: isDocumentDirty(document) },
+      document: withEditBase({ ...document, isDirty: isDocumentDirty(document) }),
     });
   } catch (error) {
     console.error(JSON.stringify({
@@ -42,7 +27,7 @@ export async function POST(request: Request) {
     }));
     return Response.json(
       { error: error instanceof Error ? error.message : "The draft could not be saved." },
-      { status: 500 },
+      { status: error instanceof EditorialConflictError ? 409 : 500 },
     );
   }
 }

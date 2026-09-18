@@ -1,0 +1,25 @@
+{
+  "compilerOptions": {
+    "target": "ES2022",
+    "lib": ["ES2023", "DOM", "DOM.Iterable"],
+    "module": "NodeNext",
+    "moduleResolution": "NodeNext",
+    "rootDir": ".",
+    "outDir": "dist",
+    "declaration": true,
+    "declarationMap": true,
+    "sourceMap": true,
+    "rewriteRelativeImportExtensions": true,
+    "jsx": "react-jsx",
+    "baseUrl": "../..",
+    "paths": {
+      "react": ["apps/studio/node_modules/@types/react/index.d.ts"],
+      "react/jsx-runtime": ["apps/studio/node_modules/@types/react/jsx-runtime.d.ts"],
+      "lucide-react": ["apps/studio/node_modules/lucide-react/dist/lucide-react.d.ts"]
+    },
+    "typeRoots": ["../../apps/studio/node_modules/@types"],
+    "strict": true,
+    "skipLibCheck": true
+  },
+  "include": ["studio/**/*.ts", "studio/**/*.tsx"]
+}

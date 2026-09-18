@@ -1,6 +1,9 @@
 ---
 title: "AI"
+id: 91cc16df-acf5-49e0-8afe-44683466ec57
+publicPath: ai.md
 slug: ai
+aliases: []
 ---
 
 This page is available for explaining how AI participates in your writing, research, or publishing process.

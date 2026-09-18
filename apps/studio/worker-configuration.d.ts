@@ -3,6 +3,8 @@
 // Runtime types generated with workerd@1.20260811.1 2026-08-14 nodejs_compat
 interface __BaseEnv_Env {
 	DB: D1Database;
+	WRITE_PLACID_MIGRATION_MODE?: string;
+	WRITE_PLACID_AUTO_PUBLISH?: string;
 }
 declare namespace Cloudflare {
 	interface Env extends __BaseEnv_Env {}

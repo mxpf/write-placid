@@ -19,7 +19,14 @@ export function getD1() {
   return env.DB;
 }
 
+let schemaReady: Promise<void> | undefined;
+
 export async function ensureSchema() {
+  schemaReady ||= initializeSchema().catch((error) => { schemaReady = undefined; throw error; });
+  await schemaReady;
+}
+
+async function initializeSchema() {
   const d1 = getD1();
   await d1.batch([
     d1.prepare(`
@@ -69,6 +76,7 @@ export async function ensureSchema() {
     ["google_doc_id", "TEXT NOT NULL DEFAULT ''"],
     ["drive_revision", "TEXT NOT NULL DEFAULT ''"],
     ["drive_synced_body", "TEXT NOT NULL DEFAULT ''"],
+    ["editorial_json", "TEXT NOT NULL DEFAULT '{}'"],
     ["public_updated_at", "TEXT NOT NULL DEFAULT ''"],
   ] as const;
   for (const [name, definition] of additions) {
