@@ -15,7 +15,8 @@
     "paths": {
       "react": ["apps/studio/node_modules/@types/react/index.d.ts"],
       "react/jsx-runtime": ["apps/studio/node_modules/@types/react/jsx-runtime.d.ts"],
-      "lucide-react": ["apps/studio/node_modules/lucide-react/dist/lucide-react.d.ts"]
+      "lucide-react": ["apps/studio/node_modules/lucide-react/dist/lucide-react.d.ts"],
+      "drizzle-orm/sqlite-core": ["apps/studio/node_modules/drizzle-orm/sqlite-core/index.d.ts"]
     },
     "typeRoots": ["../../apps/studio/node_modules/@types"],
     "strict": true,

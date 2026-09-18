@@ -4,7 +4,7 @@ Write Placid is the canonical owner of the reusable publishing foundation. Insta
 
 ## Version and contract
 
-The package is `@mxpf/write-placid-core`. Version `1.1.1` implements public snapshot contract `1`; both values are exported from the package root. `npm run pack:core` produces a self-contained artifact with ESM JavaScript, declarations, CSS, and source maps. It requires no build or sibling checkout when installed.
+The package is `@mxpf/write-placid-core`. Version `1.2.0` implements public snapshot contract `1`; both values are exported from the package root. `npm run pack:core` produces a self-contained artifact with ESM JavaScript, declarations, CSS, and source maps. It requires no build or sibling checkout when installed.
 
 Until a permanent release channel is selected, downstream repositories should pin the full Write Placid commit SHA and commit the resulting lockfile. Never use a branch or mutable tag in production. If CI cannot read the repository, attach the verified package artifact to an immutable GitHub release and pin its URL and lockfile integrity.
 
@@ -16,7 +16,13 @@ Until a permanent release channel is selected, downstream repositories should pi
 - `/site`: deterministic RSS, sitemap, and alias redirects from injected configuration.
 - `/studio/client` and `/studio.css`: shared editor, caption UI, image affordances, save queue, dialogs, and neutral styling. React, React DOM, and Lucide are peer dependencies; fonts and theme overrides remain installation-owned.
 - `/studio/content`, `/studio/editorial`, `/studio/save-state`, `/studio/save-queue`, `/studio/editor-recovery`, `/studio/caption-inline`, `/studio/article-images`, `/studio/rich-text`, and `/studio/caption-editor`: reusable primitives with declarations.
-- `/studio/github`, `/studio/kdrive`, `/studio/images`, `/studio/publishing`, and `/studio/migration`: server-only storage, atomic snapshot, image, and migration adapters. Instance routes supply authentication, D1 cache/order/recovery, environment bindings, and scheduling.
+- `/studio/github`, `/studio/kdrive`, `/studio/images`, `/studio/publishing`, and `/studio/migration`: server-only storage, atomic snapshot, image, and migration adapters. An explicitly empty `WRITE_PLACID_GITHUB_CONTENT_ROOT` targets the repository root.
+- `/studio/repository`: `createEditorialRepository({ listCachedDocuments, loadCanonicalDocuments, saveCanonicalDocument, saveCachedDocument })` returns canonical-first read, editor-save, and incoming-save operations. `EditorialConflictError` is exported at module scope.
+- `/studio/d1`: `createD1Store({ getD1, mappedGoogleDocId? })` returns schema initialization, document cache, private ordering, deletion recovery, and cursor operations. `/studio/d1-schema` exposes the matching Drizzle schema for migration tooling. Binding lookup and any private document map are injected by the installation.
+- `/studio/drive`: `createDriveBridge({ url, secret, fetch?, validateUrl?, now? })` returns configuration, list/get/create, and three-way synchronization operations without packaging credentials.
+- `/studio/reconciliation`: `createRepositoryReconciliation({ isCanonicalConfigured, readEditorialRepository, listCachedDocuments, cacheDocuments, deleteCachedDocument, publishEditorialRepository })` returns the whole-graph reconciliation operation.
+- `/studio/scheduler`: `runScheduledReconciliation(controller, { migrationMode, record, logger? }, reconcile)` preserves completion/failure evidence while leaving worker bindings and `waitUntil` local.
+- `/studio/reorder` and `/studio/smart-quotes`: editor ordering and typographic helpers.
 
 The package has no personal content, production credentials, deployment IDs, private drafts, licensed fonts, or Thinkinghaus defaults.
 

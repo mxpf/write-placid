@@ -4,7 +4,9 @@ import { parseWritingDocument, } from "./content.js";
 const owner = process.env.WRITE_PLACID_GITHUB_OWNER || "your-github-name";
 const repository = process.env.WRITE_PLACID_GITHUB_REPO || "write-placid";
 const branch = process.env.WRITE_PLACID_GITHUB_BRANCH || "main";
-const contentRoot = (process.env.WRITE_PLACID_GITHUB_CONTENT_ROOT || "apps/site").trim().replace(/^\/+|\/+$/g, "");
+const contentRoot = (process.env.WRITE_PLACID_GITHUB_CONTENT_ROOT === undefined
+    ? "apps/site"
+    : process.env.WRITE_PLACID_GITHUB_CONTENT_ROOT).trim().replace(/^\/+|\/+$/g, "");
 const apiRoot = `https://api.github.com/repos/${owner}/${repository}`;
 function repositoryPath(pathname) {
     return contentRoot ? `${contentRoot}/${pathname}` : pathname;

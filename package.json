@@ -1,6 +1,6 @@
 {
   "name": "@mxpf/write-placid-core",
-  "version": "1.1.1",
+  "version": "1.2.0",
   "private": true,
   "type": "module",
   "files": [
@@ -90,9 +90,42 @@
     "./studio/migration": {
       "types": "./packages/core/dist/studio/editorial-migration.d.ts",
       "default": "./packages/core/dist/studio/editorial-migration.js"
+    },
+    "./studio/repository": {
+      "types": "./packages/core/dist/studio/editorial-repository.d.ts",
+      "default": "./packages/core/dist/studio/editorial-repository.js"
+    },
+    "./studio/d1": {
+      "types": "./packages/core/dist/studio/d1.d.ts",
+      "default": "./packages/core/dist/studio/d1.js"
+    },
+    "./studio/d1-schema": {
+      "types": "./packages/core/dist/studio/d1-schema.d.ts",
+      "default": "./packages/core/dist/studio/d1-schema.js"
+    },
+    "./studio/drive": {
+      "types": "./packages/core/dist/studio/drive.d.ts",
+      "default": "./packages/core/dist/studio/drive.js"
+    },
+    "./studio/reconciliation": {
+      "types": "./packages/core/dist/studio/kdrive-sync.d.ts",
+      "default": "./packages/core/dist/studio/kdrive-sync.js"
+    },
+    "./studio/scheduler": {
+      "types": "./packages/core/dist/studio/scheduled.d.ts",
+      "default": "./packages/core/dist/studio/scheduled.js"
+    },
+    "./studio/reorder": {
+      "types": "./packages/core/dist/studio/reorder.d.ts",
+      "default": "./packages/core/dist/studio/reorder.js"
+    },
+    "./studio/smart-quotes": {
+      "types": "./packages/core/dist/studio/smart-quotes.d.ts",
+      "default": "./packages/core/dist/studio/smart-quotes.js"
     }
   },
   "peerDependencies": {
+    "drizzle-orm": ">=0.45.0 <1",
     "lucide-react": ">=0.468.0 <1",
     "react": ">=19.2.0 <20",
     "react-dom": ">=19.2.0 <20"

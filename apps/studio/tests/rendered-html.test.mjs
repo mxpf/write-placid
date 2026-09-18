@@ -263,7 +263,7 @@ test("preserves public-compatible article images through Studio rich text", asyn
   const [studio, route, publisher, styles] = await Promise.all([
     readFile(new URL("../../../packages/core/studio/Studio.tsx", import.meta.url), "utf8"),
     readFile(new URL("../app/api/content/image/route.ts", import.meta.url), "utf8"),
-    readFile(new URL("../app/publish-images.ts", import.meta.url), "utf8"),
+    readFile(new URL("../../../packages/core/studio/publish-images.ts", import.meta.url), "utf8"),
     readFile(new URL("../../../packages/core/studio/studio.css", import.meta.url), "utf8"),
   ]);
   assert.match(studio, /accept="image\/jpeg,image\/png,image\/webp,image\/gif"/);
@@ -489,14 +489,14 @@ test("reorders drafts without disturbing the rest of the library", async () => {
   const [studio, route, storage] = await Promise.all([
     readFile(new URL("../../../packages/core/studio/Studio.tsx", import.meta.url), "utf8"),
     readFile(new URL("../app/api/content/reorder/route.ts", import.meta.url), "utf8"),
-    readFile(new URL("../db/documents.ts", import.meta.url), "utf8"),
+    readFile(new URL("../../../packages/core/studio/d1.ts", import.meta.url), "utf8"),
   ]);
   assert.match(studio, /\(min-width: 701px\) and \(pointer: fine\)/);
   assert.match(studio, /draggable=\{reorderable\}/);
   assert.match(route, /reorderDraftDocuments/);
-  assert.match(storage, /uniqueIds\.size !== ids\.length/);
-  assert.match(storage, /asc\(documents\.sortOrder\), desc\(documents\.date\)/);
-  assert.match(storage, /set: rowUpdates\(row\)/);
+  assert.match(storage, /unique\.size !== ids\.length/);
+  assert.match(storage, /ORDER BY type ASC,sort_order ASC,date DESC/);
+  assert.match(storage, /ON CONFLICT\(id\) DO UPDATE/);
 });
 
 
