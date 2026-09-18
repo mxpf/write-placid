@@ -10,7 +10,7 @@ type D1Statement = {
 };
 export type D1DatabaseLike = {
     prepare: (sql: string) => D1Statement;
-    batch: (statements: D1Statement[]) => Promise<unknown>;
+    batch: (statements: any[]) => Promise<unknown>;
 };
 export type D1StoreOptions = {
     getD1: () => D1DatabaseLike;

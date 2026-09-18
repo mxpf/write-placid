@@ -2,7 +2,7 @@ import type { WritingDocument } from "./content.ts";
 
 type D1Result<T = Record<string, unknown>> = { results?: T[] };
 type D1Statement = { bind: (...values: unknown[]) => D1Statement; run: () => Promise<unknown>; first: <T = Record<string, unknown>>() => Promise<T | null>; all: <T = Record<string, unknown>>() => Promise<D1Result<T>> };
-export type D1DatabaseLike = { prepare: (sql: string) => D1Statement; batch: (statements: D1Statement[]) => Promise<unknown> };
+export type D1DatabaseLike = { prepare: (sql: string) => D1Statement; batch: (statements: any[]) => Promise<unknown> };
 type Row = Record<string, unknown>;
 
 export type D1StoreOptions = { getD1: () => D1DatabaseLike; mappedGoogleDocId?: (path: string) => string; now?: () => string };
