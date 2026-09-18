@@ -1,6 +1,6 @@
 {
   "name": "@mxpf/write-placid-core",
-  "version": "1.1.0",
+  "version": "1.1.1",
   "private": true,
   "type": "module",
   "files": [
@@ -66,6 +66,30 @@
     "./studio/caption-editor": {
       "types": "./packages/core/dist/studio/CaptionEditor.d.ts",
       "default": "./packages/core/dist/studio/CaptionEditor.js"
+    },
+    "./studio/github": {
+      "types": "./packages/core/dist/studio/github.d.ts",
+      "default": "./packages/core/dist/studio/github.js"
+    },
+    "./studio/kdrive": {
+      "types": "./packages/core/dist/studio/kdrive.d.ts",
+      "default": "./packages/core/dist/studio/kdrive.js"
+    },
+    "./studio/images": {
+      "types": "./packages/core/dist/studio/image-files.d.ts",
+      "default": "./packages/core/dist/studio/image-files.js"
+    },
+    "./studio/publish-images": {
+      "types": "./packages/core/dist/studio/publish-images.d.ts",
+      "default": "./packages/core/dist/studio/publish-images.js"
+    },
+    "./studio/publishing": {
+      "types": "./packages/core/dist/studio/editorial-publishing.d.ts",
+      "default": "./packages/core/dist/studio/editorial-publishing.js"
+    },
+    "./studio/migration": {
+      "types": "./packages/core/dist/studio/editorial-migration.d.ts",
+      "default": "./packages/core/dist/studio/editorial-migration.js"
     }
   },
   "peerDependencies": {
