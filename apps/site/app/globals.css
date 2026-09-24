@@ -320,12 +320,24 @@ body {
 }
 
 .article-body .article-image {
-  --article-image-opacity: 0.6;
+  --article-image-opacity: 1;
   width: 112.5%;
   margin: 60px -6.25%;
+  opacity: 1;
+}
+
+.article-body .article-image[data-scroll-fade-active] {
   opacity: var(--article-image-opacity);
   transition: opacity 80ms linear;
   will-change: opacity;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .article-body .article-image {
+    opacity: 1;
+    transition: none;
+    will-change: auto;
+  }
 }
 
 .article-body .article-image img {

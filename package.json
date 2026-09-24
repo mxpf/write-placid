@@ -1,6 +1,6 @@
 {
   "name": "@mxpf/write-placid-core",
-  "version": "1.3.0",
+  "version": "1.4.0",
   "private": true,
   "type": "module",
   "files": [
@@ -25,6 +25,10 @@
     "./site": {
       "types": "./packages/core/site/site.d.ts",
       "default": "./packages/core/site/site.mjs"
+    },
+    "./scroll-fade": {
+      "types": "./packages/core/site/scroll-fade.d.ts",
+      "default": "./packages/core/site/scroll-fade.mjs"
     },
     "./studio/client": {
       "types": "./packages/core/dist/studio/Studio.d.ts",

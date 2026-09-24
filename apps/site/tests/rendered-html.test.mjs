@@ -333,3 +333,17 @@ test("calculates reading time and preserves draft status", () => {
   assert.equal(draft.status, "draft");
   assert.equal(draft.readingTime, "1 minute read");
 });
+
+test("article images are visible without JavaScript and use the packaged fade controller", async () => {
+  const [styles, component, packageManifest] = await Promise.all([
+    readFile(new URL("../app/globals.css", import.meta.url), "utf8"),
+    readFile(new URL("../app/ScrollFadeImage.tsx", import.meta.url), "utf8"),
+    readFile(new URL("../../../package.json", import.meta.url), "utf8"),
+  ]);
+
+  assert.match(styles, /\.article-body \.article-image \{[\s\S]*--article-image-opacity: 1;/);
+  assert.match(styles, /@media \(prefers-reduced-motion: reduce\)[\s\S]*opacity: 1;/);
+  assert.match(component, /from "@mxpf\/write-placid-core\/scroll-fade"/);
+  assert.match(component, /return attachScrollFade\(figure\)/);
+  assert.equal(JSON.parse(packageManifest).exports["./scroll-fade"].default, "./packages/core/site/scroll-fade.mjs");
+});
