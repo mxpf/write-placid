@@ -144,7 +144,7 @@ function decodeImageTitle(value) {
 }
 
 /** @param {string} src */
-function isSafeImageSrc(src) {
+export function isSafeImageSrc(src) {
   if (src.startsWith("/")) return !src.startsWith("//");
   try {
     return new URL(src).protocol === "https:";

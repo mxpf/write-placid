@@ -1,4 +1,4 @@
-import { parseCaptionMarkdown, parseContentBlocks, parseInlineMarkdown, stripInlineMarkdown } from "./markdown.mjs";
+import { isSafeImageSrc, parseCaptionMarkdown, parseContentBlocks, parseImageMarkdown, parseInlineMarkdown, stripInlineMarkdown } from "./markdown.mjs";
 import { displayDate } from "./content.mjs";
 
 const escapeXml = (value) => String(value).replaceAll("&", "&amp;").replaceAll("<", "&lt;").replaceAll(">", "&gt;").replaceAll('"', "&quot;").replaceAll("'", "&apos;");
@@ -69,6 +69,32 @@ export function generateSitemap(posts, pages, { siteUrl, nowPath = "/now" }) {
   const paths = ["/", nowPath, ...pages.map(({ slug }) => `/${slug}`), ...posts.map(({ slug }) => `/${slug}`)];
   const urls = paths.map((pathname) => `  <url><loc>${escapeXml(new URL(pathname, siteUrl).href)}</loc></url>`).join("\n");
   return `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${urls}\n</urlset>\n`;
+}
+
+/** Select the first image accepted by the shared Markdown image contract. */
+export function firstSafeArticleImage(paragraphs) {
+  for (const paragraph of paragraphs) {
+    const image = parseImageMarkdown(paragraph);
+    if (image) return image;
+  }
+  return null;
+}
+
+/**
+ * Build portable Open Graph and Twitter metadata from publication content and
+ * installation-owned identity/configuration.
+ */
+export function buildSocialMetadata(document, { siteName, siteUrl, fallbackImage, pathname = `/${document.slug}` }) {
+  const articleImage = firstSafeArticleImage(document.paragraphs || []);
+  const selectedImage = articleImage || { src: fallbackImage, alt: `${siteName} social card` };
+  if (!isSafeImageSrc(selectedImage.src)) throw new Error("The social fallback image must use an HTTPS or root-relative URL.");
+  const image = { url: new URL(selectedImage.src, siteUrl).href, alt: selectedImage.alt };
+  const description = stripInlineMarkdown(document.paragraphs?.[0] || "");
+  const canonicalUrl = new URL(pathname, siteUrl).href;
+  return {
+    openGraph: { title: document.title, description, siteName, url: canonicalUrl, images: [image] },
+    twitter: { card: "summary_large_image", title: document.title, description, images: [image] },
+  };
 }
 
 const escapeHtml = (value) => String(value).replaceAll("&", "&amp;").replaceAll('"', "&quot;").replaceAll("<", "&lt;");

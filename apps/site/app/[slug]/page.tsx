@@ -4,6 +4,7 @@ import { Footer } from "../Footer";
 import { LetterCascade } from "../LetterCascade";
 import { Webmentions } from "../Webmentions";
 import { stripInlineMarkdown } from "../../lib/markdown.mjs";
+import { buildSocialMetadata } from "@mxpf/write-placid-core/site";
 import { getPost, getStandalonePage, posts, standalonePages } from "../posts";
 import { siteConfig } from "../site-config";
 import { sitePath } from "../site-path";
@@ -21,6 +22,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
     title: content?.title,
     description: content ? stripInlineMarkdown(content.paragraphs[0]) : undefined,
     alternates: content ? { canonical: `/${slug}`, types: { "application/rss+xml": "/rss.xml" } } : undefined,
+    ...(content ? buildSocialMetadata(content, { siteName: siteConfig.name, siteUrl: siteConfig.url, fallbackImage: "/og.png", pathname: `/${slug}` }) : {}),
   };
 }
 

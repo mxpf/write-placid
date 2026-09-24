@@ -5,7 +5,7 @@ import path from "node:path";
 import test from "node:test";
 import { parseCaptionMarkdown, parseImageMarkdown } from "../site/markdown.mjs";
 import { createContentRepository, resolveDocumentLinks } from "../site/content.mjs";
-import { generateRssFeed, generateSitemap, redirectDocument } from "../site/site.mjs";
+import { buildSocialMetadata, generateRssFeed, generateSitemap, redirectDocument } from "../site/site.mjs";
 
 const post = { type: "post", id: "550e8400-e29b-41d4-a716-446655440000", publicPath: "hello.md", sourcePath: "content/posts/hello.md", title: "Hello", slug: "hello", aliases: ["/old-hello.html"], date: "2026-01-01", publishedAt: "2026-01-01T00:00:00.000Z", status: "published", body: "A *small* note.", paragraphs: ["A *small* note."] };
 
@@ -36,4 +36,28 @@ test("feed, sitemap, and redirects are configuration-only and deterministic", ()
   const redirect = redirectDocument("/hello.html", { siteName: "Example" });
   assert.match(redirect, /location\.replace\("\/hello\.html" \+ location\.search \+ location\.hash\)/);
   assert.match(redirect, /Moved · Example/);
+});
+
+test("social metadata uses the first safe article image and preserves its alt text", () => {
+  const metadata = buildSocialMetadata({ ...post, paragraphs: ["![Unsafe](javascript:alert(1))", "Intro text.", "![A quiet room](/images/quiet-room.jpg)", "![Later](https://example.com/later.jpg)"] }, {
+    siteName: "Example",
+    siteUrl: "https://example.com",
+    fallbackImage: "/fallback.png",
+  });
+  const expected = { url: "https://example.com/images/quiet-room.jpg", alt: "A quiet room" };
+  assert.deepEqual(metadata.openGraph.images, [expected]);
+  assert.deepEqual(metadata.twitter.images, [expected]);
+  assert.equal(metadata.openGraph.url, "https://example.com/hello");
+});
+
+test("social metadata uses the installation fallback for image-free posts", () => {
+  const metadata = buildSocialMetadata(post, {
+    siteName: "Example",
+    siteUrl: "https://example.com/base/",
+    fallbackImage: "/social-card.png",
+  });
+  const expected = { url: "https://example.com/social-card.png", alt: "Example social card" };
+  assert.deepEqual(metadata.openGraph.images, [expected]);
+  assert.deepEqual(metadata.twitter.images, [expected]);
+  assert.throws(() => buildSocialMetadata(post, { siteName: "Example", siteUrl: "https://example.com", fallbackImage: "javascript:alert(1)" }), /fallback image/);
 });

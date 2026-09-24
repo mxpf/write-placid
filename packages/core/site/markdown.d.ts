@@ -3,6 +3,7 @@ export type CaptionRun = { text: string; italic?: boolean; href?: string };
 export type ContentBlock = { type: "heading" | "blockquote" | "paragraph"; index: number; text: string } | { type: "image"; index: number; alt: string; src: string; title?: string } | { type: "unordered-list"; index: number; items: string[] } | { type: "ordered-list"; index: number; items: string[]; start: number };
 export function safeCaptionHref(value: string): string | null;
 export function parseCaptionMarkdown(value: string): CaptionRun[];
+export function isSafeImageSrc(src: string): boolean;
 export function parseImageMarkdown(value: string): { alt: string; src: string; title?: string } | null;
 export function parseInlineMarkdown(value: string): InlineToken[];
 export function stripInlineMarkdown(value: string): string;
