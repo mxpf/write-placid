@@ -12,6 +12,8 @@ Image-title captions may contain the shared safe inline subset: plain text, ital
 
 Set `webmentionEndpoint` in `site.config.json` to enable build-time Webmentions. `npm run refresh:webmentions` updates the checked-in cache under `data/`; readers never contact the Webmention provider directly, and a failed refresh leaves the last good cache intact.
 
+`npm run build:static-public` produces `dist/static-public`, a verified static reader without framework hydration or RSC navigation payloads. Configure its early canvas, `color-scheme`, and cross-document View Transition opt-in under `staticPublic` in `site.config.json`. The defaults are neutral white/light. An installation should set its real canvas and scheme so the browser can paint the correct background before the external stylesheet arrives. Motion timings and all visual styling remain in the installation stylesheet; no overlay background is added by the exporter.
+
 ```bash
 npm install
 npm run dev

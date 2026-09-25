@@ -1,6 +1,6 @@
 {
   "name": "@mxpf/write-placid-core",
-  "version": "1.4.0",
+  "version": "1.5.0",
   "private": true,
   "type": "module",
   "files": [
@@ -29,6 +29,14 @@
     "./scroll-fade": {
       "types": "./packages/core/site/scroll-fade.d.ts",
       "default": "./packages/core/site/scroll-fade.mjs"
+    },
+    "./static-public": {
+      "types": "./packages/core/site/static-public.d.ts",
+      "default": "./packages/core/site/static-public.mjs"
+    },
+    "./static-public/browser": {
+      "types": "./packages/core/site/static-public-browser.d.ts",
+      "default": "./packages/core/site/static-public-browser.mjs"
     },
     "./studio/client": {
       "types": "./packages/core/dist/studio/Studio.d.ts",

@@ -4,9 +4,11 @@ Write Placid is the canonical owner of the reusable publishing foundation. Insta
 
 ## Version and contract
 
-The package is `@mxpf/write-placid-core`. Version `1.4.0` implements public snapshot contract `1`; both values are exported from the package root. `npm run pack:core` produces a self-contained artifact with ESM JavaScript, declarations, CSS, and source maps. It requires no build or sibling checkout when installed.
+The package is `@mxpf/write-placid-core`. Version `1.5.0` implements public snapshot contract `1`; both values are exported from the package root. `npm run pack:core` produces a self-contained artifact with ESM JavaScript, declarations, CSS, and source maps. It requires no build or sibling checkout when installed.
 
 Public sites can import `attachScrollFade` from `@mxpf/write-placid-core/scroll-fade`. The controller keeps images fully visible until observation is successfully initialized, preserves the installation's configurable bidirectional viewport fade, respects reduced motion, and restores the safe visible baseline during cleanup. Caption rendering and installation styling remain owned by the consuming site.
+
+The optional `@mxpf/write-placid-core/static-public` build mode turns a completed Vinext static export into a verified reader artifact without framework hydration, RSC payloads, or client-navigation chunks. It preserves semantic HTML, metadata, structured data, ordinary scripts, CSS, assets, RSS, aliases, and instance integrations. The shell emits an early configurable canvas and color scheme plus a synchronous, reduced-motion-aware cross-document transition opt-in. Neutral defaults are white/light; installations own all brand colors, motion CSS, analytics configuration, author controls, content, and typography assets. The browser helper progressively restores typography mutation guards, scroll progress, the shared image fade, and end-of-article footer reveal with configurable selectors and safe no-JavaScript/failure behavior.
 
 Until a permanent release channel is selected, downstream repositories should pin the full Write Placid commit SHA and commit the resulting lockfile. Never use a branch or mutable tag in production. If CI cannot read the repository, attach the verified package artifact to an immutable GitHub release and pin its URL and lockfile integrity.
 

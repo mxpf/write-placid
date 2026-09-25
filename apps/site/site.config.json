@@ -11,5 +11,10 @@
   "statsUrl": "",
   "trackingScriptUrl": "",
   "trackingEndpoint": "",
-  "trackingSiteKey": ""
+  "trackingSiteKey": "",
+  "staticPublic": {
+    "canvasColor": "#1a1814",
+    "colorScheme": "dark",
+    "viewTransitions": true
+  }
 }

@@ -15,6 +15,7 @@
     "refresh:webmentions": "node scripts/refresh-webmentions.mjs",
     "prebuild:pages": "node scripts/clean-static-export.mjs && node scripts/generate-posts.mjs",
     "build:pages": "STATIC_EXPORT=1 vinext build && node scripts/add-cached-stylesheet-alias.mjs && node scripts/generate-redirects.mjs",
+    "build:static-public": "npm run build:pages && node scripts/build-static-public.mjs",
     "start": "WRANGLER_LOG_PATH=.wrangler/wrangler.log vinext start",
     "test": "npm run build:pages && node --test tests/*.test.mjs",
     "lint": "eslint . --ignore-pattern dist --ignore-pattern .next",
