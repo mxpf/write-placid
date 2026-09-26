@@ -3,6 +3,7 @@ import "./globals.css";
 import { siteConfig } from "./site-config";
 import { sitePath } from "./site-path";
 import { TypographyGuards } from "./TypographyGuards";
+import { ThemeToggle } from "./ThemeToggle";
 
 const author = siteConfig.authorName && siteConfig.authorUrl
   ? { name: siteConfig.authorName, url: siteConfig.authorUrl }
@@ -69,14 +70,21 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
+    <html lang="en" suppressHydrationWarning>
       <head>
+        <script
+          id="write-placid-theme-init"
+          dangerouslySetInnerHTML={{
+            __html: `try{const t=localStorage.getItem("write-placid-theme");if(t==="light"||t==="dark"){document.documentElement.dataset.theme=t;document.documentElement.style.colorScheme=t}}catch{}`,
+          }}
+        />
         {siteConfig.relMeUrl ? <link rel="me" href={siteConfig.relMeUrl} /> : null}
         {siteConfig.webmentionEndpoint ? (
           <link rel="webmention" href={siteConfig.webmentionEndpoint} />
         ) : null}
       </head>
       <body data-studio-url={siteConfig.studioUrl || undefined}>
+        <ThemeToggle />
         {children}
         <TypographyGuards />
         <script
@@ -87,6 +95,7 @@ export default function RootLayout({
           }}
         />
         <script defer src={sitePath("/author-mode.js")} />
+        <script defer src={sitePath("/theme-toggle.js")} />
         {siteConfig.trackingScriptUrl && siteConfig.trackingEndpoint && siteConfig.trackingSiteKey ? (
           <script
             defer
