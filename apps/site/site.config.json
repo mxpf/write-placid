@@ -1,6 +1,6 @@
 {
   "name": "Write Placid",
-  "description": "A quiet place for notes, essays, and the occasional strange thing.",
+  "description": "A small publishing system for writing that deserves a clear, durable home.",
   "url": "https://example.com",
   "language": "en-US",
   "authorName": "",
@@ -13,8 +13,8 @@
   "trackingEndpoint": "",
   "trackingSiteKey": "",
   "staticPublic": {
-    "canvasColor": "#1a1814",
-    "colorScheme": "dark",
+    "canvasColor": "#f1ede3",
+    "colorScheme": "light",
     "viewTransitions": true
   }
 }

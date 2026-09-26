@@ -2,6 +2,10 @@
   "version": 1,
   "documents": [
     { "id": "0f62447e-2f77-40c4-98ac-1cd14a443ef5", "type": "post", "slug": "a-small-note", "path": "content/posts/a-small-note.md", "url": "/a-small-note.html", "aliases": [] },
+    { "id": "6f54b529-4b32-4b60-8be4-0c11eea4d9a1", "type": "post", "slug": "the-shape-of-a-note", "path": "content/posts/the-shape-of-a-note.md", "url": "/the-shape-of-a-note.html", "aliases": [] },
+    { "id": "945a8f54-7471-448a-95e6-94b2765559a3", "type": "post", "slug": "keep-the-address", "path": "content/posts/keep-the-address.md", "url": "/keep-the-address.html", "aliases": [] },
+    { "id": "5adac8b2-8d6a-4c85-a68d-d46db70ca824", "type": "post", "slug": "publish-without-performing", "path": "content/posts/publish-without-performing.md", "url": "/publish-without-performing.html", "aliases": [] },
+    { "id": "0a6f742d-e5cd-4e3e-a598-ec04b753228d", "type": "post", "slug": "a-place-of-your-own", "path": "content/posts/a-place-of-your-own.md", "url": "/a-place-of-your-own.html", "aliases": [] },
     { "id": "2ffef968-a293-4f04-b3c6-1ec237f5a24b", "type": "now", "slug": "now-20260814", "path": "content/now/now-20260814.md", "url": "/now.html", "aliases": [] },
     { "id": "40db3ab2-e0f8-4c6d-b80b-b16ddbf68ef3", "type": "page", "slug": "about", "path": "content/pages/about.md", "url": "/about.html", "aliases": [] },
     { "id": "91cc16df-acf5-49e0-8afe-44683466ec57", "type": "page", "slug": "ai", "path": "content/pages/ai.md", "url": "/ai.html", "aliases": [] },

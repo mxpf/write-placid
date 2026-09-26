@@ -18,13 +18,20 @@ export default function Home() {
   return (
     <main className="site index-page">
       <div className="index-frame">
-        <a className="desktop-brand" href={sitePath("/")}><LetterCascade text={siteConfig.name} /></a>
+        <div className="index-intro">
+          <a className="desktop-brand" href={sitePath("/")}><LetterCascade text={siteConfig.name} /></a>
+          <p>{siteConfig.description}</p>
+          <p className="index-note">A calm, self-owned place for essays, notes, links, and whatever comes next.</p>
+        </div>
         <div className="index-column">
           <h1 className="sr-only">{siteConfig.name}</h1>
           <ol className="post-list">
             {posts.map((post) => (
               <li key={post.slug}>
-                <a href={sitePath(`/${post.slug}${staticExport ? ".html" : ""}`)}>{post.title}</a>
+                <a href={sitePath(`/${post.slug}${staticExport ? ".html" : ""}`)}>
+                  <span>{post.title}</span>
+                  <span className="post-meta">{post.readingTime}</span>
+                </a>
               </li>
             ))}
           </ol>

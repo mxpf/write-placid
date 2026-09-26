@@ -1,10 +1,12 @@
 :root {
-  --blog-background: #1a1814;
-  --blog-foreground: #f1ede3;
-  --blog-muted: #9a9285;
+  --blog-background: #f1ede3;
+  --blog-foreground: #1a1814;
+  --blog-body: #454139;
+  --blog-muted: #605b51;
+  --blog-link: #116a62;
   --blog-rule: color-mix(in srgb, var(--blog-foreground) 18%, transparent);
   --reading-measure: 56ch;
-  color-scheme: dark;
+  color-scheme: light;
 }
 
 @font-face {
@@ -109,6 +111,27 @@ body {
   white-space: nowrap;
 }
 
+.index-intro {
+  position: sticky;
+  top: 24px;
+  grid-column: 1;
+  align-self: start;
+  max-width: 31rem;
+  padding-right: clamp(24px, 6vw, 96px);
+}
+
+.index-intro p {
+  max-width: 38ch;
+  margin: 48px 0 0;
+  color: var(--blog-body);
+  text-wrap: pretty;
+}
+
+.index-intro .index-note {
+  margin-top: 24px;
+  color: var(--blog-muted);
+}
+
 .site .index-frame .desktop-brand {
   font-weight: 400;
 }
@@ -174,13 +197,30 @@ body {
 }
 
 .post-list li {
-  min-height: 48px;
+  min-height: 56px;
   margin: 0;
+  border-bottom: 1px solid var(--blog-rule);
 }
 
 .site .post-list a {
-  display: inline-block;
+  display: flex;
+  justify-content: space-between;
+  gap: 24px;
+  padding: 15px 0 16px;
   font-weight: 400;
+}
+
+.post-meta {
+  flex: 0 0 auto;
+  color: var(--blog-muted);
+  font-size: 12px;
+  opacity: 0;
+  transition: opacity 180ms ease;
+}
+
+.post-list a:hover .post-meta,
+.post-list a:focus-visible .post-meta {
+  opacity: 1;
 }
 
 .site .footer {
@@ -237,7 +277,7 @@ body {
 
 .article-body {
   width: 100%;
-  color: #b3aca2;
+  color: var(--blog-body);
   font-weight: 400;
 }
 
@@ -410,7 +450,7 @@ body {
 
 .article-body a:hover,
 .article-body a:focus-visible {
-  color: var(--blog-foreground);
+  color: var(--blog-link);
   opacity: 1;
 }
 
@@ -443,7 +483,21 @@ body {
   }
 
   .site .desktop-brand {
-    display: none;
+    display: inline-flex;
+  }
+
+  .index-intro {
+    position: static;
+    max-width: none;
+    padding: 0 0 72px;
+  }
+
+  .index-intro p {
+    margin-top: 40px;
+  }
+
+  .index-intro .index-note {
+    margin-top: 28px;
   }
 
   .index-column,
@@ -458,7 +512,7 @@ body {
   }
 
   .site .footer-brand {
-    display: inline-block;
+    display: none;
     margin-bottom: 28px;
   }
 
@@ -475,6 +529,10 @@ body {
 
   .post-list li {
     min-height: 56px;
+  }
+
+  .post-meta {
+    opacity: 1;
   }
 
   .article-header h1,
