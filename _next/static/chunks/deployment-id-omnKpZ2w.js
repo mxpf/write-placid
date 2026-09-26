@@ -1,1 +1,0 @@
-function e(){}function t(e,t=void 0){t&&e.set(`x-deployment-id`,t)}export{e as n,t};

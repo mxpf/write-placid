@@ -3,7 +3,7 @@
   <channel>
     <title>Write Placid</title>
     <link>https://example.com/</link>
-    <description>A quiet place for notes, essays, and the occasional strange thing.</description>
+    <description>A small publishing system for writing that deserves a clear, durable home.</description>
     <language>en-US</language>
     <lastBuildDate>Fri, 14 Aug 2026 12:00:00 GMT</lastBuildDate>
     <atom:link href="https://example.com/rss.xml" rel="self" type="application/rss+xml" />
@@ -25,6 +25,51 @@
       <description>A few things receiving attention right now:</description>
       <content:encoded><![CDATA[<p>A few things receiving attention right now:</p>
 <ul><li>Replacing this sample with an honest account of what is actually occupying the week.</li><li>Keeping the list short enough to remain useful.</li></ul>]]></content:encoded>
+    </item>
+    <item>
+      <title>The shape of a note</title>
+      <link>https://example.com/the-shape-of-a-note</link>
+      <guid isPermaLink="true">https://example.com/the-shape-of-a-note</guid>
+      <pubDate>Sat, 08 Aug 2026 12:00:00 GMT</pubDate>
+      <description>A note can be small without being unfinished.</description>
+      <content:encoded><![CDATA[<p>A note can be small without being unfinished.</p>
+<p>It can hold one observation, one useful link, or a sentence that keeps returning. The shape is not a lesser essay. It is simply the amount of room the thought needs.</p>
+<blockquote><p>A publishing practice becomes easier when every idea does not have to become an event.</p></blockquote>
+<p>Write it clearly. Give it a stable address. Let it remain exactly as large as it wants to be.</p>]]></content:encoded>
+    </item>
+    <item>
+      <title>Keep the address</title>
+      <link>https://example.com/keep-the-address</link>
+      <guid isPermaLink="true">https://example.com/keep-the-address</guid>
+      <pubDate>Fri, 24 Jul 2026 12:00:00 GMT</pubDate>
+      <description>The web is at its best when a thought has somewhere dependable to live.</description>
+      <content:encoded><![CDATA[<p>The web is at its best when a thought has somewhere dependable to live.</p>
+<p>A stable address is a small promise: the title may sharpen, the sentences may improve, and the surrounding site may change, but the path remains useful.</p>
+<p>That promise matters to readers, feeds, links, search indexes, and your future self.</p>
+<h2>A practical rule</h2>
+<p>Choose the public path deliberately. Preserve old paths as aliases. Treat identity as part of the writing rather than an implementation detail.</p>]]></content:encoded>
+    </item>
+    <item>
+      <title>Publish without performing</title>
+      <link>https://example.com/publish-without-performing</link>
+      <guid isPermaLink="true">https://example.com/publish-without-performing</guid>
+      <pubDate>Fri, 03 Jul 2026 12:00:00 GMT</pubDate>
+      <description>Publishing does not have to be a performance of certainty.</description>
+      <content:encoded><![CDATA[<p>Publishing does not have to be a performance of certainty.</p>
+<p>It can be a way of making thought available: edited enough to respect the reader, open enough to admit that the thinking may continue.</p>
+<ul><li>Keep the claim proportional to what you know.</li><li>Leave room for revision.</li><li>Prefer a useful sentence over a dramatic conclusion.</li></ul>
+<p>The publish button can be a quiet threshold instead of a stage.</p>]]></content:encoded>
+    </item>
+    <item>
+      <title>A place of your own</title>
+      <link>https://example.com/a-place-of-your-own</link>
+      <guid isPermaLink="true">https://example.com/a-place-of-your-own</guid>
+      <pubDate>Fri, 12 Jun 2026 12:00:00 GMT</pubDate>
+      <description>The useful thing about a personal site is not that it competes with every other place you could publish.</description>
+      <content:encoded><![CDATA[<p>The useful thing about a personal site is not that it competes with every other place you could publish.</p>
+<p>It is that it remains yours.</p>
+<p>You can keep the typography plain, the archive legible, the feeds open, and the machinery small enough to understand. You can link outward generously because the work has a home to return to.</p>
+<p>That is enough infrastructure for a durable writing practice.</p>]]></content:encoded>
     </item>
   </channel>
 </rss>
