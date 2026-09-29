@@ -1,29 +1,33 @@
+@import "../theme/thinkinghaus-v0.5.css";
+
 :root {
-  --paper: #f7f6f2;
-  --panel: #eeece6;
-  --ink: #1c1c1a;
-  --muted: #6f6d67;
-  --line: #d7d4cc;
-  --green: #2e5d45;
-  --header: rgba(247, 246, 242, 0.96);
-  --button-hover: #363632;
-  --placeholder: #6f6d67;
-  --overlay: rgba(28, 28, 26, 0.26);
+  --paper: var(--th-bg);
+  --panel: var(--th-surface);
+  --ink: var(--th-text);
+  --muted: var(--th-text-muted);
+  --line: var(--th-border);
+  --green: var(--th-success);
+  --header: color-mix(in srgb, var(--th-bg) 96%, transparent);
+  --button-hover: var(--th-neutral-900);
+  --placeholder: var(--th-text-muted);
+  --overlay: color-mix(in srgb, var(--th-charcoal) 26%, transparent);
+  --danger: var(--th-error);
+  --focus: var(--th-focus);
   --placid-font-family: system-ui, sans-serif;
   color-scheme: light;
 }
 
 :root[data-theme="dark"] {
-  --paper: #171816;
-  --panel: #242521;
-  --ink: #f0eee8;
-  --muted: #aaa79f;
-  --line: #3b3c37;
-  --green: #91bca3;
-  --header: rgba(23, 24, 22, 0.96);
-  --button-hover: #d8d5ce;
-  --placeholder: #85837c;
-  --overlay: rgba(0, 0, 0, 0.5);
+  --paper: var(--th-bg);
+  --panel: var(--th-surface);
+  --ink: var(--th-text);
+  --muted: var(--th-text-muted);
+  --line: var(--th-border);
+  --green: var(--th-success);
+  --header: color-mix(in srgb, var(--th-bg) 96%, transparent);
+  --button-hover: var(--th-neutral-100);
+  --placeholder: var(--th-text-muted);
+  --overlay: color-mix(in srgb, var(--th-charcoal) 50%, transparent);
   color-scheme: dark;
 }
 
@@ -57,6 +61,15 @@ a {
 
 button {
   border: 0;
+}
+
+::selection {
+  background: var(--th-selection-bg);
+  color: var(--th-selection-text);
+}
+
+:where(button, a, input, textarea):focus-visible {
+  outline-color: var(--focus);
 }
 
 .sr-only {
@@ -398,7 +411,7 @@ button {
 }
 
 .post-state.is-published {
-  border-color: #adc5b6;
+  border-color: var(--green);
   color: var(--green);
 }
 
@@ -411,8 +424,8 @@ button {
 
 .delete-button:hover:not(:disabled),
 .delete-button:focus-visible:not(:disabled) {
-  border-color: #d5a9a3;
-  color: #a33a2e;
+  border-color: var(--danger);
+  color: var(--danger);
 }
 
 .draft-button:hover:not(:disabled),
@@ -592,7 +605,7 @@ button {
 }
 
 .body-input .article-image:focus-visible {
-  outline: 2px solid currentColor;
+  outline: 2px solid var(--focus);
   outline-offset: 6px;
 }
 
@@ -660,7 +673,7 @@ button {
 
 .source-fields input:focus,
 .link-dialog input:focus {
-  border-color: var(--ink);
+  border-color: var(--focus);
 }
 
 .formatting-toolbar em {
@@ -763,7 +776,7 @@ button {
 .dialog-actions .remove-link-button:hover,
 .dialog-actions .remove-link-button:focus-visible {
   background: transparent;
-  color: #a33a2e;
+  color: var(--danger);
 }
 
 .notice {
@@ -1025,7 +1038,7 @@ button {
 }
 
 .caption-input:focus {
-  outline: 1px solid var(--ink);
+  outline: 2px solid var(--focus);
   outline-offset: 1px;
 }
 
@@ -1071,7 +1084,7 @@ button {
 }
 
 .body-input .edit-image-control:focus-visible {
-  outline: 2px solid var(--ink);
+  outline: 2px solid var(--focus);
   outline-offset: 3px;
 }
 

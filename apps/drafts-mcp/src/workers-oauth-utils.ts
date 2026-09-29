@@ -442,12 +442,18 @@ export function renderApprovalDialog(request: Request, options: ApprovalDialogOp
         <title>${clientName} | Authorization Request</title>
         <style>
           :root {
-            --primary-color: #0070f3;
-            --error-color: #f44336;
-            --border-color: #e5e7eb;
-            --text-color: #333;
-            --background-color: #fff;
-            --card-shadow: 0 8px 36px 8px rgba(0, 0, 0, 0.1);
+            /* Thinkinghaus palette v0.5 semantic roles. */
+            --primary-color: #1c1811;
+            --on-primary-color: #f4eddf;
+            --link-color: #1a6a5e;
+            --focus-color: #785800;
+            --error-color: #9b4127;
+            --border-color: #d0cbbf;
+            --text-color: #1c1811;
+            --body-color: #474135;
+            --background-color: #f4eddf;
+            --surface-color: #ebe4d5;
+            --card-shadow: 0 8px 36px 8px color-mix(in srgb, #1c1811 10%, transparent);
           }
 
           body {
@@ -456,7 +462,7 @@ export function renderApprovalDialog(request: Request, options: ApprovalDialogOp
                          "Segoe UI Emoji", "Segoe UI Symbol";
             line-height: 1.6;
             color: var(--text-color);
-            background-color: #f9fafb;
+            background-color: var(--surface-color);
             margin: 0;
             padding: 0;
           }
@@ -509,7 +515,7 @@ export function renderApprovalDialog(request: Request, options: ApprovalDialogOp
           }
 
           .description {
-            color: #555;
+            color: var(--body-color);
           }
 
           .client-info {
@@ -542,7 +548,7 @@ export function renderApprovalDialog(request: Request, options: ApprovalDialogOp
           }
 
           .detail-value a {
-            color: inherit;
+            color: var(--link-color);
             text-decoration: underline;
           }
 
@@ -574,12 +580,22 @@ export function renderApprovalDialog(request: Request, options: ApprovalDialogOp
 
           .button-primary {
             background-color: var(--primary-color);
-            color: white;
+            color: var(--on-primary-color);
           }
 
           .button-secondary {
             background-color: transparent;
             border: 1px solid var(--border-color);
+            color: var(--text-color);
+          }
+
+          :where(a, button):focus-visible {
+            outline: 2px solid var(--focus-color);
+            outline-offset: 3px;
+          }
+
+          ::selection {
+            background: #d0cbbf;
             color: var(--text-color);
           }
 

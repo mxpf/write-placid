@@ -38,7 +38,7 @@ export function renderWeeklyEmail(summary) {
     .join("");
 
   const html = `<!doctype html>
-<html><body style="margin:0;background:#f7f6f2;color:#1c1c1a;font-family:Helvetica Neue,Helvetica,Arial,sans-serif;font-size:18px;line-height:1.45">
+<html><body style="margin:0;background:#f4eddf;color:#1c1811;font-family:Helvetica Neue,Helvetica,Arial,sans-serif;font-size:18px;line-height:1.45">
   <div style="max-width:620px;margin:0 auto;padding:48px 24px 64px">
     <p style="margin:0 0 56px">Trackinghaus alpha</p>
     <p style="margin:0 0 12px">Last week</p>
@@ -46,7 +46,7 @@ export function renderWeeklyEmail(summary) {
     <h1 style="margin:0 0 32px;font-size:20px;line-height:1.35;font-weight:400">${escapeHtml(summary.insight.headline)}</h1>
     <p style="margin:0 0 48px;font-size:20px;line-height:1.6">${escapeHtml(summary.insight.detail)}</p>
     ${writingRows ? `<table style="width:100%;border-collapse:collapse;margin:0 0 48px">${writingRows}</table>` : ""}
-    <p style="margin:0 0 56px"><a href="${escapeHtml(weeklyUrl)}" style="color:#1c1c1a">See the evidence</a></p>
+    <p style="margin:0 0 56px"><a href="${escapeHtml(weeklyUrl)}" style="color:#1a6a5e">See the evidence</a></p>
     <p style="margin:0;font-size:15px;line-height:1.5">No individual visitors are identified. Trackinghaus alpha stores only aggregate counters.</p>
   </div>
 </body></html>`;

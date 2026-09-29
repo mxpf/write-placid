@@ -15,9 +15,13 @@
 }
 
 :root {
-  --ink: #eeede9;
-  --ground: #1c1c1a;
-  --link: #8f8f93;
+  /* Thinkinghaus palette v0.5, pinned in packages/core/theme. */
+  --ink: #f4eddf;
+  --ground: #1c1811;
+  --body: #afada6;
+  --muted: #9c9281;
+  --link: #75aea2;
+  --focus: #b79142;
   --rule: color-mix(in srgb, var(--ink) 22%, transparent);
   color: var(--ink);
   background: var(--ground);
@@ -63,8 +67,13 @@ button:focus-visible,
 input:focus-visible,
 textarea:focus-visible,
 a:focus-visible {
-  outline: 1px solid currentColor;
+  outline: 2px solid var(--focus);
   outline-offset: 3px;
+}
+
+::selection {
+  background: #625b4d;
+  color: var(--ink);
 }
 
 button:disabled {

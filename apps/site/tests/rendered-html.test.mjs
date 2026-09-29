@@ -249,8 +249,9 @@ test("keeps published writing readable and the visual system intentional", async
   assert.doesNotMatch(siteStyles, /--step-article-title/);
   assert.match(siteStyles, /--reading-measure: 56ch/);
   assert.match(siteStyles, /\.site\s*\{[^}]*font-size: 16px/s);
-  assert.match(siteStyles, /:root\s*\{[^}]*--blog-background: #f1ede3;[^}]*--blog-foreground: #1a1814;[^}]*--blog-body: #454139;[^}]*--blog-muted: #605b51;[^}]*--blog-link: #116a62;[^}]*color-scheme: light;/s);
-  assert.match(siteStyles, /:root\[data-theme="dark"\]\s*\{[^}]*--blog-background: #1a1814;[^}]*--blog-foreground: #f1ede3;[^}]*color-scheme: dark;/s);
+  assert.match(siteStyles, /@import "@mxpf\/write-placid-core\/thinkinghaus\.css"/);
+  assert.match(siteStyles, /:root\s*\{[^}]*--blog-background: var\(--th-bg\);[^}]*--blog-foreground: var\(--th-text\);[^}]*--blog-body: var\(--th-text-body\);[^}]*--blog-muted: var\(--th-text-muted\);[^}]*--blog-link: var\(--th-link\);[^}]*color-scheme: light;/s);
+  assert.match(siteStyles, /:root\[data-theme="dark"\]\s*\{[^}]*--blog-background: var\(--th-bg\);[^}]*--blog-foreground: var\(--th-text\);[^}]*color-scheme: dark;/s);
   assert.match(siteStyles, /\.theme-toggle-track\s*\{[^}]*height: 14px;[^}]*border-radius: 999px;[^}]*background: var\(--toggle-track\)/s);
   assert.doesNotMatch(siteStyles, /\.theme-toggle-track\s*\{[^}]*border:/s);
   assert.doesNotMatch(siteStyles, /prefers-color-scheme/);

@@ -1,0 +1,1120 @@
+{
+  "version": "0.5",
+  "source": "https://thinking.haus",
+  "anchors": {
+    "charcoal": "#1C1811",
+    "ivory": "#F4EDDF",
+    "taupe": "#9C9281",
+    "body": "#AFADA6"
+  },
+  "families": {
+    "core": [
+      "clay",
+      "ochre",
+      "moss",
+      "patina"
+    ],
+    "optional": [
+      "slate",
+      "heather"
+    ]
+  },
+  "scales": {
+    "neutral": {
+      "0": "#F4EDDF",
+      "50": "#EBE4D5",
+      "100": "#E1DACC",
+      "150": "#D9D2C6",
+      "200": "#D0CBBF",
+      "300": "#BFBCB3",
+      "400": "#AFADA6",
+      "500": "#9C9281",
+      "600": "#7E7667",
+      "700": "#625B4D",
+      "800": "#474135",
+      "850": "#3A352A",
+      "900": "#2E2920",
+      "950": "#252018",
+      "1000": "#1C1811"
+    },
+    "clay": {
+      "50": "#F5E1D9",
+      "100": "#F2D5CA",
+      "150": "#EFC9BC",
+      "200": "#ECBCAD",
+      "300": "#DF9F8C",
+      "400": "#D2836C",
+      "500": "#BB654D",
+      "600": "#9B4127",
+      "700": "#7A301A",
+      "800": "#5C2415",
+      "850": "#4C2013",
+      "900": "#3C1C12",
+      "950": "#2C1C15"
+    },
+    "ochre": {
+      "50": "#EEE5D4",
+      "100": "#E7DBC3",
+      "150": "#E1D1B1",
+      "200": "#DAC6A0",
+      "300": "#C9AB73",
+      "400": "#B79142",
+      "500": "#99752A",
+      "600": "#785800",
+      "700": "#5D4300",
+      "800": "#473100",
+      "850": "#3D2A04",
+      "900": "#32240A",
+      "950": "#271F10"
+    },
+    "moss": {
+      "50": "#E6E8D9",
+      "100": "#DBDFCB",
+      "150": "#CFD7BD",
+      "200": "#C4CEAF",
+      "300": "#ADBC91",
+      "400": "#97AA74",
+      "500": "#748751",
+      "600": "#506624",
+      "700": "#3F4D20",
+      "800": "#2E3A16",
+      "850": "#293116",
+      "900": "#242A14",
+      "950": "#1F2115"
+    },
+    "patina": {
+      "50": "#E0E9E3",
+      "100": "#D1E1DA",
+      "150": "#C2D9D1",
+      "200": "#B3D1C8",
+      "300": "#94BFB5",
+      "400": "#75AEA2",
+      "500": "#58897E",
+      "600": "#1A6A5E",
+      "700": "#254F47",
+      "800": "#1C3B33",
+      "850": "#1C322C",
+      "900": "#1C2A24",
+      "950": "#19221E"
+    },
+    "slate": {
+      "50": "#E4E6EA",
+      "100": "#D7DDE5",
+      "150": "#CBD4DF",
+      "200": "#BECBDA",
+      "300": "#A5B7CD",
+      "400": "#8CA3C0",
+      "500": "#6982A0",
+      "600": "#446081",
+      "700": "#344964",
+      "800": "#26374A",
+      "850": "#232F3E",
+      "900": "#1F2731",
+      "950": "#1D2023"
+    },
+    "heather": {
+      "50": "#ECE3E7",
+      "100": "#E4D8E0",
+      "150": "#DDCED9",
+      "200": "#D5C3D2",
+      "300": "#C4ACC2",
+      "400": "#B496B3",
+      "500": "#947594",
+      "600": "#755376",
+      "700": "#5B405B",
+      "800": "#453044",
+      "850": "#3A2938",
+      "900": "#2F222C",
+      "950": "#251E21"
+    }
+  },
+  "modes": {
+    "dark": {
+      "bg": "charcoal",
+      "surface": "neutral-950",
+      "surface-raised": "neutral-900",
+      "border": "neutral-800",
+      "border-hover": "neutral-700",
+      "text": "ivory",
+      "text-body": "body",
+      "text-muted": "taupe",
+      "text-faint": "neutral-600",
+      "selection-bg": "neutral-700",
+      "selection-text": "ivory",
+      "clay": "clay-400",
+      "ochre": "ochre-400",
+      "moss": "moss-400",
+      "patina": "patina-400",
+      "slate": "slate-400",
+      "heather": "heather-400",
+      "link": "patina-400",
+      "focus": "ochre-400",
+      "success": "moss-400",
+      "warning": "ochre-400",
+      "error": "clay-400",
+      "info": "slate-400",
+      "border-control": "neutral-500",
+      "clay-fill": "clay-solid",
+      "on-clay-fill": "ivory",
+      "ochre-fill": "ochre-solid",
+      "on-ochre-fill": "ivory",
+      "moss-fill": "moss-solid",
+      "on-moss-fill": "ivory",
+      "patina-fill": "patina-solid",
+      "on-patina-fill": "ivory"
+    },
+    "light": {
+      "bg": "ivory",
+      "surface": "neutral-50",
+      "surface-raised": "neutral-100",
+      "border": "neutral-200",
+      "border-hover": "neutral-300",
+      "text": "charcoal",
+      "text-body": "neutral-800",
+      "text-muted": "neutral-700",
+      "text-faint": "neutral-600",
+      "selection-bg": "neutral-200",
+      "selection-text": "charcoal",
+      "clay": "clay-600",
+      "ochre": "ochre-600",
+      "moss": "moss-600",
+      "patina": "patina-600",
+      "slate": "slate-600",
+      "heather": "heather-600",
+      "link": "patina-600",
+      "focus": "ochre-600",
+      "success": "moss-600",
+      "warning": "ochre-600",
+      "error": "clay-600",
+      "info": "slate-600",
+      "border-control": "neutral-600",
+      "clay-fill": "clay-solid",
+      "on-clay-fill": "ivory",
+      "ochre-fill": "ochre-solid",
+      "on-ochre-fill": "ivory",
+      "moss-fill": "moss-solid",
+      "on-moss-fill": "ivory",
+      "patina-fill": "patina-solid",
+      "on-patina-fill": "ivory"
+    }
+  },
+  "contrastChecks": [
+    {
+      "mode": "dark",
+      "role": "text",
+      "background": "bg",
+      "ratio": 15.17,
+      "target": 4.5,
+      "pass": true
+    },
+    {
+      "mode": "dark",
+      "role": "text",
+      "background": "surface",
+      "ratio": 13.88,
+      "target": 4.5,
+      "pass": true
+    },
+    {
+      "mode": "dark",
+      "role": "text",
+      "background": "surface-raised",
+      "ratio": 12.4,
+      "target": 4.5,
+      "pass": true
+    },
+    {
+      "mode": "dark",
+      "role": "text-body",
+      "background": "bg",
+      "ratio": 7.87,
+      "target": 4.5,
+      "pass": true
+    },
+    {
+      "mode": "dark",
+      "role": "text-body",
+      "background": "surface",
+      "ratio": 7.2,
+      "target": 4.5,
+      "pass": true
+    },
+    {
+      "mode": "dark",
+      "role": "text-body",
+      "background": "surface-raised",
+      "ratio": 6.43,
+      "target": 4.5,
+      "pass": true
+    },
+    {
+      "mode": "dark",
+      "role": "text-muted",
+      "background": "bg",
+      "ratio": 5.76,
+      "target": 4.5,
+      "pass": true
+    },
+    {
+      "mode": "dark",
+      "role": "text-muted",
+      "background": "surface",
+      "ratio": 5.27,
+      "target": 4.5,
+      "pass": true
+    },
+    {
+      "mode": "dark",
+      "role": "text-muted",
+      "background": "surface-raised",
+      "ratio": 4.71,
+      "target": 4.5,
+      "pass": true
+    },
+    {
+      "mode": "dark",
+      "role": "text-faint",
+      "background": "bg",
+      "ratio": 3.93,
+      "target": 4.5,
+      "pass": false
+    },
+    {
+      "mode": "dark",
+      "role": "text-faint",
+      "background": "surface",
+      "ratio": 3.6,
+      "target": 4.5,
+      "pass": false
+    },
+    {
+      "mode": "dark",
+      "role": "text-faint",
+      "background": "surface-raised",
+      "ratio": 3.21,
+      "target": 4.5,
+      "pass": false
+    },
+    {
+      "mode": "dark",
+      "role": "clay",
+      "background": "bg",
+      "ratio": 6.06,
+      "target": 4.5,
+      "pass": true
+    },
+    {
+      "mode": "dark",
+      "role": "clay",
+      "background": "surface",
+      "ratio": 5.55,
+      "target": 4.5,
+      "pass": true
+    },
+    {
+      "mode": "dark",
+      "role": "clay",
+      "background": "surface-raised",
+      "ratio": 4.95,
+      "target": 4.5,
+      "pass": true
+    },
+    {
+      "mode": "dark",
+      "role": "ochre",
+      "background": "bg",
+      "ratio": 6.01,
+      "target": 4.5,
+      "pass": true
+    },
+    {
+      "mode": "dark",
+      "role": "ochre",
+      "background": "surface",
+      "ratio": 5.5,
+      "target": 4.5,
+      "pass": true
+    },
+    {
+      "mode": "dark",
+      "role": "ochre",
+      "background": "surface-raised",
+      "ratio": 4.91,
+      "target": 4.5,
+      "pass": true
+    },
+    {
+      "mode": "dark",
+      "role": "moss",
+      "background": "bg",
+      "ratio": 7.0,
+      "target": 4.5,
+      "pass": true
+    },
+    {
+      "mode": "dark",
+      "role": "moss",
+      "background": "surface",
+      "ratio": 6.41,
+      "target": 4.5,
+      "pass": true
+    },
+    {
+      "mode": "dark",
+      "role": "moss",
+      "background": "surface-raised",
+      "ratio": 5.72,
+      "target": 4.5,
+      "pass": true
+    },
+    {
+      "mode": "dark",
+      "role": "patina",
+      "background": "bg",
+      "ratio": 7.01,
+      "target": 4.5,
+      "pass": true
+    },
+    {
+      "mode": "dark",
+      "role": "patina",
+      "background": "surface",
+      "ratio": 6.42,
+      "target": 4.5,
+      "pass": true
+    },
+    {
+      "mode": "dark",
+      "role": "patina",
+      "background": "surface-raised",
+      "ratio": 5.73,
+      "target": 4.5,
+      "pass": true
+    },
+    {
+      "mode": "dark",
+      "role": "slate",
+      "background": "bg",
+      "ratio": 6.83,
+      "target": 4.5,
+      "pass": true
+    },
+    {
+      "mode": "dark",
+      "role": "slate",
+      "background": "surface",
+      "ratio": 6.25,
+      "target": 4.5,
+      "pass": true
+    },
+    {
+      "mode": "dark",
+      "role": "slate",
+      "background": "surface-raised",
+      "ratio": 5.58,
+      "target": 4.5,
+      "pass": true
+    },
+    {
+      "mode": "dark",
+      "role": "heather",
+      "background": "bg",
+      "ratio": 6.69,
+      "target": 4.5,
+      "pass": true
+    },
+    {
+      "mode": "dark",
+      "role": "heather",
+      "background": "surface",
+      "ratio": 6.13,
+      "target": 4.5,
+      "pass": true
+    },
+    {
+      "mode": "dark",
+      "role": "heather",
+      "background": "surface-raised",
+      "ratio": 5.47,
+      "target": 4.5,
+      "pass": true
+    },
+    {
+      "mode": "dark",
+      "role": "link",
+      "background": "bg",
+      "ratio": 7.01,
+      "target": 4.5,
+      "pass": true
+    },
+    {
+      "mode": "dark",
+      "role": "link",
+      "background": "surface",
+      "ratio": 6.42,
+      "target": 4.5,
+      "pass": true
+    },
+    {
+      "mode": "dark",
+      "role": "link",
+      "background": "surface-raised",
+      "ratio": 5.73,
+      "target": 4.5,
+      "pass": true
+    },
+    {
+      "mode": "dark",
+      "role": "success",
+      "background": "bg",
+      "ratio": 7.0,
+      "target": 4.5,
+      "pass": true
+    },
+    {
+      "mode": "dark",
+      "role": "success",
+      "background": "surface",
+      "ratio": 6.41,
+      "target": 4.5,
+      "pass": true
+    },
+    {
+      "mode": "dark",
+      "role": "success",
+      "background": "surface-raised",
+      "ratio": 5.72,
+      "target": 4.5,
+      "pass": true
+    },
+    {
+      "mode": "dark",
+      "role": "warning",
+      "background": "bg",
+      "ratio": 6.01,
+      "target": 4.5,
+      "pass": true
+    },
+    {
+      "mode": "dark",
+      "role": "warning",
+      "background": "surface",
+      "ratio": 5.5,
+      "target": 4.5,
+      "pass": true
+    },
+    {
+      "mode": "dark",
+      "role": "warning",
+      "background": "surface-raised",
+      "ratio": 4.91,
+      "target": 4.5,
+      "pass": true
+    },
+    {
+      "mode": "dark",
+      "role": "error",
+      "background": "bg",
+      "ratio": 6.06,
+      "target": 4.5,
+      "pass": true
+    },
+    {
+      "mode": "dark",
+      "role": "error",
+      "background": "surface",
+      "ratio": 5.55,
+      "target": 4.5,
+      "pass": true
+    },
+    {
+      "mode": "dark",
+      "role": "error",
+      "background": "surface-raised",
+      "ratio": 4.95,
+      "target": 4.5,
+      "pass": true
+    },
+    {
+      "mode": "dark",
+      "role": "info",
+      "background": "bg",
+      "ratio": 6.83,
+      "target": 4.5,
+      "pass": true
+    },
+    {
+      "mode": "dark",
+      "role": "info",
+      "background": "surface",
+      "ratio": 6.25,
+      "target": 4.5,
+      "pass": true
+    },
+    {
+      "mode": "dark",
+      "role": "info",
+      "background": "surface-raised",
+      "ratio": 5.58,
+      "target": 4.5,
+      "pass": true
+    },
+    {
+      "mode": "dark",
+      "role": "focus",
+      "background": "bg",
+      "ratio": 6.01,
+      "target": 3,
+      "pass": true
+    },
+    {
+      "mode": "dark",
+      "role": "focus",
+      "background": "surface",
+      "ratio": 5.5,
+      "target": 3,
+      "pass": true
+    },
+    {
+      "mode": "dark",
+      "role": "focus",
+      "background": "surface-raised",
+      "ratio": 4.91,
+      "target": 3,
+      "pass": true
+    },
+    {
+      "mode": "dark",
+      "role": "border-control",
+      "background": "bg",
+      "ratio": 5.76,
+      "target": 3,
+      "pass": true
+    },
+    {
+      "mode": "dark",
+      "role": "border-control",
+      "background": "surface",
+      "ratio": 5.27,
+      "target": 3,
+      "pass": true
+    },
+    {
+      "mode": "dark",
+      "role": "border-control",
+      "background": "surface-raised",
+      "ratio": 4.71,
+      "target": 3,
+      "pass": true
+    },
+    {
+      "mode": "dark",
+      "role": "selection-text",
+      "background": "selection-bg",
+      "ratio": 5.77,
+      "target": 4.5,
+      "pass": true
+    },
+    {
+      "mode": "dark",
+      "role": "on-clay-fill",
+      "background": "clay-fill",
+      "ratio": 5.67,
+      "target": 4.5,
+      "pass": true
+    },
+    {
+      "mode": "dark",
+      "role": "on-ochre-fill",
+      "background": "ochre-fill",
+      "ratio": 5.63,
+      "target": 4.5,
+      "pass": true
+    },
+    {
+      "mode": "dark",
+      "role": "on-moss-fill",
+      "background": "moss-fill",
+      "ratio": 5.57,
+      "target": 4.5,
+      "pass": true
+    },
+    {
+      "mode": "dark",
+      "role": "on-patina-fill",
+      "background": "patina-fill",
+      "ratio": 5.63,
+      "target": 4.5,
+      "pass": true
+    },
+    {
+      "mode": "light",
+      "role": "text",
+      "background": "bg",
+      "ratio": 15.17,
+      "target": 4.5,
+      "pass": true
+    },
+    {
+      "mode": "light",
+      "role": "text",
+      "background": "surface",
+      "ratio": 13.96,
+      "target": 4.5,
+      "pass": true
+    },
+    {
+      "mode": "light",
+      "role": "text",
+      "background": "surface-raised",
+      "ratio": 12.71,
+      "target": 4.5,
+      "pass": true
+    },
+    {
+      "mode": "light",
+      "role": "text-body",
+      "background": "bg",
+      "ratio": 8.69,
+      "target": 4.5,
+      "pass": true
+    },
+    {
+      "mode": "light",
+      "role": "text-body",
+      "background": "surface",
+      "ratio": 7.99,
+      "target": 4.5,
+      "pass": true
+    },
+    {
+      "mode": "light",
+      "role": "text-body",
+      "background": "surface-raised",
+      "ratio": 7.28,
+      "target": 4.5,
+      "pass": true
+    },
+    {
+      "mode": "light",
+      "role": "text-muted",
+      "background": "bg",
+      "ratio": 5.77,
+      "target": 4.5,
+      "pass": true
+    },
+    {
+      "mode": "light",
+      "role": "text-muted",
+      "background": "surface",
+      "ratio": 5.31,
+      "target": 4.5,
+      "pass": true
+    },
+    {
+      "mode": "light",
+      "role": "text-muted",
+      "background": "surface-raised",
+      "ratio": 4.84,
+      "target": 4.5,
+      "pass": true
+    },
+    {
+      "mode": "light",
+      "role": "text-faint",
+      "background": "bg",
+      "ratio": 3.86,
+      "target": 4.5,
+      "pass": false
+    },
+    {
+      "mode": "light",
+      "role": "text-faint",
+      "background": "surface",
+      "ratio": 3.55,
+      "target": 4.5,
+      "pass": false
+    },
+    {
+      "mode": "light",
+      "role": "text-faint",
+      "background": "surface-raised",
+      "ratio": 3.23,
+      "target": 4.5,
+      "pass": false
+    },
+    {
+      "mode": "light",
+      "role": "clay",
+      "background": "bg",
+      "ratio": 5.67,
+      "target": 4.5,
+      "pass": true
+    },
+    {
+      "mode": "light",
+      "role": "clay",
+      "background": "surface",
+      "ratio": 5.22,
+      "target": 4.5,
+      "pass": true
+    },
+    {
+      "mode": "light",
+      "role": "clay",
+      "background": "surface-raised",
+      "ratio": 4.75,
+      "target": 4.5,
+      "pass": true
+    },
+    {
+      "mode": "light",
+      "role": "ochre",
+      "background": "bg",
+      "ratio": 5.64,
+      "target": 4.5,
+      "pass": true
+    },
+    {
+      "mode": "light",
+      "role": "ochre",
+      "background": "surface",
+      "ratio": 5.19,
+      "target": 4.5,
+      "pass": true
+    },
+    {
+      "mode": "light",
+      "role": "ochre",
+      "background": "surface-raised",
+      "ratio": 4.73,
+      "target": 4.5,
+      "pass": true
+    },
+    {
+      "mode": "light",
+      "role": "moss",
+      "background": "bg",
+      "ratio": 5.52,
+      "target": 4.5,
+      "pass": true
+    },
+    {
+      "mode": "light",
+      "role": "moss",
+      "background": "surface",
+      "ratio": 5.08,
+      "target": 4.5,
+      "pass": true
+    },
+    {
+      "mode": "light",
+      "role": "moss",
+      "background": "surface-raised",
+      "ratio": 4.62,
+      "target": 4.5,
+      "pass": true
+    },
+    {
+      "mode": "light",
+      "role": "patina",
+      "background": "bg",
+      "ratio": 5.52,
+      "target": 4.5,
+      "pass": true
+    },
+    {
+      "mode": "light",
+      "role": "patina",
+      "background": "surface",
+      "ratio": 5.08,
+      "target": 4.5,
+      "pass": true
+    },
+    {
+      "mode": "light",
+      "role": "patina",
+      "background": "surface-raised",
+      "ratio": 4.62,
+      "target": 4.5,
+      "pass": true
+    },
+    {
+      "mode": "light",
+      "role": "slate",
+      "background": "bg",
+      "ratio": 5.57,
+      "target": 4.5,
+      "pass": true
+    },
+    {
+      "mode": "light",
+      "role": "slate",
+      "background": "surface",
+      "ratio": 5.13,
+      "target": 4.5,
+      "pass": true
+    },
+    {
+      "mode": "light",
+      "role": "slate",
+      "background": "surface-raised",
+      "ratio": 4.67,
+      "target": 4.5,
+      "pass": true
+    },
+    {
+      "mode": "light",
+      "role": "heather",
+      "background": "bg",
+      "ratio": 5.54,
+      "target": 4.5,
+      "pass": true
+    },
+    {
+      "mode": "light",
+      "role": "heather",
+      "background": "surface",
+      "ratio": 5.1,
+      "target": 4.5,
+      "pass": true
+    },
+    {
+      "mode": "light",
+      "role": "heather",
+      "background": "surface-raised",
+      "ratio": 4.64,
+      "target": 4.5,
+      "pass": true
+    },
+    {
+      "mode": "light",
+      "role": "link",
+      "background": "bg",
+      "ratio": 5.52,
+      "target": 4.5,
+      "pass": true
+    },
+    {
+      "mode": "light",
+      "role": "link",
+      "background": "surface",
+      "ratio": 5.08,
+      "target": 4.5,
+      "pass": true
+    },
+    {
+      "mode": "light",
+      "role": "link",
+      "background": "surface-raised",
+      "ratio": 4.62,
+      "target": 4.5,
+      "pass": true
+    },
+    {
+      "mode": "light",
+      "role": "success",
+      "background": "bg",
+      "ratio": 5.52,
+      "target": 4.5,
+      "pass": true
+    },
+    {
+      "mode": "light",
+      "role": "success",
+      "background": "surface",
+      "ratio": 5.08,
+      "target": 4.5,
+      "pass": true
+    },
+    {
+      "mode": "light",
+      "role": "success",
+      "background": "surface-raised",
+      "ratio": 4.62,
+      "target": 4.5,
+      "pass": true
+    },
+    {
+      "mode": "light",
+      "role": "warning",
+      "background": "bg",
+      "ratio": 5.64,
+      "target": 4.5,
+      "pass": true
+    },
+    {
+      "mode": "light",
+      "role": "warning",
+      "background": "surface",
+      "ratio": 5.19,
+      "target": 4.5,
+      "pass": true
+    },
+    {
+      "mode": "light",
+      "role": "warning",
+      "background": "surface-raised",
+      "ratio": 4.73,
+      "target": 4.5,
+      "pass": true
+    },
+    {
+      "mode": "light",
+      "role": "error",
+      "background": "bg",
+      "ratio": 5.67,
+      "target": 4.5,
+      "pass": true
+    },
+    {
+      "mode": "light",
+      "role": "error",
+      "background": "surface",
+      "ratio": 5.22,
+      "target": 4.5,
+      "pass": true
+    },
+    {
+      "mode": "light",
+      "role": "error",
+      "background": "surface-raised",
+      "ratio": 4.75,
+      "target": 4.5,
+      "pass": true
+    },
+    {
+      "mode": "light",
+      "role": "info",
+      "background": "bg",
+      "ratio": 5.57,
+      "target": 4.5,
+      "pass": true
+    },
+    {
+      "mode": "light",
+      "role": "info",
+      "background": "surface",
+      "ratio": 5.13,
+      "target": 4.5,
+      "pass": true
+    },
+    {
+      "mode": "light",
+      "role": "info",
+      "background": "surface-raised",
+      "ratio": 4.67,
+      "target": 4.5,
+      "pass": true
+    },
+    {
+      "mode": "light",
+      "role": "focus",
+      "background": "bg",
+      "ratio": 5.64,
+      "target": 3,
+      "pass": true
+    },
+    {
+      "mode": "light",
+      "role": "focus",
+      "background": "surface",
+      "ratio": 5.19,
+      "target": 3,
+      "pass": true
+    },
+    {
+      "mode": "light",
+      "role": "focus",
+      "background": "surface-raised",
+      "ratio": 4.73,
+      "target": 3,
+      "pass": true
+    },
+    {
+      "mode": "light",
+      "role": "border-control",
+      "background": "bg",
+      "ratio": 3.86,
+      "target": 3,
+      "pass": true
+    },
+    {
+      "mode": "light",
+      "role": "border-control",
+      "background": "surface",
+      "ratio": 3.55,
+      "target": 3,
+      "pass": true
+    },
+    {
+      "mode": "light",
+      "role": "border-control",
+      "background": "surface-raised",
+      "ratio": 3.23,
+      "target": 3,
+      "pass": true
+    },
+    {
+      "mode": "light",
+      "role": "selection-text",
+      "background": "selection-bg",
+      "ratio": 10.92,
+      "target": 4.5,
+      "pass": true
+    },
+    {
+      "mode": "light",
+      "role": "on-clay-fill",
+      "background": "clay-fill",
+      "ratio": 5.67,
+      "target": 4.5,
+      "pass": true
+    },
+    {
+      "mode": "light",
+      "role": "on-ochre-fill",
+      "background": "ochre-fill",
+      "ratio": 5.63,
+      "target": 4.5,
+      "pass": true
+    },
+    {
+      "mode": "light",
+      "role": "on-moss-fill",
+      "background": "moss-fill",
+      "ratio": 5.57,
+      "target": 4.5,
+      "pass": true
+    },
+    {
+      "mode": "light",
+      "role": "on-patina-fill",
+      "background": "patina-fill",
+      "ratio": 5.63,
+      "target": 4.5,
+      "pass": true
+    }
+  ],
+  "method": {
+    "space": "Oklab / OKLCH",
+    "description": "v0.5 adds 0.0015 to Oklab a and 0.006 to Oklab b for every v0.4 color, retaining Oklab lightness before sRGB rounding. Out-of-gamut colors reduce chroma at fixed lightness and hue. All four foundation colors remain exact neutral-scale aliases. Roles and stop numbers are unchanged.",
+    "gamutAdjustments": [
+      "#463205",
+      "#5B4409",
+      "#785800"
+    ]
+  },
+  "fills": {
+    "clay-solid": "#9B4127",
+    "ochre-solid": "#75591C",
+    "moss-solid": "#536431",
+    "patina-solid": "#3B655C"
+  },
+  "anchorAliases": {
+    "charcoal": "neutral-1000",
+    "ivory": "neutral-0",
+    "taupe": "neutral-500",
+    "body": "neutral-400"
+  }
+}

@@ -1,25 +1,27 @@
+@import "@mxpf/write-placid-core/thinkinghaus.css";
+
 :root {
-  --blog-background: #f1ede3;
-  --blog-foreground: #1a1814;
-  --blog-body: #454139;
-  --blog-muted: #605b51;
-  --blog-link: #116a62;
+  --blog-background: var(--th-bg);
+  --blog-foreground: var(--th-text);
+  --blog-body: var(--th-text-body);
+  --blog-muted: var(--th-text-muted);
+  --blog-link: var(--th-link);
   --blog-rule: color-mix(in srgb, var(--blog-foreground) 18%, transparent);
-  --toggle-track: #d6d1c6;
-  --toggle-thumb: #7c766b;
+  --toggle-track: var(--th-border);
+  --toggle-thumb: var(--th-text-faint);
   --reading-measure: 56ch;
   color-scheme: light;
 }
 
 :root[data-theme="dark"] {
-  --blog-background: #1a1814;
-  --blog-foreground: #f1ede3;
-  --blog-body: #adadaa;
-  --blog-muted: #9a9285;
-  --blog-link: #72aea6;
+  --blog-background: var(--th-bg);
+  --blog-foreground: var(--th-text);
+  --blog-body: var(--th-text-body);
+  --blog-muted: var(--th-text-muted);
+  --blog-link: var(--th-link);
   --blog-rule: color-mix(in srgb, var(--blog-foreground) 18%, transparent);
-  --toggle-track: #38352e;
-  --toggle-thumb: #9a9285;
+  --toggle-track: var(--th-border);
+  --toggle-thumb: var(--th-text-muted);
   color-scheme: dark;
 }
 
@@ -131,13 +133,18 @@ body {
 }
 
 .theme-toggle:focus-visible {
-  outline: 1px solid var(--blog-foreground);
+  outline: 2px solid var(--th-focus);
   outline-offset: 3px;
 }
 
 .site a:focus-visible {
-  outline: 1px solid currentColor;
+  outline: 2px solid var(--th-focus);
   outline-offset: 4px;
+}
+
+::selection {
+  background: var(--th-selection-bg);
+  color: var(--th-selection-text);
 }
 
 .sr-only {

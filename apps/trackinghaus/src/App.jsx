@@ -32,7 +32,7 @@ function TrendChart({ days }) {
       context.clearRect(0, 0, bounds.width, bounds.height);
 
       const styles = getComputedStyle(document.documentElement);
-      const ink = styles.getPropertyValue("--ink").trim() || "#eeede9";
+      const ink = styles.getPropertyValue("--ink").trim() || "#f4eddf";
 
       const labelInset = 24;
       const left = labelInset;
