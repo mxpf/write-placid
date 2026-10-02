@@ -514,7 +514,9 @@ body {
   text-underline-offset: 3px;
 }
 
-.article-body a {
+.article-body a,
+.article-body a:visited {
+  color: inherit;
   text-decoration: underline;
   text-decoration-thickness: 1px;
   text-underline-offset: 3px;
@@ -523,7 +525,7 @@ body {
 
 .article-body a:hover,
 .article-body a:focus-visible {
-  color: var(--blog-link);
+  color: var(--blog-foreground);
   opacity: 1;
 }
 

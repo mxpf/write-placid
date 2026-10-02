@@ -45,7 +45,7 @@
       "default": "./packages/core/dist/studio/Studio.js"
     },
     "./studio.css": "./packages/core/studio/studio.css",
-    "./thinkinghaus.css": "./packages/core/theme/thinkinghaus-v0.5.css",
+    "./thinkinghaus.css": "./packages/core/theme/thinkinghaus-v0.6.css",
     "./studio/content": {
       "types": "./packages/core/dist/studio/content.d.ts",
       "default": "./packages/core/dist/studio/content.js"

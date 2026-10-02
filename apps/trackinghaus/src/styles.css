@@ -15,12 +15,12 @@
 }
 
 :root {
-  /* Thinkinghaus palette v0.5, pinned in packages/core/theme. */
+  /* Thinkinghaus palette v0.6, pinned in packages/core/theme. */
   --ink: #f4eddf;
   --ground: #1c1811;
   --body: #afada6;
   --muted: #9c9281;
-  --link: #75aea2;
+  --link: #afada6;
   --focus: #b79142;
   --rule: color-mix(in srgb, var(--ink) 22%, transparent);
   color: var(--ink);
@@ -205,9 +205,14 @@ h2 {
 
 .inline-link {
   display: inline;
+  color: var(--link);
   text-decoration: underline;
   text-decoration-thickness: 1px;
   text-underline-offset: 3px;
+}
+
+.inline-link:visited {
+  color: var(--link);
 }
 
 .brand button,
@@ -217,7 +222,7 @@ h2 {
 
 .brand button:hover,
 .text-link:hover {
-  color: var(--link);
+  color: var(--ink);
 }
 
 .evidence {

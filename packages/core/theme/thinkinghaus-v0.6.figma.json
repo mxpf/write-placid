@@ -1,0 +1,866 @@
+{
+  "primitives": {
+    "palette": {
+      "neutral-0": {
+        "value": "#F4EDDF",
+        "type": "color",
+        "description": "CSS: var(--th-neutral-0)"
+      },
+      "neutral-50": {
+        "value": "#EBE4D5",
+        "type": "color",
+        "description": "CSS: var(--th-neutral-50)"
+      },
+      "neutral-100": {
+        "value": "#E1DACC",
+        "type": "color",
+        "description": "CSS: var(--th-neutral-100)"
+      },
+      "neutral-150": {
+        "value": "#D9D2C6",
+        "type": "color",
+        "description": "CSS: var(--th-neutral-150)"
+      },
+      "neutral-200": {
+        "value": "#D0CBBF",
+        "type": "color",
+        "description": "CSS: var(--th-neutral-200)"
+      },
+      "neutral-300": {
+        "value": "#BFBCB3",
+        "type": "color",
+        "description": "CSS: var(--th-neutral-300)"
+      },
+      "neutral-400": {
+        "value": "#AFADA6",
+        "type": "color",
+        "description": "CSS: var(--th-neutral-400)"
+      },
+      "neutral-500": {
+        "value": "#9C9281",
+        "type": "color",
+        "description": "CSS: var(--th-neutral-500)"
+      },
+      "neutral-600": {
+        "value": "#7E7667",
+        "type": "color",
+        "description": "CSS: var(--th-neutral-600)"
+      },
+      "neutral-700": {
+        "value": "#625B4D",
+        "type": "color",
+        "description": "CSS: var(--th-neutral-700)"
+      },
+      "neutral-800": {
+        "value": "#474135",
+        "type": "color",
+        "description": "CSS: var(--th-neutral-800)"
+      },
+      "neutral-850": {
+        "value": "#3A352A",
+        "type": "color",
+        "description": "CSS: var(--th-neutral-850)"
+      },
+      "neutral-900": {
+        "value": "#2E2920",
+        "type": "color",
+        "description": "CSS: var(--th-neutral-900)"
+      },
+      "neutral-950": {
+        "value": "#252018",
+        "type": "color",
+        "description": "CSS: var(--th-neutral-950)"
+      },
+      "neutral-1000": {
+        "value": "#1C1811",
+        "type": "color",
+        "description": "CSS: var(--th-neutral-1000)"
+      },
+      "clay-50": {
+        "value": "#F5E1D9",
+        "type": "color",
+        "description": "CSS: var(--th-clay-50)"
+      },
+      "clay-100": {
+        "value": "#F2D5CA",
+        "type": "color",
+        "description": "CSS: var(--th-clay-100)"
+      },
+      "clay-150": {
+        "value": "#EFC9BC",
+        "type": "color",
+        "description": "CSS: var(--th-clay-150)"
+      },
+      "clay-200": {
+        "value": "#ECBCAD",
+        "type": "color",
+        "description": "CSS: var(--th-clay-200)"
+      },
+      "clay-300": {
+        "value": "#DF9F8C",
+        "type": "color",
+        "description": "CSS: var(--th-clay-300)"
+      },
+      "clay-400": {
+        "value": "#D2836C",
+        "type": "color",
+        "description": "CSS: var(--th-clay-400)"
+      },
+      "clay-500": {
+        "value": "#BB654D",
+        "type": "color",
+        "description": "CSS: var(--th-clay-500)"
+      },
+      "clay-600": {
+        "value": "#9B4127",
+        "type": "color",
+        "description": "CSS: var(--th-clay-600)"
+      },
+      "clay-700": {
+        "value": "#7A301A",
+        "type": "color",
+        "description": "CSS: var(--th-clay-700)"
+      },
+      "clay-800": {
+        "value": "#5C2415",
+        "type": "color",
+        "description": "CSS: var(--th-clay-800)"
+      },
+      "clay-850": {
+        "value": "#4C2013",
+        "type": "color",
+        "description": "CSS: var(--th-clay-850)"
+      },
+      "clay-900": {
+        "value": "#3C1C12",
+        "type": "color",
+        "description": "CSS: var(--th-clay-900)"
+      },
+      "clay-950": {
+        "value": "#2C1C15",
+        "type": "color",
+        "description": "CSS: var(--th-clay-950)"
+      },
+      "ochre-50": {
+        "value": "#EEE5D4",
+        "type": "color",
+        "description": "CSS: var(--th-ochre-50)"
+      },
+      "ochre-100": {
+        "value": "#E7DBC3",
+        "type": "color",
+        "description": "CSS: var(--th-ochre-100)"
+      },
+      "ochre-150": {
+        "value": "#E1D1B1",
+        "type": "color",
+        "description": "CSS: var(--th-ochre-150)"
+      },
+      "ochre-200": {
+        "value": "#DAC6A0",
+        "type": "color",
+        "description": "CSS: var(--th-ochre-200)"
+      },
+      "ochre-300": {
+        "value": "#C9AB73",
+        "type": "color",
+        "description": "CSS: var(--th-ochre-300)"
+      },
+      "ochre-400": {
+        "value": "#B79142",
+        "type": "color",
+        "description": "CSS: var(--th-ochre-400)"
+      },
+      "ochre-500": {
+        "value": "#99752A",
+        "type": "color",
+        "description": "CSS: var(--th-ochre-500)"
+      },
+      "ochre-600": {
+        "value": "#785800",
+        "type": "color",
+        "description": "CSS: var(--th-ochre-600)"
+      },
+      "ochre-700": {
+        "value": "#5D4300",
+        "type": "color",
+        "description": "CSS: var(--th-ochre-700)"
+      },
+      "ochre-800": {
+        "value": "#473100",
+        "type": "color",
+        "description": "CSS: var(--th-ochre-800)"
+      },
+      "ochre-850": {
+        "value": "#3D2A04",
+        "type": "color",
+        "description": "CSS: var(--th-ochre-850)"
+      },
+      "ochre-900": {
+        "value": "#32240A",
+        "type": "color",
+        "description": "CSS: var(--th-ochre-900)"
+      },
+      "ochre-950": {
+        "value": "#271F10",
+        "type": "color",
+        "description": "CSS: var(--th-ochre-950)"
+      },
+      "moss-50": {
+        "value": "#E6E8D9",
+        "type": "color",
+        "description": "CSS: var(--th-moss-50)"
+      },
+      "moss-100": {
+        "value": "#DBDFCB",
+        "type": "color",
+        "description": "CSS: var(--th-moss-100)"
+      },
+      "moss-150": {
+        "value": "#CFD7BD",
+        "type": "color",
+        "description": "CSS: var(--th-moss-150)"
+      },
+      "moss-200": {
+        "value": "#C4CEAF",
+        "type": "color",
+        "description": "CSS: var(--th-moss-200)"
+      },
+      "moss-300": {
+        "value": "#ADBC91",
+        "type": "color",
+        "description": "CSS: var(--th-moss-300)"
+      },
+      "moss-400": {
+        "value": "#97AA74",
+        "type": "color",
+        "description": "CSS: var(--th-moss-400)"
+      },
+      "moss-500": {
+        "value": "#748751",
+        "type": "color",
+        "description": "CSS: var(--th-moss-500)"
+      },
+      "moss-600": {
+        "value": "#506624",
+        "type": "color",
+        "description": "CSS: var(--th-moss-600)"
+      },
+      "moss-700": {
+        "value": "#3F4D20",
+        "type": "color",
+        "description": "CSS: var(--th-moss-700)"
+      },
+      "moss-800": {
+        "value": "#2E3A16",
+        "type": "color",
+        "description": "CSS: var(--th-moss-800)"
+      },
+      "moss-850": {
+        "value": "#293116",
+        "type": "color",
+        "description": "CSS: var(--th-moss-850)"
+      },
+      "moss-900": {
+        "value": "#242A14",
+        "type": "color",
+        "description": "CSS: var(--th-moss-900)"
+      },
+      "moss-950": {
+        "value": "#1F2115",
+        "type": "color",
+        "description": "CSS: var(--th-moss-950)"
+      },
+      "patina-50": {
+        "value": "#E0E9E3",
+        "type": "color",
+        "description": "CSS: var(--th-patina-50)"
+      },
+      "patina-100": {
+        "value": "#D1E1DA",
+        "type": "color",
+        "description": "CSS: var(--th-patina-100)"
+      },
+      "patina-150": {
+        "value": "#C2D9D1",
+        "type": "color",
+        "description": "CSS: var(--th-patina-150)"
+      },
+      "patina-200": {
+        "value": "#B3D1C8",
+        "type": "color",
+        "description": "CSS: var(--th-patina-200)"
+      },
+      "patina-300": {
+        "value": "#94BFB5",
+        "type": "color",
+        "description": "CSS: var(--th-patina-300)"
+      },
+      "patina-400": {
+        "value": "#75AEA2",
+        "type": "color",
+        "description": "CSS: var(--th-patina-400)"
+      },
+      "patina-500": {
+        "value": "#58897E",
+        "type": "color",
+        "description": "CSS: var(--th-patina-500)"
+      },
+      "patina-600": {
+        "value": "#1A6A5E",
+        "type": "color",
+        "description": "CSS: var(--th-patina-600)"
+      },
+      "patina-700": {
+        "value": "#254F47",
+        "type": "color",
+        "description": "CSS: var(--th-patina-700)"
+      },
+      "patina-800": {
+        "value": "#1C3B33",
+        "type": "color",
+        "description": "CSS: var(--th-patina-800)"
+      },
+      "patina-850": {
+        "value": "#1C322C",
+        "type": "color",
+        "description": "CSS: var(--th-patina-850)"
+      },
+      "patina-900": {
+        "value": "#1C2A24",
+        "type": "color",
+        "description": "CSS: var(--th-patina-900)"
+      },
+      "patina-950": {
+        "value": "#19221E",
+        "type": "color",
+        "description": "CSS: var(--th-patina-950)"
+      },
+      "slate-50": {
+        "value": "#E4E6EA",
+        "type": "color",
+        "description": "CSS: var(--th-slate-50)"
+      },
+      "slate-100": {
+        "value": "#D7DDE5",
+        "type": "color",
+        "description": "CSS: var(--th-slate-100)"
+      },
+      "slate-150": {
+        "value": "#CBD4DF",
+        "type": "color",
+        "description": "CSS: var(--th-slate-150)"
+      },
+      "slate-200": {
+        "value": "#BECBDA",
+        "type": "color",
+        "description": "CSS: var(--th-slate-200)"
+      },
+      "slate-300": {
+        "value": "#A5B7CD",
+        "type": "color",
+        "description": "CSS: var(--th-slate-300)"
+      },
+      "slate-400": {
+        "value": "#8CA3C0",
+        "type": "color",
+        "description": "CSS: var(--th-slate-400)"
+      },
+      "slate-500": {
+        "value": "#6982A0",
+        "type": "color",
+        "description": "CSS: var(--th-slate-500)"
+      },
+      "slate-600": {
+        "value": "#446081",
+        "type": "color",
+        "description": "CSS: var(--th-slate-600)"
+      },
+      "slate-700": {
+        "value": "#344964",
+        "type": "color",
+        "description": "CSS: var(--th-slate-700)"
+      },
+      "slate-800": {
+        "value": "#26374A",
+        "type": "color",
+        "description": "CSS: var(--th-slate-800)"
+      },
+      "slate-850": {
+        "value": "#232F3E",
+        "type": "color",
+        "description": "CSS: var(--th-slate-850)"
+      },
+      "slate-900": {
+        "value": "#1F2731",
+        "type": "color",
+        "description": "CSS: var(--th-slate-900)"
+      },
+      "slate-950": {
+        "value": "#1D2023",
+        "type": "color",
+        "description": "CSS: var(--th-slate-950)"
+      },
+      "heather-50": {
+        "value": "#ECE3E7",
+        "type": "color",
+        "description": "CSS: var(--th-heather-50)"
+      },
+      "heather-100": {
+        "value": "#E4D8E0",
+        "type": "color",
+        "description": "CSS: var(--th-heather-100)"
+      },
+      "heather-150": {
+        "value": "#DDCED9",
+        "type": "color",
+        "description": "CSS: var(--th-heather-150)"
+      },
+      "heather-200": {
+        "value": "#D5C3D2",
+        "type": "color",
+        "description": "CSS: var(--th-heather-200)"
+      },
+      "heather-300": {
+        "value": "#C4ACC2",
+        "type": "color",
+        "description": "CSS: var(--th-heather-300)"
+      },
+      "heather-400": {
+        "value": "#B496B3",
+        "type": "color",
+        "description": "CSS: var(--th-heather-400)"
+      },
+      "heather-500": {
+        "value": "#947594",
+        "type": "color",
+        "description": "CSS: var(--th-heather-500)"
+      },
+      "heather-600": {
+        "value": "#755376",
+        "type": "color",
+        "description": "CSS: var(--th-heather-600)"
+      },
+      "heather-700": {
+        "value": "#5B405B",
+        "type": "color",
+        "description": "CSS: var(--th-heather-700)"
+      },
+      "heather-800": {
+        "value": "#453044",
+        "type": "color",
+        "description": "CSS: var(--th-heather-800)"
+      },
+      "heather-850": {
+        "value": "#3A2938",
+        "type": "color",
+        "description": "CSS: var(--th-heather-850)"
+      },
+      "heather-900": {
+        "value": "#2F222C",
+        "type": "color",
+        "description": "CSS: var(--th-heather-900)"
+      },
+      "heather-950": {
+        "value": "#251E21",
+        "type": "color",
+        "description": "CSS: var(--th-heather-950)"
+      },
+      "clay-solid": {
+        "value": "#9B4127",
+        "type": "color",
+        "description": "CSS: var(--th-clay-solid)"
+      },
+      "ochre-solid": {
+        "value": "#75591C",
+        "type": "color",
+        "description": "CSS: var(--th-ochre-solid)"
+      },
+      "moss-solid": {
+        "value": "#536431",
+        "type": "color",
+        "description": "CSS: var(--th-moss-solid)"
+      },
+      "patina-solid": {
+        "value": "#3B655C",
+        "type": "color",
+        "description": "CSS: var(--th-patina-solid)"
+      },
+      "charcoal": {
+        "value": "{palette.neutral-1000}",
+        "type": "color",
+        "description": "Thinkinghaus charcoal; CSS: var(--th-charcoal)"
+      },
+      "ivory": {
+        "value": "{palette.neutral-0}",
+        "type": "color",
+        "description": "Thinkinghaus ivory; CSS: var(--th-ivory)"
+      },
+      "taupe": {
+        "value": "{palette.neutral-500}",
+        "type": "color",
+        "description": "Thinkinghaus taupe; CSS: var(--th-taupe)"
+      },
+      "body": {
+        "value": "{palette.neutral-400}",
+        "type": "color",
+        "description": "Thinkinghaus body; CSS: var(--th-body)"
+      }
+    }
+  },
+  "dark": {
+    "color": {
+      "bg": {
+        "value": "{palette.charcoal}",
+        "type": "color",
+        "description": "Dark mode; CSS: var(--th-bg)"
+      },
+      "surface": {
+        "value": "{palette.neutral-950}",
+        "type": "color",
+        "description": "Dark mode; CSS: var(--th-surface)"
+      },
+      "surface-raised": {
+        "value": "{palette.neutral-900}",
+        "type": "color",
+        "description": "Dark mode; CSS: var(--th-surface-raised)"
+      },
+      "border": {
+        "value": "{palette.neutral-800}",
+        "type": "color",
+        "description": "Dark mode; CSS: var(--th-border)"
+      },
+      "border-hover": {
+        "value": "{palette.neutral-700}",
+        "type": "color",
+        "description": "Dark mode; CSS: var(--th-border-hover)"
+      },
+      "text": {
+        "value": "{palette.ivory}",
+        "type": "color",
+        "description": "Dark mode; CSS: var(--th-text)"
+      },
+      "text-body": {
+        "value": "{palette.body}",
+        "type": "color",
+        "description": "Dark mode; CSS: var(--th-text-body)"
+      },
+      "text-muted": {
+        "value": "{palette.taupe}",
+        "type": "color",
+        "description": "Dark mode; CSS: var(--th-text-muted)"
+      },
+      "text-faint": {
+        "value": "{palette.neutral-600}",
+        "type": "color",
+        "description": "Dark mode; CSS: var(--th-text-faint)"
+      },
+      "selection-bg": {
+        "value": "{palette.neutral-700}",
+        "type": "color",
+        "description": "Dark mode; CSS: var(--th-selection-bg)"
+      },
+      "selection-text": {
+        "value": "{palette.ivory}",
+        "type": "color",
+        "description": "Dark mode; CSS: var(--th-selection-text)"
+      },
+      "clay": {
+        "value": "{palette.clay-400}",
+        "type": "color",
+        "description": "Dark mode; CSS: var(--th-clay)"
+      },
+      "ochre": {
+        "value": "{palette.ochre-400}",
+        "type": "color",
+        "description": "Dark mode; CSS: var(--th-ochre)"
+      },
+      "moss": {
+        "value": "{palette.moss-400}",
+        "type": "color",
+        "description": "Dark mode; CSS: var(--th-moss)"
+      },
+      "patina": {
+        "value": "{palette.patina-400}",
+        "type": "color",
+        "description": "Dark mode; CSS: var(--th-patina)"
+      },
+      "slate": {
+        "value": "{palette.slate-400}",
+        "type": "color",
+        "description": "Dark mode; CSS: var(--th-slate)"
+      },
+      "heather": {
+        "value": "{palette.heather-400}",
+        "type": "color",
+        "description": "Dark mode; CSS: var(--th-heather)"
+      },
+      "link": {
+        "value": "{palette.body}",
+        "type": "color",
+        "description": "Dark mode; CSS: var(--th-link)"
+      },
+      "focus": {
+        "value": "{palette.ochre-400}",
+        "type": "color",
+        "description": "Dark mode; CSS: var(--th-focus)"
+      },
+      "success": {
+        "value": "{palette.moss-400}",
+        "type": "color",
+        "description": "Dark mode; CSS: var(--th-success)"
+      },
+      "warning": {
+        "value": "{palette.ochre-400}",
+        "type": "color",
+        "description": "Dark mode; CSS: var(--th-warning)"
+      },
+      "error": {
+        "value": "{palette.clay-400}",
+        "type": "color",
+        "description": "Dark mode; CSS: var(--th-error)"
+      },
+      "info": {
+        "value": "{palette.slate-400}",
+        "type": "color",
+        "description": "Dark mode; CSS: var(--th-info)"
+      },
+      "border-control": {
+        "value": "{palette.neutral-500}",
+        "type": "color",
+        "description": "Dark mode; CSS: var(--th-border-control)"
+      },
+      "clay-fill": {
+        "value": "{palette.clay-solid}",
+        "type": "color",
+        "description": "Dark mode; CSS: var(--th-clay-fill)"
+      },
+      "on-clay-fill": {
+        "value": "{palette.ivory}",
+        "type": "color",
+        "description": "Dark mode; CSS: var(--th-on-clay-fill)"
+      },
+      "ochre-fill": {
+        "value": "{palette.ochre-solid}",
+        "type": "color",
+        "description": "Dark mode; CSS: var(--th-ochre-fill)"
+      },
+      "on-ochre-fill": {
+        "value": "{palette.ivory}",
+        "type": "color",
+        "description": "Dark mode; CSS: var(--th-on-ochre-fill)"
+      },
+      "moss-fill": {
+        "value": "{palette.moss-solid}",
+        "type": "color",
+        "description": "Dark mode; CSS: var(--th-moss-fill)"
+      },
+      "on-moss-fill": {
+        "value": "{palette.ivory}",
+        "type": "color",
+        "description": "Dark mode; CSS: var(--th-on-moss-fill)"
+      },
+      "patina-fill": {
+        "value": "{palette.patina-solid}",
+        "type": "color",
+        "description": "Dark mode; CSS: var(--th-patina-fill)"
+      },
+      "on-patina-fill": {
+        "value": "{palette.ivory}",
+        "type": "color",
+        "description": "Dark mode; CSS: var(--th-on-patina-fill)"
+      }
+    }
+  },
+  "light": {
+    "color": {
+      "bg": {
+        "value": "{palette.ivory}",
+        "type": "color",
+        "description": "Light mode; CSS: var(--th-bg)"
+      },
+      "surface": {
+        "value": "{palette.neutral-50}",
+        "type": "color",
+        "description": "Light mode; CSS: var(--th-surface)"
+      },
+      "surface-raised": {
+        "value": "{palette.neutral-100}",
+        "type": "color",
+        "description": "Light mode; CSS: var(--th-surface-raised)"
+      },
+      "border": {
+        "value": "{palette.neutral-200}",
+        "type": "color",
+        "description": "Light mode; CSS: var(--th-border)"
+      },
+      "border-hover": {
+        "value": "{palette.neutral-300}",
+        "type": "color",
+        "description": "Light mode; CSS: var(--th-border-hover)"
+      },
+      "text": {
+        "value": "{palette.charcoal}",
+        "type": "color",
+        "description": "Light mode; CSS: var(--th-text)"
+      },
+      "text-body": {
+        "value": "{palette.neutral-800}",
+        "type": "color",
+        "description": "Light mode; CSS: var(--th-text-body)"
+      },
+      "text-muted": {
+        "value": "{palette.neutral-700}",
+        "type": "color",
+        "description": "Light mode; CSS: var(--th-text-muted)"
+      },
+      "text-faint": {
+        "value": "{palette.neutral-600}",
+        "type": "color",
+        "description": "Light mode; CSS: var(--th-text-faint)"
+      },
+      "selection-bg": {
+        "value": "{palette.neutral-200}",
+        "type": "color",
+        "description": "Light mode; CSS: var(--th-selection-bg)"
+      },
+      "selection-text": {
+        "value": "{palette.charcoal}",
+        "type": "color",
+        "description": "Light mode; CSS: var(--th-selection-text)"
+      },
+      "clay": {
+        "value": "{palette.clay-600}",
+        "type": "color",
+        "description": "Light mode; CSS: var(--th-clay)"
+      },
+      "ochre": {
+        "value": "{palette.ochre-600}",
+        "type": "color",
+        "description": "Light mode; CSS: var(--th-ochre)"
+      },
+      "moss": {
+        "value": "{palette.moss-600}",
+        "type": "color",
+        "description": "Light mode; CSS: var(--th-moss)"
+      },
+      "patina": {
+        "value": "{palette.patina-600}",
+        "type": "color",
+        "description": "Light mode; CSS: var(--th-patina)"
+      },
+      "slate": {
+        "value": "{palette.slate-600}",
+        "type": "color",
+        "description": "Light mode; CSS: var(--th-slate)"
+      },
+      "heather": {
+        "value": "{palette.heather-600}",
+        "type": "color",
+        "description": "Light mode; CSS: var(--th-heather)"
+      },
+      "link": {
+        "value": "{palette.neutral-800}",
+        "type": "color",
+        "description": "Light mode; CSS: var(--th-link)"
+      },
+      "focus": {
+        "value": "{palette.ochre-600}",
+        "type": "color",
+        "description": "Light mode; CSS: var(--th-focus)"
+      },
+      "success": {
+        "value": "{palette.moss-600}",
+        "type": "color",
+        "description": "Light mode; CSS: var(--th-success)"
+      },
+      "warning": {
+        "value": "{palette.ochre-600}",
+        "type": "color",
+        "description": "Light mode; CSS: var(--th-warning)"
+      },
+      "error": {
+        "value": "{palette.clay-600}",
+        "type": "color",
+        "description": "Light mode; CSS: var(--th-error)"
+      },
+      "info": {
+        "value": "{palette.slate-600}",
+        "type": "color",
+        "description": "Light mode; CSS: var(--th-info)"
+      },
+      "border-control": {
+        "value": "{palette.neutral-600}",
+        "type": "color",
+        "description": "Light mode; CSS: var(--th-border-control)"
+      },
+      "clay-fill": {
+        "value": "{palette.clay-solid}",
+        "type": "color",
+        "description": "Light mode; CSS: var(--th-clay-fill)"
+      },
+      "on-clay-fill": {
+        "value": "{palette.ivory}",
+        "type": "color",
+        "description": "Light mode; CSS: var(--th-on-clay-fill)"
+      },
+      "ochre-fill": {
+        "value": "{palette.ochre-solid}",
+        "type": "color",
+        "description": "Light mode; CSS: var(--th-ochre-fill)"
+      },
+      "on-ochre-fill": {
+        "value": "{palette.ivory}",
+        "type": "color",
+        "description": "Light mode; CSS: var(--th-on-ochre-fill)"
+      },
+      "moss-fill": {
+        "value": "{palette.moss-solid}",
+        "type": "color",
+        "description": "Light mode; CSS: var(--th-moss-fill)"
+      },
+      "on-moss-fill": {
+        "value": "{palette.ivory}",
+        "type": "color",
+        "description": "Light mode; CSS: var(--th-on-moss-fill)"
+      },
+      "patina-fill": {
+        "value": "{palette.patina-solid}",
+        "type": "color",
+        "description": "Light mode; CSS: var(--th-patina-fill)"
+      },
+      "on-patina-fill": {
+        "value": "{palette.ivory}",
+        "type": "color",
+        "description": "Light mode; CSS: var(--th-on-patina-fill)"
+      }
+    }
+  },
+  "$themes": [
+    {
+      "id": "thinkinghaus-dark",
+      "name": "Dark",
+      "group": "Color",
+      "selectedTokenSets": {
+        "primitives": "source",
+        "dark": "enabled"
+      }
+    },
+    {
+      "id": "thinkinghaus-light",
+      "name": "Light",
+      "group": "Color",
+      "selectedTokenSets": {
+        "primitives": "source",
+        "light": "enabled"
+      }
+    }
+  ],
+  "$metadata": {
+    "tokenSetOrder": [
+      "primitives",
+      "dark",
+      "light"
+    ]
+  }
+}

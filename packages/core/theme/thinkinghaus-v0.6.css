@@ -1,4 +1,4 @@
-/* Thinkinghaus palette v0.5. */
+/* Thinkinghaus palette v0.6. */
 :root {
   --th-neutral-0: #F4EDDF;
   --th-neutral-50: #EBE4D5;
@@ -121,7 +121,7 @@
   --th-patina: var(--th-patina-400);
   --th-slate: var(--th-slate-400);
   --th-heather: var(--th-heather-400);
-  --th-link: var(--th-patina-400);
+  --th-link: var(--th-body);
   --th-focus: var(--th-ochre-400);
   --th-success: var(--th-moss-400);
   --th-warning: var(--th-ochre-400);
@@ -160,7 +160,7 @@
   --th-patina: var(--th-patina-600);
   --th-slate: var(--th-slate-600);
   --th-heather: var(--th-heather-600);
-  --th-link: var(--th-patina-600);
+  --th-link: var(--th-neutral-800);
   --th-focus: var(--th-ochre-600);
   --th-success: var(--th-moss-600);
   --th-warning: var(--th-ochre-600);

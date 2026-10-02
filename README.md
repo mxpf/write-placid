@@ -49,7 +49,7 @@ npm run check          # config, builds, tests, and type checks
 
 Write Placid is deliberately super normal. It uses a restrained type scale, ordinary links, generous space, and very little interface decoration. The system is meant to help a person return to the writing, not admire the publishing machinery.
 
-Color follows [Thinkinghaus palette v0.5](docs/DESIGN.md), pinned locally and applied through semantic roles across the reader, Studio, Trackinghaus, and authorization UI.
+Color follows [Thinkinghaus palette v0.6](docs/DESIGN.md), pinned locally and applied through semantic roles across the reader, Studio, Trackinghaus, and authorization UI.
 
 ## Ownership
 

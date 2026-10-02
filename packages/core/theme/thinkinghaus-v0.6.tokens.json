@@ -1,5 +1,5 @@
 {
-  "version": "0.5",
+  "version": "0.6",
   "source": "https://thinking.haus",
   "anchors": {
     "charcoal": "#1C1811",
@@ -147,7 +147,7 @@
       "patina": "patina-400",
       "slate": "slate-400",
       "heather": "heather-400",
-      "link": "patina-400",
+      "link": "body",
       "focus": "ochre-400",
       "success": "moss-400",
       "warning": "ochre-400",
@@ -181,7 +181,7 @@
       "patina": "patina-600",
       "slate": "slate-600",
       "heather": "heather-600",
-      "link": "patina-600",
+      "link": "neutral-800",
       "focus": "ochre-600",
       "success": "moss-600",
       "warning": "ochre-600",
@@ -443,7 +443,7 @@
       "mode": "dark",
       "role": "link",
       "background": "bg",
-      "ratio": 7.01,
+      "ratio": 7.87,
       "target": 4.5,
       "pass": true
     },
@@ -451,7 +451,7 @@
       "mode": "dark",
       "role": "link",
       "background": "surface",
-      "ratio": 6.42,
+      "ratio": 7.2,
       "target": 4.5,
       "pass": true
     },
@@ -459,7 +459,7 @@
       "mode": "dark",
       "role": "link",
       "background": "surface-raised",
-      "ratio": 5.73,
+      "ratio": 6.43,
       "target": 4.5,
       "pass": true
     },
@@ -891,7 +891,7 @@
       "mode": "light",
       "role": "link",
       "background": "bg",
-      "ratio": 5.52,
+      "ratio": 8.69,
       "target": 4.5,
       "pass": true
     },
@@ -899,7 +899,7 @@
       "mode": "light",
       "role": "link",
       "background": "surface",
-      "ratio": 5.08,
+      "ratio": 7.99,
       "target": 4.5,
       "pass": true
     },
@@ -907,7 +907,7 @@
       "mode": "light",
       "role": "link",
       "background": "surface-raised",
-      "ratio": 4.62,
+      "ratio": 7.28,
       "target": 4.5,
       "pass": true
     },

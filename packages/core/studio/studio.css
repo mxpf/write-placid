@@ -1,4 +1,4 @@
-@import "../theme/thinkinghaus-v0.5.css";
+@import "../theme/thinkinghaus-v0.6.css";
 
 :root {
   --paper: var(--th-bg);
@@ -592,8 +592,10 @@ button {
   font-weight: 400;
 }
 
-.body-input a {
+.body-input a,
+.body-input a:visited {
   color: inherit;
+  text-decoration: underline;
   text-decoration-thickness: 1px;
   text-underline-offset: 2px;
 }
@@ -1042,7 +1044,9 @@ button {
   outline-offset: 1px;
 }
 
-.caption-input a {
+.caption-input a,
+.caption-input a:visited {
+  color: inherit;
   text-decoration: underline;
   text-underline-offset: 2px;
 }

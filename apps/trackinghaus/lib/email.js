@@ -46,7 +46,7 @@ export function renderWeeklyEmail(summary) {
     <h1 style="margin:0 0 32px;font-size:20px;line-height:1.35;font-weight:400">${escapeHtml(summary.insight.headline)}</h1>
     <p style="margin:0 0 48px;font-size:20px;line-height:1.6">${escapeHtml(summary.insight.detail)}</p>
     ${writingRows ? `<table style="width:100%;border-collapse:collapse;margin:0 0 48px">${writingRows}</table>` : ""}
-    <p style="margin:0 0 56px"><a href="${escapeHtml(weeklyUrl)}" style="color:#1a6a5e">See the evidence</a></p>
+    <p style="margin:0 0 56px"><a href="${escapeHtml(weeklyUrl)}" style="color:#474135;text-decoration:underline">See the evidence</a></p>
     <p style="margin:0;font-size:15px;line-height:1.5">No individual visitors are identified. Trackinghaus alpha stores only aggregate counters.</p>
   </div>
 </body></html>`;

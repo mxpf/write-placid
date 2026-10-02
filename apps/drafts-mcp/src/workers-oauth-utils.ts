@@ -442,10 +442,10 @@ export function renderApprovalDialog(request: Request, options: ApprovalDialogOp
         <title>${clientName} | Authorization Request</title>
         <style>
           :root {
-            /* Thinkinghaus palette v0.5 semantic roles. */
+            /* Thinkinghaus palette v0.6 semantic roles. */
             --primary-color: #1c1811;
             --on-primary-color: #f4eddf;
-            --link-color: #1a6a5e;
+            --link-color: #474135;
             --focus-color: #785800;
             --error-color: #9b4127;
             --border-color: #d0cbbf;
@@ -547,7 +547,8 @@ export function renderApprovalDialog(request: Request, options: ApprovalDialogOp
             word-break: break-all;
           }
 
-          .detail-value a {
+          .detail-value a,
+          .detail-value a:visited {
             color: var(--link-color);
             text-decoration: underline;
           }
