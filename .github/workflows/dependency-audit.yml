@@ -9,11 +9,16 @@ permissions:
   contents: read
 
 jobs:
-  public-site:
+  audit:
     runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: apps/site
+    strategy:
+      fail-fast: false
+      matrix:
+        directory:
+          - apps/site
+          - apps/studio
+          - apps/trackinghaus
+          - apps/drafts-mcp
     steps:
       - name: Check out the repository
         uses: actions/checkout@v5
@@ -23,14 +28,17 @@ jobs:
         with:
           node-version: 22
           cache: npm
-          cache-dependency-path: apps/site/package-lock.json
+          cache-dependency-path: ${{ matrix.directory }}/package-lock.json
 
       - name: Install dependencies
         run: npm ci
+        working-directory: ${{ matrix.directory }}
 
       - name: Audit production dependencies
-        run: npm run audit:production
+        run: npm audit --omit=dev --audit-level=high
+        working-directory: ${{ matrix.directory }}
 
       - name: Audit the complete development toolchain
         continue-on-error: true
-        run: npm run audit:full
+        run: npm audit --audit-level=high
+        working-directory: ${{ matrix.directory }}

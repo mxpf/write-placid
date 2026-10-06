@@ -1,6 +1,8 @@
 export type InlineToken = { type: "text" | "italic"; value: string } | { type: "link"; value: string; href: string };
 export type CaptionRun = { text: string; italic?: boolean; href?: string };
-export type ContentBlock = { type: "heading" | "blockquote" | "paragraph"; index: number; text: string } | { type: "image"; index: number; alt: string; src: string; title?: string } | { type: "unordered-list"; index: number; items: string[] } | { type: "ordered-list"; index: number; items: string[]; start: number };
+export type ContentListItem = { text: string; children?: ContentListBlock[] };
+export type ContentListBlock = { type: "unordered-list"; index: number; items: ContentListItem[] } | { type: "ordered-list"; index: number; items: ContentListItem[]; start: number };
+export type ContentBlock = { type: "heading" | "blockquote" | "paragraph"; index: number; text: string } | { type: "image"; index: number; alt: string; src: string; title?: string } | ContentListBlock;
 export function safeCaptionHref(value: string): string | null;
 export function parseCaptionMarkdown(value: string): CaptionRun[];
 export function isSafeImageSrc(src: string): boolean;

@@ -1,5 +1,5 @@
 ---
-title: "Publish without performing"
+title: "Publish without performing: a quiet threshold"
 id: 5adac8b2-8d6a-4c85-a68d-d46db70ca824
 publicPath: publish-without-performing.md
 slug: publish-without-performing
@@ -14,6 +14,9 @@ Publishing does not have to be a performance of certainty.
 It can be a way of making thought available: edited enough to respect the reader, open enough to admit that the thinking may continue.
 
 - Keep the claim proportional to what you know.
+
+  - Name the evidence you actually have.
+  - Leave uncertainty visible when it matters.
 
 - Leave room for revision.
 

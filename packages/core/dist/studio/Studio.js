@@ -1,7 +1,7 @@
 "use client";
 import { jsx as _jsx, jsxs as _jsxs, Fragment as _Fragment } from "react/jsx-runtime";
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState, } from "react";
-import { GripVertical, Heading2, Image as ImageIcon, Italic, Link as LinkIcon, Quote as QuoteIcon, } from "lucide-react";
+import { GripVertical, Heading2, Image as ImageIcon, Italic, Link as LinkIcon, Quote as QuoteIcon, Redo2, Undo2, } from "lucide-react";
 import { acknowledgeSave, withEditBase } from "./save-state.js";
 import { createSaveQueue } from "./save-queue.js";
 import { CaptionEditor } from "./CaptionEditor.js";
@@ -729,6 +729,14 @@ export function Studio() {
         document.execCommand("formatBlock", false, selectedQuote && editor.contains(selectedQuote) ? "p" : "blockquote");
         updateCurrent({ body: editorToMarkdown(editor) });
     };
+    const runHistoryCommand = (command) => {
+        const editor = bodyRef.current;
+        if (!current || !editor)
+            return;
+        editor.focus({ preventScroll: true });
+        document.execCommand(command, false);
+        updateCurrent({ body: editorToMarkdown(editor) });
+    };
     const openExistingLink = (anchor) => {
         const editor = bodyRef.current;
         if (!current || !editor?.contains(anchor))
@@ -747,7 +755,7 @@ export function Studio() {
             return;
         const selection = window.getSelection();
         const range = selection?.rangeCount ? selection.getRangeAt(0) : null;
-        if (!range || !bodyRef.current.contains(range.commonAncestorContainer)) {
+        if (!range || range.collapsed || !range.toString().trim() || !bodyRef.current.contains(range.commonAncestorContainer)) {
             showNotice("Select some text to link first.");
             return;
         }
@@ -1046,7 +1054,28 @@ export function Studio() {
             openImage(figure, element?.closest("[data-editor-image-control]") || figure);
             return;
         }
-        if ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === "i") {
+        const commandKey = event.metaKey || event.ctrlKey;
+        const key = event.key.toLowerCase();
+        if (commandKey && key === "k") {
+            const selection = window.getSelection();
+            const range = selection?.rangeCount ? selection.getRangeAt(0) : null;
+            if (range && !range.collapsed && range.toString().trim() && bodyRef.current?.contains(range.commonAncestorContainer)) {
+                event.preventDefault();
+                openLink();
+            }
+            return;
+        }
+        if (commandKey && key === "z") {
+            event.preventDefault();
+            runHistoryCommand(event.shiftKey ? "redo" : "undo");
+            return;
+        }
+        if (commandKey && key === "y") {
+            event.preventDefault();
+            runHistoryCommand("redo");
+            return;
+        }
+        if (commandKey && key === "i") {
             event.preventDefault();
             applyItalic();
             return;
@@ -1134,7 +1163,7 @@ export function Studio() {
                                             : current.type === "now"
                                                 ? current.status === "published" ? "Now · Published" : "Now · Draft"
                                                 : current.status === "published" ? "Published" : "Draft" }), current.type !== "page" ? (_jsxs("div", { className: "post-dates", children: [_jsxs("label", { children: [_jsx("span", { children: current.type === "post" ? "Post date" : "Date" }), _jsx("input", { "aria-label": current.type === "post" ? "Post date" : "Date", type: "date", value: current.date, onChange: (event) => updateCurrent({ date: event.target.value }) })] }), current.type === "post" && current.publicUpdatedAt ? (_jsxs("span", { className: "modified-date", children: ["Last edited ", displayDate(current.publicUpdatedAt.slice(0, 10))] })) : null] })) : null, current.type !== "page" && !current.id.startsWith("new:") ? (_jsxs(_Fragment, { children: [current.status === "published" ? (_jsx("button", { className: "draft-button", type: "button", disabled: publishing || deleting, onClick: moveToDraft, children: "Move to draft" })) : null, _jsx("button", { className: "delete-button", type: "button", disabled: publishing || deleting, onClick: deleteCurrent, children: deleting ? "Deleting…" : "Delete" })] })) : null] }), _jsx("label", { className: "sr-only", htmlFor: "title-input", children: "Title" }), _jsx("textarea", { id: "title-input", className: "title-input", rows: 2, value: current.title, placeholder: current.type === "now" ? "Now" : "Untitled", readOnly: current.type === "now", onChange: (event) => updateCurrent({ title: smartenQuotes(event.target.value) }) }), current.type === "post" && !current.id.startsWith("new:") ? (_jsxs("details", { className: "editorial-details", children: [_jsx("summary", { children: "Public address and folder" }), _jsx("label", { htmlFor: "slug-input", children: "Public slug" }), _jsx("input", { id: "slug-input", defaultValue: current.slug, onBlur: (event) => { if (event.target.value !== current.slug)
-                                            updateCurrent({ slug: event.target.value }); } }, `${current.id}:${current.slug}`), _jsx("p", { children: new URL(`${current.slug}.html`, `${studioConfig.siteUrl.replace(/\/$/, "")}/`).href }), _jsx("p", { children: "Changing the title or folder keeps this address. A new slug keeps the previous address as a redirect." }), _jsxs("p", { children: ["Folder: ", current.kdrivePath?.split("/").slice(0, -1).join("/") || "Drafts"] }), current.aliases?.length ? _jsxs("p", { children: ["Former addresses: ", current.aliases.join(", ")] }) : null] })) : null, _jsxs("div", { className: "formatting-toolbar", "aria-label": "Text formatting", children: [_jsx("button", { type: "button", onMouseDown: (event) => event.preventDefault(), onClick: applySectionHeading, "aria-label": "Section heading", title: "Section heading", children: _jsx(Heading2, { "aria-hidden": "true", size: 18, strokeWidth: 1.75 }) }), _jsx("button", { type: "button", onMouseDown: (event) => event.preventDefault(), onClick: applyBlockQuote, "aria-label": "Block quote", title: "Block quote", children: _jsx(QuoteIcon, { "aria-hidden": "true", size: 17, strokeWidth: 1.75 }) }), _jsx("button", { type: "button", onMouseDown: (event) => event.preventDefault(), onClick: applyItalic, "aria-label": "Italic", title: "Italic", children: _jsx(Italic, { "aria-hidden": "true", size: 17, strokeWidth: 1.75 }) }), _jsx("button", { type: "button", onMouseDown: (event) => event.preventDefault(), onClick: openLink, "aria-label": "Add link", title: "Add link", children: _jsx(LinkIcon, { "aria-hidden": "true", size: 17, strokeWidth: 1.75 }) }), current.type === "post" ? (_jsx("button", { type: "button", onMouseDown: (event) => event.preventDefault(), onClick: () => openImage(), "aria-label": "Add image", title: "Add image", children: _jsx(ImageIcon, { "aria-hidden": "true", size: 17, strokeWidth: 1.75 }) })) : null, _jsx("span", { children: "Select text, then choose a style." })] }), _jsx("label", { className: "sr-only", htmlFor: "body-input", children: "Main text" }), _jsx("div", { ref: bodyRef, id: "body-input", className: "body-input", contentEditable: true, suppressContentEditableWarning: true, role: "textbox", tabIndex: 0, "aria-label": "Main text", "aria-multiline": "true", "data-placeholder": "Begin anywhere.", onBeforeInput: handleEditorBeforeInput, onInput: handleEditorInput, onPaste: handleEditorPaste, onClick: handleEditorClick, onKeyDown: handleEditorKeyDown }), current.type === "post" ? (_jsxs("details", { className: "source-details", open: Boolean(current.source), children: [_jsx("summary", { children: "Source or further reading" }), _jsxs("div", { className: "source-fields", children: [_jsxs("label", { children: [_jsx("span", { children: "Link text" }), _jsx("input", { value: current.source?.label || "", placeholder: "Read the original piece", onChange: (event) => updateCurrent({
+                                            updateCurrent({ slug: event.target.value }); } }, `${current.id}:${current.slug}`), _jsx("p", { children: new URL(`${current.slug}.html`, `${studioConfig.siteUrl.replace(/\/$/, "")}/`).href }), _jsx("p", { children: "Changing the title or folder keeps this address. A new slug keeps the previous address as a redirect." }), _jsxs("p", { children: ["Folder: ", current.kdrivePath?.split("/").slice(0, -1).join("/") || "Drafts"] }), current.aliases?.length ? _jsxs("p", { children: ["Former addresses: ", current.aliases.join(", ")] }) : null] })) : null, _jsxs("div", { className: "formatting-toolbar", "aria-label": "Text formatting", children: [_jsx("button", { type: "button", onMouseDown: (event) => event.preventDefault(), onClick: () => runHistoryCommand("undo"), "aria-label": "Undo", title: "Undo (\u2318Z)", children: _jsx(Undo2, { "aria-hidden": "true", size: 17, strokeWidth: 1.75 }) }), _jsx("button", { type: "button", onMouseDown: (event) => event.preventDefault(), onClick: () => runHistoryCommand("redo"), "aria-label": "Redo", title: "Redo (\u2318Y)", children: _jsx(Redo2, { "aria-hidden": "true", size: 17, strokeWidth: 1.75 }) }), _jsx("button", { type: "button", onMouseDown: (event) => event.preventDefault(), onClick: applySectionHeading, "aria-label": "Section heading", title: "Section heading", children: _jsx(Heading2, { "aria-hidden": "true", size: 18, strokeWidth: 1.75 }) }), _jsx("button", { type: "button", onMouseDown: (event) => event.preventDefault(), onClick: applyBlockQuote, "aria-label": "Block quote", title: "Block quote", children: _jsx(QuoteIcon, { "aria-hidden": "true", size: 17, strokeWidth: 1.75 }) }), _jsx("button", { type: "button", onMouseDown: (event) => event.preventDefault(), onClick: applyItalic, "aria-label": "Italic", title: "Italic", children: _jsx(Italic, { "aria-hidden": "true", size: 17, strokeWidth: 1.75 }) }), _jsx("button", { type: "button", onMouseDown: (event) => event.preventDefault(), onClick: openLink, "aria-label": "Add link", title: "Add link (\u2318K)", children: _jsx(LinkIcon, { "aria-hidden": "true", size: 17, strokeWidth: 1.75 }) }), current.type === "post" ? (_jsx("button", { type: "button", onMouseDown: (event) => event.preventDefault(), onClick: () => openImage(), "aria-label": "Add image", title: "Add image", children: _jsx(ImageIcon, { "aria-hidden": "true", size: 17, strokeWidth: 1.75 }) })) : null, _jsx("span", { children: "Select text, then choose a style." })] }), _jsx("label", { className: "sr-only", htmlFor: "body-input", children: "Main text" }), _jsx("div", { ref: bodyRef, id: "body-input", className: "body-input", contentEditable: true, suppressContentEditableWarning: true, role: "textbox", tabIndex: 0, "aria-label": "Main text", "aria-multiline": "true", "data-placeholder": "Begin anywhere.", onBeforeInput: handleEditorBeforeInput, onInput: handleEditorInput, onPaste: handleEditorPaste, onClick: handleEditorClick, onKeyDown: handleEditorKeyDown }), current.type === "post" ? (_jsxs("details", { className: "source-details", open: Boolean(current.source), children: [_jsx("summary", { children: "Source or further reading" }), _jsxs("div", { className: "source-fields", children: [_jsxs("label", { children: [_jsx("span", { children: "Link text" }), _jsx("input", { value: current.source?.label || "", placeholder: "Read the original piece", onChange: (event) => updateCurrent({
                                                             source: {
                                                                 label: smartenQuotes(event.target.value),
                                                                 href: current.source?.href || "",

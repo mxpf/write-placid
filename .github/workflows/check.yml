@@ -22,4 +22,5 @@ jobs:
             apps/trackinghaus/package-lock.json
             apps/drafts-mcp/package-lock.json
       - run: npm run setup
+      - run: npm exec --prefix apps/site playwright install --with-deps chromium
       - run: npm run check

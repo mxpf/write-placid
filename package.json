@@ -157,13 +157,14 @@
     "dev:tracking": "npm run dev --prefix apps/trackinghaus",
     "check:config": "node scripts/check-config.mjs",
     "check:site": "npm test --prefix apps/site",
+    "check:a11y": "npm run test:a11y --prefix apps/site",
     "check:studio": "npm test --prefix apps/studio",
     "check:tracking": "npm test --prefix apps/trackinghaus",
     "check:mcp": "npm run type-check --prefix apps/drafts-mcp",
     "build:core": "apps/studio/node_modules/.bin/tsc -p packages/core/tsconfig.json",
     "check:core": "npm run build:core && node --test packages/core/tests/*.test.mjs",
     "pack:core": "npm pack --pack-destination artifacts/core",
-    "check": "npm run check:core && npm run check:config && npm run check:site && npm run check:studio && npm run check:tracking && npm run check:mcp"
+    "check": "npm run check:core && npm run check:config && npm run check:site && npm run check:a11y && npm run check:studio && npm run check:tracking && npm run check:mcp"
   },
   "description": "The reusable publishing, content identity, rendering, and authoring core for Write Placid installations.",
   "repository": {

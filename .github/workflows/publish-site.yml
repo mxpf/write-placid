@@ -15,11 +15,39 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out the repository
+        uses: actions/checkout@v5
+
+      - name: Use Node.js
+        uses: actions/setup-node@v5
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: |
+            apps/site/package-lock.json
+            apps/studio/package-lock.json
+            apps/trackinghaus/package-lock.json
+            apps/drafts-mcp/package-lock.json
+
+      - name: Install dependencies
+        run: npm run setup
+
+      - name: Install the accessibility-test browser
+        run: npm exec --prefix apps/site playwright install --with-deps chromium
+
+      - name: Run the complete quality gate
+        run: npm run check
+
   publish:
+    needs: verify
     runs-on: ubuntu-latest
     env:
       PAGES_BASE_PATH: /write-placid
       NEXT_PUBLIC_PAGES_BASE_PATH: /write-placid
+      WRITE_PLACID_SITE_URL: https://maxpfennig.haus/write-placid
     defaults:
       run:
         working-directory: apps/site

@@ -4,6 +4,8 @@ dist/
 .next/
 .vinext/
 .wrangler/
+playwright-report/
+test-results/
 .env
 .env.*
 .dev.vars

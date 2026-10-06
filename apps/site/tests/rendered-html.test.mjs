@@ -7,24 +7,12 @@ import { calculateReadingTime, parsePost, readNowEntries, readPages, readPosts, 
 import { generateRssFeed } from "../scripts/rss.mjs";
 
 async function render(pathname = "/") {
-  const workerUrl = new URL("../dist/server/index.js", import.meta.url);
-  workerUrl.searchParams.set("test", `${process.pid}-${Date.now()}`);
-  const { default: worker } = await import(workerUrl.href);
-
-  return worker.fetch(
-    new Request(`http://localhost${pathname}`, {
-      headers: { accept: "text/html" },
-    }),
-    {
-      ASSETS: {
-        fetch: async () => new Response("Not found", { status: 404 }),
-      },
-    },
-    {
-      waitUntil() {},
-      passThroughOnException() {},
-    },
-  );
+  const route = pathname === "/" ? "index" : pathname.replace(/^\/+|\/+$/g, "");
+  const html = await readFile(new URL(`../dist/client/${route}.html`, import.meta.url), "utf8");
+  return new Response(html, {
+    status: 200,
+    headers: { "content-type": "text/html; charset=utf-8" },
+  });
 }
 
 test("renders the Write Placid index from published Markdown", async () => {
@@ -69,6 +57,15 @@ test("can prefix internal links for a GitHub project Pages deployment", async ()
   delete process.env.NEXT_PUBLIC_PAGES_BASE_PATH;
   assert.equal(sitePath("/about"), "/write-placid/about");
   assert.equal(sitePath("https://example.com"), "https://example.com");
+});
+
+test("can replace the sample URL with the deployment URL at build time", async () => {
+  process.env.WRITE_PLACID_SITE_URL = "https://write-placid.test/demo/";
+  const moduleUrl = new URL("../scripts/site-config.mjs", import.meta.url);
+  moduleUrl.searchParams.set("test", `${process.pid}-${Date.now()}`);
+  const { siteConfig } = await import(moduleUrl.href);
+  delete process.env.WRITE_PLACID_SITE_URL;
+  assert.equal(siteConfig.url, "https://write-placid.test/demo");
 });
 
 test("keeps edit controls private until author mode is activated", async () => {
@@ -253,7 +250,9 @@ test("keeps published writing readable and the visual system intentional", async
   assert.match(siteStyles, /@import "@mxpf\/write-placid-core\/article-layout\.css"/);
   assert.match(siteStyles, /:root\s*\{[^}]*--blog-background: var\(--th-bg\);[^}]*--blog-foreground: var\(--th-text\);[^}]*--blog-body: var\(--th-text-body\);[^}]*--blog-muted: var\(--th-text-muted\);[^}]*--blog-link: var\(--th-link\);[^}]*color-scheme: light;/s);
   assert.match(siteStyles, /:root\[data-theme="dark"\]\s*\{[^}]*--blog-background: var\(--th-bg\);[^}]*--blog-foreground: var\(--th-text\);[^}]*color-scheme: dark;/s);
-  assert.match(siteStyles, /\.theme-toggle-track\s*\{[^}]*height: 14px;[^}]*border-radius: 999px;[^}]*background: var\(--toggle-track\)/s);
+  assert.match(siteStyles, /\.theme-toggle\s*\{[^}]*width: 44px;[^}]*height: 44px;/s);
+  assert.match(siteStyles, /\.theme-toggle-track\s*\{[^}]*height: 14px;[^}]*margin-top: 15px;[^}]*border-radius: 999px;[^}]*background: var\(--toggle-track\)/s);
+  assert.match(siteStyles, /--toggle-track: var\(--th-neutral-600\)/);
   assert.doesNotMatch(siteStyles, /\.theme-toggle-track\s*\{[^}]*border:/s);
   assert.doesNotMatch(siteStyles, /prefers-color-scheme/);
   assert.match(siteStyles, /\.letter-cascade\s*\{[^}]*gap: 0;[^}]*letter-spacing: 0;/s);
@@ -340,6 +339,20 @@ test("calculates reading time and preserves draft status", () => {
   }));
   assert.equal(draft.status, "draft");
   assert.equal(draft.readingTime, "1 minute read");
+
+  const nested = parsePost(serializePost({
+    title: "Nested list",
+    slug: "nested-list",
+    date: "2026-08-06",
+    status: "draft",
+    body: "- Parent\n\n  - Child one\n  - Child two\n\n- Sibling",
+  }));
+  assert.deepEqual(nested.paragraphs, [
+    "- Parent",
+    "  - Child one",
+    "  - Child two",
+    "- Sibling",
+  ]);
 });
 
 test("article images are visible without JavaScript and use the packaged fade controller", async () => {
@@ -350,7 +363,8 @@ test("article images are visible without JavaScript and use the packaged fade co
   ]);
 
   assert.match(styles, /\.article-body \.article-image \{[\s\S]*--article-image-opacity: 1;/);
-  assert.match(styles, /@media \(prefers-reduced-motion: reduce\)[\s\S]*opacity: 1;/);
+  assert.match(styles, /\.article-body \.article-image\[data-scroll-fade-active\] img \{[\s\S]*opacity: var\(--article-image-opacity\)/);
+  assert.match(styles, /@media \(prefers-reduced-motion: reduce\)[\s\S]*\.article-body \.article-image img \{[\s\S]*opacity: 1;/);
   assert.match(component, /from "@mxpf\/write-placid-core\/scroll-fade"/);
   assert.match(component, /return attachScrollFade\(figure\)/);
   assert.equal(JSON.parse(packageManifest).exports["./scroll-fade"].default, "./packages/core/site/scroll-fade.mjs");

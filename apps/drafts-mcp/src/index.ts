@@ -163,11 +163,22 @@ export class WritePlacidMCP extends McpAgent<Env, Record<string, never>, Props> 
 	}
 }
 
-export default new OAuthProvider({
-	apiHandler: WritePlacidMCP.serve("/mcp"),
-	apiRoute: "/mcp",
-	authorizeEndpoint: "/authorize",
-	clientRegistrationEndpoint: "/register",
-	defaultHandler: { fetch: handleAccessRequest as any },
-	tokenEndpoint: "/token",
-});
+function oauthProvider(request: Request) {
+	return new OAuthProvider({
+		apiHandler: WritePlacidMCP.serve("/mcp"),
+		apiRoute: "/mcp",
+		authorizeEndpoint: "/authorize",
+		clientRegistrationEndpoint: "/register",
+		defaultHandler: { fetch: handleAccessRequest as any },
+		resourceMetadata: {
+			resource: `${new URL(request.url).origin}/mcp`,
+		},
+		tokenEndpoint: "/token",
+	});
+}
+
+export default {
+	fetch(request: Request, env: Env, ctx: ExecutionContext) {
+		return oauthProvider(request).fetch(request, env, ctx);
+	},
+};

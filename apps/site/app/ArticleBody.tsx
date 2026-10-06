@@ -1,3 +1,4 @@
+import type { ContentListBlock } from "@mxpf/write-placid-core/markdown";
 import { parseContentBlocks, stripInlineMarkdown } from "../lib/markdown.mjs";
 import { InlineText } from "./InlineText";
 import { ScrollFadeImage } from "./ScrollFadeImage";
@@ -6,6 +7,23 @@ function paragraphClassName(paragraph: string) {
   return /^[“‘"']/.test(stripInlineMarkdown(paragraph).trimStart())
     ? "optical-margin-fallback"
     : undefined;
+}
+
+function ArticleList({ block }: { block: ContentListBlock }) {
+  const items = block.items.map((item, itemIndex) => (
+    <li key={`${block.index}-${itemIndex}-${item.text}`}>
+      <InlineText text={item.text} />
+      {item.children?.map((child, childIndex) => (
+        <ArticleList block={child} key={`${child.index}-${childIndex}-${child.type}`} />
+      ))}
+    </li>
+  ));
+
+  return block.type === "ordered-list" ? (
+    <ol className="article-list article-numbered-list" start={block.start}>{items}</ol>
+  ) : (
+    <ul className="article-list">{items}</ul>
+  );
 }
 
 export function ArticleBody({ paragraphs }: { paragraphs: readonly string[] }) {
@@ -23,17 +41,7 @@ export function ArticleBody({ paragraphs }: { paragraphs: readonly string[] }) {
     }
 
     if (block.type === "unordered-list" || block.type === "ordered-list") {
-      const items = block.items.map((item, itemIndex) => (
-        <li key={`${block.index + itemIndex}-${item}`}><InlineText text={item} /></li>
-      ));
-
-      return block.type === "ordered-list" ? (
-        <ol className="article-list article-numbered-list" key={`list-${block.index}`} start={block.start}>
-          {items}
-        </ol>
-      ) : (
-        <ul className="article-list" key={`list-${block.index}`}>{items}</ul>
-      );
+      return <ArticleList block={block} key={`list-${block.index}`} />;
     }
 
     if (block.type === "image") {

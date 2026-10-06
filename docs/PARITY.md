@@ -30,8 +30,8 @@ Personal articles, live IDs, licensed fonts, production URLs, and rollout eviden
 - Site and Studio builds, project Pages paths, feeds, redirects, and Instrument Sans.
 - No personal content, licensed font files, secrets, production IDs, or rollout evidence in the package.
 
-## Boundaries and release decision
+## Boundaries and release channel
 
 Trackinghaus remains separately owned and optional. Google Docs and Drafts MCP remain optional inputs and cannot bypass the save/publish contract. KDrive is canonical only when configured; D1 is cache/order/recovery state, never stale content fallback. Base paths remain installation configuration.
 
-Before the first downstream production pin, choose public Git commit installation if repository/CI visibility is sufficient, or an immutable GitHub release attachment containing the verified package artifact. No npm registry is required.
+The canonical downstream channel is the verified package artifact attached to an immutable GitHub release. Installations pin the complete asset URL and commit the resulting lockfile integrity. A full public Git commit SHA is the fallback when repository and CI visibility are sufficient. No npm registry is required.

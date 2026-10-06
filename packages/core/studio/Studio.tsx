@@ -15,6 +15,8 @@ import {
   Italic,
   Link as LinkIcon,
   Quote as QuoteIcon,
+  Redo2,
+  Undo2,
 } from "lucide-react";
 import { acknowledgeSave, withEditBase } from "./save-state.ts";
 import { createSaveQueue } from "./save-queue.ts";
@@ -819,6 +821,14 @@ export function Studio() {
     updateCurrent({ body: editorToMarkdown(editor) });
   };
 
+  const runHistoryCommand = (command: "undo" | "redo") => {
+    const editor = bodyRef.current;
+    if (!current || !editor) return;
+    editor.focus({ preventScroll: true });
+    document.execCommand(command, false);
+    updateCurrent({ body: editorToMarkdown(editor) });
+  };
+
   const openExistingLink = (anchor: HTMLAnchorElement) => {
     const editor = bodyRef.current;
     if (!current || !editor?.contains(anchor)) return;
@@ -837,7 +847,7 @@ export function Studio() {
     if (!current || !bodyRef.current) return;
     const selection = window.getSelection();
     const range = selection?.rangeCount ? selection.getRangeAt(0) : null;
-    if (!range || !bodyRef.current.contains(range.commonAncestorContainer)) {
+    if (!range || range.collapsed || !range.toString().trim() || !bodyRef.current.contains(range.commonAncestorContainer)) {
       showNotice("Select some text to link first.");
       return;
     }
@@ -1138,7 +1148,28 @@ export function Studio() {
       openImage(figure, element?.closest<HTMLElement>("[data-editor-image-control]") || figure);
       return;
     }
-    if ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === "i") {
+    const commandKey = event.metaKey || event.ctrlKey;
+    const key = event.key.toLowerCase();
+    if (commandKey && key === "k") {
+      const selection = window.getSelection();
+      const range = selection?.rangeCount ? selection.getRangeAt(0) : null;
+      if (range && !range.collapsed && range.toString().trim() && bodyRef.current?.contains(range.commonAncestorContainer)) {
+        event.preventDefault();
+        openLink();
+      }
+      return;
+    }
+    if (commandKey && key === "z") {
+      event.preventDefault();
+      runHistoryCommand(event.shiftKey ? "redo" : "undo");
+      return;
+    }
+    if (commandKey && key === "y") {
+      event.preventDefault();
+      runHistoryCommand("redo");
+      return;
+    }
+    if (commandKey && key === "i") {
       event.preventDefault();
       applyItalic();
       return;
@@ -1384,6 +1415,24 @@ export function Studio() {
                 <button
                   type="button"
                   onMouseDown={(event) => event.preventDefault()}
+                  onClick={() => runHistoryCommand("undo")}
+                  aria-label="Undo"
+                  title="Undo (⌘Z)"
+                >
+                  <Undo2 aria-hidden="true" size={17} strokeWidth={1.75} />
+                </button>
+                <button
+                  type="button"
+                  onMouseDown={(event) => event.preventDefault()}
+                  onClick={() => runHistoryCommand("redo")}
+                  aria-label="Redo"
+                  title="Redo (⌘Y)"
+                >
+                  <Redo2 aria-hidden="true" size={17} strokeWidth={1.75} />
+                </button>
+                <button
+                  type="button"
+                  onMouseDown={(event) => event.preventDefault()}
                   onClick={applySectionHeading}
                   aria-label="Section heading"
                   title="Section heading"
@@ -1413,7 +1462,7 @@ export function Studio() {
                   onMouseDown={(event) => event.preventDefault()}
                   onClick={openLink}
                   aria-label="Add link"
-                  title="Add link"
+                  title="Add link (⌘K)"
                 >
                   <LinkIcon aria-hidden="true" size={17} strokeWidth={1.75} />
                 </button>

@@ -6,6 +6,14 @@ slug: links
 aliases: []
 ---
 
-[A useful link](https://example.com)
+[The IndieWeb](https://indieweb.org/)
 
-A sentence about why it is worth following.
+A community and collection of practical patterns for publishing on a domain you control.
+
+[A List Apart](https://alistapart.com/)
+
+Long-form writing about durable web design, standards, content, and the people who make websites.
+
+[The Creative Independent](https://thecreativeindependent.com/)
+
+Conversations and guides about sustaining an independent creative practice.

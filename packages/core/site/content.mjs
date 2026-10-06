@@ -46,12 +46,12 @@ function parseBodyBlocks(body) {
   return body
     .split(/\n\s*\n/)
     .flatMap((block) => {
-      const lines = block.split("\n").map((line) => line.trim()).filter(Boolean);
-      if (!/^(-|\d+\.)\s+/.test(lines[0] || "")) return [lines.join(" ")];
+      const lines = block.split("\n").filter((line) => line.trim());
+      if (!/^\s*(-|\d+\.)\s+/.test(lines[0] || "")) return [lines.map((line) => line.trim()).join(" ")];
       const items = [];
       for (const line of lines) {
-        if (/^(-|\d+\.)\s+/.test(line)) items.push(line);
-        else if (items.length) items[items.length - 1] += ` ${line}`;
+        if (/^\s*(-|\d+\.)\s+/.test(line)) items.push(line.trimEnd());
+        else if (items.length) items[items.length - 1] += ` ${line.trim()}`;
       }
       return items;
     })

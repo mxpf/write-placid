@@ -9,7 +9,9 @@ const escapableInlineCharacters = new Set(["\\", "*", "_", "[", "]", "(", ")"]);
 /**
  * @typedef {{ type: "text" | "italic", value: string } | { type: "link", value: string, href: string }} InlineToken
  * @typedef {{ text: string, italic?: boolean, href?: string }} CaptionRun
- * @typedef {{ type: "heading" | "blockquote" | "paragraph", index: number, text: string } | { type: "image", index: number, alt: string, src: string, title?: string } | { type: "unordered-list", index: number, items: string[] } | { type: "ordered-list", index: number, items: string[], start: number }} ContentBlock
+ * @typedef {{ text: string, children?: ContentListBlock[] }} ContentListItem
+ * @typedef {{ type: "unordered-list", index: number, items: ContentListItem[] } | { type: "ordered-list", index: number, items: ContentListItem[], start: number }} ContentListBlock
+ * @typedef {{ type: "heading" | "blockquote" | "paragraph", index: number, text: string } | { type: "image", index: number, alt: string, src: string, title?: string } | ContentListBlock} ContentBlock
  */
 
 /** @param {string} href */
@@ -197,6 +199,58 @@ export function stripInlineMarkdown(value) {
     .join("");
 }
 
+function parseListEntry(value, index) {
+  const match = value.match(/^(\s*)(-|\d+\.)\s+(.+)$/);
+  if (!match) return null;
+  const marker = match[2];
+  return {
+    index,
+    indent: match[1].replaceAll("\t", "  ").length,
+    ordered: marker !== "-",
+    start: marker === "-" ? 1 : Number(marker.slice(0, -1)),
+    text: match[3],
+  };
+}
+
+function createListBlock(entry) {
+  return entry.ordered
+    ? { type: "ordered-list", index: entry.index, items: [], start: entry.start }
+    : { type: "unordered-list", index: entry.index, items: [] };
+}
+
+function buildListBlocks(entries) {
+  const roots = [];
+  const stack = [];
+
+  for (const entry of entries) {
+    while (stack.length && entry.indent < stack.at(-1).indent) stack.pop();
+
+    let context = stack.at(-1);
+    if (!context || entry.indent > context.indent) {
+      const container = context?.lastItem
+        ? (context.lastItem.children ??= [])
+        : roots;
+      const block = createListBlock(entry);
+      container.push(block);
+      context = { indent: entry.indent, block, container, lastItem: null };
+      stack.push(context);
+    } else if (context.block.type === (entry.ordered ? "unordered-list" : "ordered-list")) {
+      const container = context.container;
+      stack.pop();
+      const block = createListBlock(entry);
+      container.push(block);
+      context = { indent: entry.indent, block, container, lastItem: null };
+      stack.push(context);
+    }
+
+    const item = { text: entry.text };
+    context.block.items.push(item);
+    context.lastItem = item;
+  }
+
+  return roots;
+}
+
 /**
  * @param {readonly string[]} paragraphs
  * @returns {ContentBlock[]}
@@ -220,26 +274,15 @@ export function parseContentBlocks(paragraphs) {
       continue;
     }
 
-    if (unorderedListPattern.test(paragraph)) {
-      const listIndex = index;
-      const items = [];
-      while (index < paragraphs.length && unorderedListPattern.test(paragraphs[index])) {
-        items.push(paragraphs[index].replace(unorderedListPattern, ""));
+    if (unorderedListPattern.test(paragraph) || orderedListPattern.test(paragraph)) {
+      const entries = [];
+      while (index < paragraphs.length) {
+        const entry = parseListEntry(paragraphs[index], index);
+        if (!entry) break;
+        entries.push(entry);
         index += 1;
       }
-      blocks.push({ type: "unordered-list", index: listIndex, items });
-      continue;
-    }
-
-    if (orderedListPattern.test(paragraph)) {
-      const listIndex = index;
-      const start = Number(paragraph.match(/^\s*(\d+)\./)?.[1] || 1);
-      const items = [];
-      while (index < paragraphs.length && orderedListPattern.test(paragraphs[index])) {
-        items.push(paragraphs[index].replace(orderedListPattern, ""));
-        index += 1;
-      }
-      blocks.push({ type: "ordered-list", index: listIndex, start, items });
+      blocks.push(...buildListBlocks(entries));
       continue;
     }
 

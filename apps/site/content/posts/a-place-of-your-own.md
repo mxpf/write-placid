@@ -15,4 +15,6 @@ It is that it remains yours.
 
 You can keep the typography plain, the archive legible, the feeds open, and the machinery small enough to understand. You can link outward generously because the work has a home to return to.
 
+![The words Write Placid set on the template’s warm ivory canvas](/images/write-placid-social-card.png "The default social card also works as an ordinary captioned article image.")
+
 That is enough infrastructure for a durable writing practice.

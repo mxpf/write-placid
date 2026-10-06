@@ -21,6 +21,8 @@ Edit `apps/site/site.config.json`. At minimum, change `name`, `description`, and
 - `apps/site/content/pages`
 - `apps/site/content/now`
 
+For a CI-hosted demo that should keep the neutral template configuration in Git, set `WRITE_PLACID_SITE_URL` to the deployed public base URL. It overrides `url` only for that build and is applied consistently to metadata, feeds, discovery files, structured data, and Webmention targets.
+
 The included GitHub Actions workflow builds `apps/site` and publishes its static export to the `gh-pages` branch on each push to `main`. It also runs daily so an enabled Webmention cache can refresh without a content change. A temporary Webmention failure does not block publication. In repository settings, set Pages to deploy from the `gh-pages` branch. The workflow’s `PAGES_BASE_PATH` values default to `/write-placid` for this template repository; change them to your repository path, or to an empty value when deploying at the root of a custom domain. Add a `CNAME` file under `apps/site/public` only when using a custom domain.
 
 ## 3. Add the private Studio

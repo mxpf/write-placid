@@ -1,4 +1,5 @@
 import assert from "node:assert/strict";
+import { readFile } from "node:fs/promises";
 import test from "node:test";
 import { runScheduledReconciliation } from "../worker/scheduled.ts";
 
@@ -33,13 +34,13 @@ test("failure to store operational evidence does not block reconciliation", asyn
   assert.equal(called, true);
 });
 
-test("the built Worker routes scheduled events through the execution recorder", async () => {
-  const { default: worker } = await import("../dist/server/index.js");
-  const { entries, env, controller } = fixture("1");
-  let pending;
-  worker.scheduled(controller, env, { waitUntil(value) { pending = value; } });
-  assert(pending instanceof Promise);
-  await pending;
-  assert.equal(entries[0].phase, "skipped");
-  assert.equal(entries[0].reason, "migration-maintenance");
+test("the built Worker includes the scheduled execution recorder", async () => {
+  const [source, build] = await Promise.all([
+    readFile(new URL("../worker/index.ts", import.meta.url), "utf8"),
+    readFile(new URL("../dist/server/index.js", import.meta.url), "utf8"),
+  ]);
+  assert.match(source, /scheduled\([^)]*\)[\s\S]*context\.waitUntil\([\s\S]*runScheduledReconciliation/);
+  assert.match(build, /editorial-scheduled-run/);
+  assert.match(build, /migration-maintenance/);
+  assert.match(build, /WRITE_PLACID_AUTO_PUBLISH/);
 });

@@ -1,5 +1,6 @@
 import { captionToHtml, captionToText } from "./caption-inline.js";
 import { articleImageMarkdown, parseArticleImage } from "./article-images.js";
+import { parseContentBlocks } from "@mxpf/write-placid-core/markdown";
 export function readEditorImage(figure) {
     const image = figure.querySelector("img");
     const src = figure.dataset.imageSrc || image?.getAttribute("src");
@@ -59,6 +60,15 @@ function renderInlineMarkdown(value) {
         .replace(/\uE000(\d+)\uE001/g, (_, index) => links[Number(index)] ?? "")
         .replace(/\n/g, "<br>");
 }
+function renderEditorList(block) {
+    const items = block.items.map((item) => {
+        const children = item.children?.map(renderEditorList).join("") || "";
+        return `<li>${renderInlineMarkdown(item.text)}${children}</li>`;
+    }).join("");
+    const start = block.type === "ordered-list" && block.start !== 1 ? ` start="${block.start}"` : "";
+    const tag = block.type === "ordered-list" ? "ol" : "ul";
+    return `<${tag}${start}>${items}</${tag}>`;
+}
 export function markdownToEditorHtml(markdown) {
     if (!markdown.trim())
         return "";
@@ -66,25 +76,25 @@ export function markdownToEditorHtml(markdown) {
         .replace(/\r\n/g, "\n")
         .split(/\n{2,}/)
         .flatMap((block) => {
-        const lines = block.split("\n").map((line) => line.trim()).filter(Boolean);
-        if (!/^(?:[-+*]|\d+\.)\s+/.test(lines[0] || "")) {
+        const lines = block.split("\n").filter((line) => line.trim());
+        if (!/^\s*(?:[-+*]|\d+\.)\s+/.test(lines[0] || "")) {
             return [block.trim()];
         }
         const items = [];
         for (const line of lines) {
-            if (/^(?:[-+*]|\d+\.)\s+/.test(line)) {
-                items.push(line);
+            if (/^\s*(?:[-+*]|\d+\.)\s+/.test(line)) {
+                items.push(line.trimEnd().replace(/^(\s*)[+*]\s+/, "$1- "));
             }
             else if (items.length) {
-                items[items.length - 1] += ` ${line}`;
+                items[items.length - 1] += ` ${line.trim()}`;
             }
         }
         return items;
     })
         .filter(Boolean);
     const html = [];
-    const listItemPattern = /^[-+*]\s+/;
-    const numberedItemPattern = /^(\d+)\.\s+/;
+    const listItemPattern = /^\s*-\s+/;
+    const numberedItemPattern = /^\s*(\d+)\.\s+/;
     for (let index = 0; index < blocks.length;) {
         const image = parseArticleImage(blocks[index]);
         if (image) {
@@ -109,27 +119,13 @@ export function markdownToEditorHtml(markdown) {
             index += 1;
             continue;
         }
-        if (listItemPattern.test(blocks[index])) {
-            const items = [];
-            while (index < blocks.length) {
-                const lines = blocks[index].split("\n");
-                if (!lines.every((line) => listItemPattern.test(line)))
-                    break;
-                items.push(...lines.map((line) => `<li>${renderInlineMarkdown(line.replace(listItemPattern, ""))}</li>`));
+        if (listItemPattern.test(blocks[index]) || numberedItemPattern.test(blocks[index])) {
+            const listParagraphs = [];
+            while (index < blocks.length && (listItemPattern.test(blocks[index]) || numberedItemPattern.test(blocks[index]))) {
+                listParagraphs.push(blocks[index]);
                 index += 1;
             }
-            html.push(`<ul>${items.join("")}</ul>`);
-            continue;
-        }
-        if (numberedItemPattern.test(blocks[index])) {
-            const start = Number(blocks[index].match(numberedItemPattern)?.[1] || 1);
-            const items = [];
-            while (index < blocks.length && numberedItemPattern.test(blocks[index])) {
-                items.push(`<li>${renderInlineMarkdown(blocks[index].replace(numberedItemPattern, ""))}</li>`);
-                index += 1;
-            }
-            const startAttribute = start === 1 ? "" : ` start="${start}"`;
-            html.push(`<ol${startAttribute}>${items.join("")}</ol>`);
+            html.push(...parseContentBlocks(listParagraphs).map((block) => renderEditorList(block)));
             continue;
         }
         html.push(`<p>${renderInlineMarkdown(blocks[index])}</p>`);
@@ -149,6 +145,27 @@ export function numberedListShortcutStart(value) {
     const match = value.match(/^(\d+)\.$/);
     return match ? Number(match[1]) : null;
 }
+function listToMarkdown(list, depth = 0) {
+    const ordered = list.tagName.toLowerCase() === "ol";
+    const start = ordered ? Number(list.getAttribute("start") || 1) : 1;
+    return Array.from(list.children)
+        .filter((child) => child.tagName.toLowerCase() === "li")
+        .map((child, index) => {
+        const item = child;
+        const text = Array.from(item.childNodes)
+            .filter((childNode) => !(childNode.nodeType === Node.ELEMENT_NODE && ["ul", "ol"].includes(childNode.tagName.toLowerCase())))
+            .map(nodeToMarkdown)
+            .join("")
+            .trim();
+        const marker = ordered ? `${start + index}.` : "-";
+        const nested = Array.from(item.children)
+            .filter((nestedList) => ["ul", "ol"].includes(nestedList.tagName.toLowerCase()))
+            .map((nestedList) => listToMarkdown(nestedList, depth + 1))
+            .join("\n");
+        return `${"  ".repeat(depth)}${marker} ${text}${nested ? `\n${nested}` : ""}`;
+    })
+        .join(depth === 0 ? "\n\n" : "\n");
+}
 function nodeToMarkdown(node) {
     if (node.nodeType === Node.TEXT_NODE) {
         return (node.nodeValue || "").replace(/\u00a0/g, " ");
@@ -158,8 +175,11 @@ function nodeToMarkdown(node) {
     const element = node;
     if (element.dataset?.editorImageControl !== undefined)
         return "";
+    const tagName = element.tagName.toLowerCase();
+    if (tagName === "ul" || tagName === "ol")
+        return `${listToMarkdown(element)}\n\n`;
     const children = Array.from(element.childNodes).map(nodeToMarkdown).join("");
-    switch (element.tagName.toLowerCase()) {
+    switch (tagName) {
         case "br":
             return "\n";
         case "em":
@@ -169,17 +189,7 @@ function nodeToMarkdown(node) {
             const href = element.getAttribute("href") || "";
             return children && href ? `[${children}](${href})` : children;
         }
-        case "li": {
-            const parent = element.parentElement;
-            if (parent?.tagName.toLowerCase() === "ol") {
-                const start = Number(parent.getAttribute("start") || 1);
-                const index = Array.from(parent.children).indexOf(element);
-                return children.trim() ? `${start + Math.max(index, 0)}. ${children.trim()}\n\n` : "";
-            }
-            return children.trim() ? `- ${children.trim()}\n\n` : "";
-        }
-        case "ul":
-        case "ol":
+        case "li":
             return children;
         case "h2":
             return children.trim() ? `## ${children.trim()}\n\n` : "";

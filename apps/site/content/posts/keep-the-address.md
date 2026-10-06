@@ -7,6 +7,7 @@ aliases: []
 date: 2026-07-24
 status: published
 publishedAt: 2026-07-24T12:00:00.000Z
+updatedAt: 2026-08-18T12:00:00.000Z
 ---
 
 The web is at its best when a thought has somewhere dependable to live.

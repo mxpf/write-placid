@@ -42,7 +42,7 @@ For the private [Studio](apps/studio/README.md), [Trackinghaus](apps/trackinghau
 npm run dev:site       # public publication
 npm run dev:studio     # private editor
 npm run dev:tracking   # aggregate analytics dashboard
-npm run check          # config, builds, tests, and type checks
+npm run check          # config, builds, browser accessibility, tests, and type checks
 ```
 
 ## A small design position

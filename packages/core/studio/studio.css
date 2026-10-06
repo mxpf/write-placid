@@ -593,10 +593,14 @@ button {
   margin-top: 32px;
 }
 
-.body-input ul li::before {
+.body-input ul > li::before {
   position: absolute;
   inset-inline-end: calc(100% + 0.45em);
   content: "•";
+}
+
+.body-input :is(ul, ol) ul > li::before {
+  content: "◦";
 }
 
 .body-input ol li::marker {

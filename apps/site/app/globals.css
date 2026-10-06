@@ -8,8 +8,8 @@
   --blog-muted: var(--th-text-muted);
   --blog-link: var(--th-link);
   --blog-rule: color-mix(in srgb, var(--blog-foreground) 18%, transparent);
-  --toggle-track: var(--th-border);
-  --toggle-thumb: var(--th-text-faint);
+  --toggle-track: var(--th-neutral-600);
+  --toggle-thumb: var(--th-neutral-50);
   --reading-measure: 65ch;
   color-scheme: light;
 }
@@ -21,8 +21,8 @@
   --blog-muted: var(--th-text-muted);
   --blog-link: var(--th-link);
   --blog-rule: color-mix(in srgb, var(--blog-foreground) 18%, transparent);
-  --toggle-track: var(--th-border);
-  --toggle-thumb: var(--th-text-muted);
+  --toggle-track: var(--th-neutral-600);
+  --toggle-thumb: var(--th-neutral-100);
   color-scheme: dark;
 }
 
@@ -89,11 +89,11 @@ body {
 .theme-toggle {
   position: fixed;
   z-index: 20;
-  top: 24px;
+  top: 14px;
   right: 23px;
   display: flex;
   width: 44px;
-  height: 24px;
+  height: 44px;
   padding: 0;
   align-items: flex-start;
   justify-content: flex-end;
@@ -107,7 +107,7 @@ body {
   display: block;
   width: 30px;
   height: 14px;
-  margin-top: 5px;
+  margin-top: 15px;
   border-radius: 999px;
   background: var(--toggle-track);
   transition: background 160ms ease;
@@ -429,10 +429,14 @@ body {
   margin-top: 32px;
 }
 
-.article-body ul.article-list li::before {
+.article-body ul.article-list > li::before {
   position: absolute;
   inset-inline-end: calc(100% + 0.45em);
   content: "•";
+}
+
+.article-body :is(ul, ol).article-list ul.article-list > li::before {
+  content: "◦";
 }
 
 .article-body .article-numbered-list {
@@ -454,14 +458,14 @@ body {
   opacity: 1;
 }
 
-.article-body .article-image[data-scroll-fade-active] {
+.article-body .article-image[data-scroll-fade-active] img {
   opacity: var(--article-image-opacity);
   transition: opacity 80ms linear;
   will-change: opacity;
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .article-body .article-image {
+  .article-body .article-image img {
     opacity: 1;
     transition: none;
     will-change: auto;

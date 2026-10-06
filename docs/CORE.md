@@ -10,7 +10,7 @@ Public sites can import `attachScrollFade` from `@mxpf/write-placid-core/scroll-
 
 The optional `@mxpf/write-placid-core/static-public` build mode turns a completed Vinext static export into a verified reader artifact without framework hydration, RSC payloads, or client-navigation chunks. It preserves semantic HTML, metadata, structured data, ordinary scripts, CSS, assets, RSS, aliases, and instance integrations. The shell emits an early configurable canvas and color scheme plus a synchronous, reduced-motion-aware cross-document transition opt-in. Neutral defaults are white/light; installations own all brand colors, motion CSS, analytics configuration, author controls, content, and typography assets. The browser helper progressively restores typography mutation guards, scroll progress, the shared image fade, and end-of-article footer reveal with configurable selectors and safe no-JavaScript/failure behavior.
 
-Until a permanent release channel is selected, downstream repositories should pin the full Write Placid commit SHA and commit the resulting lockfile. Never use a branch or mutable tag in production. If CI cannot read the repository, attach the verified package artifact to an immutable GitHub release and pin its URL and lockfile integrity.
+Downstream repositories should install the verified package artifact attached to an immutable GitHub release and commit the resulting lockfile. Pin the complete release-asset URL and lockfile integrity; never use a branch or mutable tag in production. A full Write Placid commit SHA remains an acceptable fallback when repository and CI visibility are sufficient.
 
 ## Exported surfaces
 
@@ -39,7 +39,7 @@ Saving and publishing are separate. `WRITE_PLACID_AUTO_PUBLISH=0` is the starter
 
 ## Upgrade and rollback
 
-1. Pin the immutable SHA or release artifact and regenerate the lockfile.
+1. Pin the immutable GitHub release artifact (or full commit SHA fallback) and regenerate the lockfile.
 2. Read the changelog and contract/migration notes.
 3. Run downstream content, feed, static-export, Studio, and browser-equivalence checks.
 4. Back up KDrive and D1 before any declared data migration; use migration mode and dry-run review.

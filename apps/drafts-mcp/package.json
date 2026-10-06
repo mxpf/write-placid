@@ -10,13 +10,23 @@
 		"type-check": "tsc --noEmit"
 	},
 	"dependencies": {
-		"@cloudflare/workers-oauth-provider": "^0.8.1",
-		"agents": "^0.17.1",
-		"zod": "^4.4.3"
+		"@cloudflare/workers-oauth-provider": "^1.2.2",
+		"@modelcontextprotocol/sdk": "^1.32.1",
+		"agents": "^0.26.0",
+		"zod": "^4.6.5"
 	},
 	"devDependencies": {
-		"@types/node": "^26.0.1",
+		"@types/node": "^26.6.4",
 		"typescript": "6.0.3",
-		"wrangler": "^4.105.0"
+		"wrangler": "^4.147.0"
+	},
+	"overrides": {
+		"agents": {
+			"@modelcontextprotocol/client": "2.3.1",
+			"@modelcontextprotocol/sdk": "1.32.1"
+		},
+		"@cloudflare/codemode": {
+			"@modelcontextprotocol/sdk": "1.32.1"
+		}
 	}
 }

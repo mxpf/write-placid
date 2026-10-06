@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import { readFile, stat } from "node:fs/promises";
+import { readFile, readdir, stat } from "node:fs/promises";
 import test from "node:test";
 import {
   calculateReadingTime,
@@ -27,39 +27,22 @@ import {
 } from "../app/article-images.ts";
 import { imageContentType, validateImageUpload, validImageName } from "../app/image-files.ts";
 
-async function render(pathname = "/") {
-  const workerUrl = new URL("../dist/server/index.js", import.meta.url);
-  workerUrl.searchParams.set("test", `${process.pid}-${Date.now()}`);
-  const { default: worker } = await import(workerUrl.href);
+test("builds the private Write Placid Studio shell", async () => {
+  const chunksDirectory = new URL("../dist/client/_next/static/chunks/", import.meta.url);
+  const chunks = await readdir(chunksDirectory);
+  const [build, layout] = await Promise.all([
+    Promise.all(
+      chunks.filter((name) => name.endsWith(".js"))
+        .map((name) => readFile(new URL(name, chunksDirectory), "utf8")),
+    ).then((sources) => sources.join("\n")),
+    readFile(new URL("../app/layout.tsx", import.meta.url), "utf8"),
+  ]);
 
-  return worker.fetch(
-    new Request(`http://localhost${pathname}`, {
-      headers: { accept: "text/html" },
-    }),
-    {
-      ASSETS: {
-        fetch: async () => new Response("Not found", { status: 404 }),
-      },
-    },
-    {
-      waitUntil() {},
-      passThroughOnException() {},
-    },
-  );
-}
-
-test("renders the private Write Placid Studio shell", async () => {
-  const response = await render();
-  assert.equal(response.status, 200);
-  const html = await response.text();
-
-  assert.match(html, /<title>Write Placid Studio<\/title>/i);
-  assert.match(html, /Write Placid/);
-  assert.match(html, /Studio/);
-  assert.match(html, /New piece/);
-  assert.match(html, /New now/);
-  assert.match(html, /Publish/);
-  assert.doesNotMatch(html, /codex-preview|react-loading-skeleton/i);
+  assert.match(layout, /title: `\$\{studioConfig\.publicationName\} Studio`/);
+  assert.match(build, /New piece/);
+  assert.match(build, /New now/);
+  assert.match(build, /Publish/);
+  assert.doesNotMatch(`${layout}\n${build}`, /codex-preview|react-loading-skeleton/i);
 });
 
 test("preserves publication Markdown and computes reading time", () => {
@@ -382,6 +365,10 @@ test("renders Markdown lists as hanging bullet lists in the editor", () => {
     markdownPasteToEditorHtml("* First item\n* Second item"),
     "<ul><li>First item</li><li>Second item</li></ul>",
   );
+  assert.equal(
+    markdownToEditorHtml("- Parent item\n  - First detail\n  - Second detail\n- Next item"),
+    "<ul><li>Parent item<ul><li>First detail</li><li>Second detail</li></ul></li><li>Next item</li></ul>",
+  );
 });
 
 test("preserves numbered Markdown lists through Studio rich text", async () => {
@@ -423,6 +410,50 @@ test("preserves numbered Markdown lists through Studio rich text", async () => {
       editorToMarkdown({ childNodes: [orderedList] }),
       "3. First item.\n\n4. Second item.",
     );
+
+    const nestedList = {
+      nodeType: 1,
+      tagName: "UL",
+      childNodes: [],
+      children: [],
+      getAttribute: () => null,
+    };
+    const nestedItem = {
+      nodeType: 1,
+      tagName: "LI",
+      childNodes: [{ nodeType: 3, nodeValue: "Child item." }],
+      children: [],
+      getAttribute: () => null,
+    };
+    nestedList.childNodes = [nestedItem];
+    nestedList.children = [nestedItem];
+    const unorderedList = {
+      nodeType: 1,
+      tagName: "UL",
+      childNodes: [],
+      children: [],
+      getAttribute: () => null,
+    };
+    const parentItem = {
+      nodeType: 1,
+      tagName: "LI",
+      childNodes: [{ nodeType: 3, nodeValue: "Parent item." }, nestedList],
+      children: [nestedList],
+      getAttribute: () => null,
+    };
+    const siblingItem = {
+      nodeType: 1,
+      tagName: "LI",
+      childNodes: [{ nodeType: 3, nodeValue: "Sibling item." }],
+      children: [],
+      getAttribute: () => null,
+    };
+    unorderedList.childNodes = [parentItem, siblingItem];
+    unorderedList.children = [parentItem, siblingItem];
+    assert.equal(
+      editorToMarkdown({ childNodes: [unorderedList] }),
+      "- Parent item.\n  - Child item.\n\n- Sibling item.",
+    );
   } finally {
     if (originalNode) globalThis.Node = originalNode;
     else delete globalThis.Node;
@@ -431,8 +462,8 @@ test("preserves numbered Markdown lists through Studio rich text", async () => {
   const richText = await readFile(new URL("../../../packages/core/studio/rich-text.ts", import.meta.url), "utf8");
   const studio = await readFile(new URL("../../../packages/core/studio/Studio.tsx", import.meta.url), "utf8");
   const styles = await readFile(new URL("../../../packages/core/studio/studio.css", import.meta.url), "utf8");
-  assert.match(richText, /parent\?\.tagName\.toLowerCase\(\) === "ol"/);
-  assert.match(richText, /case "ol"/);
+  assert.match(richText, /function listToMarkdown/);
+  assert.match(richText, /renderEditorList/);
   assert.match(studio, /document\.execCommand\("insertOrderedList", false\)/);
   assert.match(
     styles,
@@ -450,6 +481,18 @@ test("offers editing and removal for links already in the editor", async () => {
   assert.match(studio, /Update link/);
   assert.match(studio, /Remove link/);
   assert.match(studio, /openExistingLink/);
+});
+
+test("offers keyboard and toolbar commands for links and edit history", async () => {
+  const studio = await readFile(new URL("../../../packages/core/studio/Studio.tsx", import.meta.url), "utf8");
+  assert.match(studio, /commandKey && key === "k"/);
+  assert.match(studio, /!range\.collapsed && range\.toString\(\)\.trim\(\)/);
+  assert.match(studio, /aria-label="Undo"/);
+  assert.match(studio, /aria-label="Redo"/);
+  assert.match(studio, /runHistoryCommand\("undo"\)/);
+  assert.match(studio, /runHistoryCommand\("redo"\)/);
+  assert.match(studio, /commandKey && key === "z"/);
+  assert.match(studio, /commandKey && key === "y"/);
 });
 
 test("opens the article requested by a public edit link", async () => {

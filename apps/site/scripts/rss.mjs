@@ -1,17 +1,17 @@
 import { writeFile } from "node:fs/promises";
 import path from "node:path";
 import { generateRssFeed as generateCoreRssFeed } from "@mxpf/write-placid-core/site";
-import config from "../site.config.json" with { type: "json" };
 import { projectRoot } from "./content.mjs";
+import { siteConfig } from "./site-config.mjs";
 
 export function generateRssFeed(posts, nowEntries = [], options = {}) {
   return generateCoreRssFeed(posts, nowEntries, {
-    siteName: config.name,
-    siteUrl: config.url,
-    description: config.description,
+    siteName: siteConfig.name,
+    siteUrl: siteConfig.url,
+    description: siteConfig.description,
     rssPath: "/rss.xml",
-    language: config.language,
-    feedId: config.name.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, ""),
+    language: siteConfig.language,
+    feedId: siteConfig.name.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, ""),
     ...options,
   });
 }

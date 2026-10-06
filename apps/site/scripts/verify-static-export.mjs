@@ -3,8 +3,11 @@ import path from "node:path";
 
 const outputDirectory = path.resolve(process.argv[2] || "dist/client");
 const mountPath = (process.env.STATIC_EXPORT_MOUNT_PATH || "").replace(/\/+$/, "");
+const expectedSiteUrl = (process.env.WRITE_PLACID_SITE_URL || "").replace(/\/+$/, "");
 const missing = new Set();
 const globalStylesheets = new Set();
+const placeholderDocuments = new Set();
+const invalidCanonicalDocuments = new Set();
 let htmlFiles = 0;
 
 async function visit(directory) {
@@ -18,6 +21,11 @@ async function visit(directory) {
 
     htmlFiles += 1;
     const html = await readFile(location, "utf8");
+    if (expectedSiteUrl) {
+      if (html.includes("https://example.com")) placeholderDocuments.add(path.relative(outputDirectory, location));
+      const canonical = html.match(/<link rel="canonical" href="([^"]+)"/)?.[1];
+      if (canonical && !canonical.startsWith(expectedSiteUrl)) invalidCanonicalDocuments.add(path.relative(outputDirectory, location));
+    }
     for (const match of html.matchAll(/(?:href|src)="(\/(?:[^"?#]+\/)?_next\/[^"?#]+)(?:[?#][^"]*)?"/g)) {
       const publicPath = decodeURIComponent(match[1]);
       const mountedPath = mountPath && publicPath.startsWith(`${mountPath}/`)
@@ -52,6 +60,23 @@ if (globalStylesheets.size > 1) {
   throw new Error(
     `Static export contains multiple global stylesheet generations:\n${[...globalStylesheets].join("\n")}`,
   );
+}
+
+if (placeholderDocuments.size) {
+  throw new Error(`Production export contains placeholder URLs:\n${[...placeholderDocuments].join("\n")}`);
+}
+
+if (invalidCanonicalDocuments.size) {
+  throw new Error(`Production export contains canonical URLs outside ${expectedSiteUrl}:\n${[...invalidCanonicalDocuments].join("\n")}`);
+}
+
+if (expectedSiteUrl) {
+  for (const filename of ["rss.xml", "sitemap.xml", "robots.txt"]) {
+    const source = await readFile(path.join(outputDirectory, filename), "utf8");
+    if (source.includes("https://example.com") || !source.includes(expectedSiteUrl)) {
+      throw new Error(`${filename} does not use the deployment URL ${expectedSiteUrl}.`);
+    }
+  }
 }
 
 console.log(`Static export is complete: ${htmlFiles} HTML files, ${[...globalStylesheets][0]}.`);

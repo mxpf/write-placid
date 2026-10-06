@@ -3,6 +3,16 @@ import { displayDate } from "./content.mjs";
 
 const escapeXml = (value) => String(value).replaceAll("&", "&amp;").replaceAll("<", "&lt;").replaceAll(">", "&gt;").replaceAll('"', "&quot;").replaceAll("'", "&apos;");
 
+function absoluteSiteUrl(value, siteUrl) {
+  if (/^https:\/\//i.test(value)) return new URL(value).href;
+  const base = new URL(siteUrl);
+  const target = new URL(value.startsWith("/") ? value : `/${value}`, "https://write-placid.invalid");
+  base.pathname = `${base.pathname.replace(/\/+$/, "")}${target.pathname}` || "/";
+  base.search = target.search;
+  base.hash = target.hash;
+  return base.href;
+}
+
 function renderInlineHtml(value) {
   return parseInlineMarkdown(value).map((token) => token.type === "link"
     ? `<a href="${escapeXml(token.href)}">${renderInlineHtml(token.value)}</a>`
@@ -31,16 +41,23 @@ function publicationDate(post) {
   return date.toUTCString();
 }
 
+function renderListHtml(block) {
+  const items = block.items.map((item) => {
+    const children = (item.children || []).map(renderListHtml).join("");
+    return `<li>${renderInlineHtml(item.text)}${children}</li>`;
+  }).join("");
+  return block.type === "unordered-list"
+    ? `<ul>${items}</ul>`
+    : `<ol${block.start === 1 ? "" : ` start="${block.start}"`}>${items}</ol>`;
+}
+
 function renderPostHtml(post, siteUrl) {
   const output = parseContentBlocks(post.paragraphs).map((block) => {
     if (block.type === "heading") return `<h2>${renderInlineHtml(block.text)}</h2>`;
     if (block.type === "blockquote") return `<blockquote><p>${renderInlineHtml(block.text)}</p></blockquote>`;
-    if (block.type === "unordered-list" || block.type === "ordered-list") {
-      const items = block.items.map((item) => `<li>${renderInlineHtml(item)}</li>`).join("");
-      return block.type === "unordered-list" ? `<ul>${items}</ul>` : `<ol${block.start === 1 ? "" : ` start="${block.start}"`}>${items}</ol>`;
-    }
+    if (block.type === "unordered-list" || block.type === "ordered-list") return renderListHtml(block);
     if (block.type === "image") {
-      const src = block.src.startsWith("/") ? `${siteUrl}${block.src}` : block.src;
+      const src = block.src.startsWith("/") ? absoluteSiteUrl(block.src, siteUrl) : block.src;
       const caption = block.title ? `<figcaption>${renderCaptionHtml(block.title)}</figcaption>` : "";
       return `<figure><img src="${escapeXml(src)}" alt="${escapeXml(block.alt)}" loading="lazy" />${caption}</figure>`;
     }
@@ -55,19 +72,19 @@ export function generateRssFeed(posts, nowEntries = [], options) {
   const entries = [...posts, ...nowEntries].sort((a, b) => (b.publishedAt || b.date).localeCompare(a.publishedAt || a.date));
   const items = entries.map((post) => {
     const isNow = post.type === "now";
-    const url = new URL(isNow ? "/now" : `/${post.slug}`, siteUrl).href;
+    const url = absoluteSiteUrl(isNow ? "/now" : `/${post.slug}`, siteUrl);
     const title = isNow ? `Now — ${displayDate(post.date)}` : post.title;
     const guid = isNow ? `${feedId}:now:${post.slug}` : url;
     const content = renderPostHtml(post, siteUrl).replaceAll("]]>", "]]]]><![CDATA[>");
     return `    <item>\n      <title>${escapeXml(title)}</title>\n      <link>${url}</link>\n      <guid isPermaLink="${isNow ? "false" : "true"}">${escapeXml(guid)}</guid>\n      <pubDate>${publicationDate(post)}</pubDate>\n      <description>${escapeXml(stripInlineMarkdown(post.paragraphs[0] || ""))}</description>\n      <content:encoded><![CDATA[${content}]]></content:encoded>\n    </item>`;
   }).join("\n");
   const lastBuildDate = entries.length ? publicationDate(entries[0]) : new Date(0).toUTCString();
-  return `<?xml version="1.0" encoding="UTF-8"?>\n<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/">\n  <channel>\n    <title>${escapeXml(siteName)}</title>\n    <link>${new URL("/", siteUrl).href}</link>\n    <description>${escapeXml(description)}</description>\n    <language>${escapeXml(language)}</language>\n    <lastBuildDate>${lastBuildDate}</lastBuildDate>\n    <atom:link href="${escapeXml(new URL(rssPath, siteUrl).href)}" rel="self" type="application/rss+xml" />\n${items}\n  </channel>\n</rss>\n`;
+  return `<?xml version="1.0" encoding="UTF-8"?>\n<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/">\n  <channel>\n    <title>${escapeXml(siteName)}</title>\n    <link>${absoluteSiteUrl("/", siteUrl)}</link>\n    <description>${escapeXml(description)}</description>\n    <language>${escapeXml(language)}</language>\n    <lastBuildDate>${lastBuildDate}</lastBuildDate>\n    <atom:link href="${escapeXml(absoluteSiteUrl(rssPath, siteUrl))}" rel="self" type="application/rss+xml" />\n${items}\n  </channel>\n</rss>\n`;
 }
 
 export function generateSitemap(posts, pages, { siteUrl, nowPath = "/now" }) {
   const paths = ["/", nowPath, ...pages.map(({ slug }) => `/${slug}`), ...posts.map(({ slug }) => `/${slug}`)];
-  const urls = paths.map((pathname) => `  <url><loc>${escapeXml(new URL(pathname, siteUrl).href)}</loc></url>`).join("\n");
+  const urls = paths.map((pathname) => `  <url><loc>${escapeXml(absoluteSiteUrl(pathname, siteUrl))}</loc></url>`).join("\n");
   return `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${urls}\n</urlset>\n`;
 }
 
@@ -88,9 +105,9 @@ export function buildSocialMetadata(document, { siteName, siteUrl, fallbackImage
   const articleImage = firstSafeArticleImage(document.paragraphs || []);
   const selectedImage = articleImage || { src: fallbackImage, alt: `${siteName} social card` };
   if (!isSafeImageSrc(selectedImage.src)) throw new Error("The social fallback image must use an HTTPS or root-relative URL.");
-  const image = { url: new URL(selectedImage.src, siteUrl).href, alt: selectedImage.alt };
+  const image = { url: absoluteSiteUrl(selectedImage.src, siteUrl), alt: selectedImage.alt };
   const description = stripInlineMarkdown(document.paragraphs?.[0] || "");
-  const canonicalUrl = new URL(pathname, siteUrl).href;
+  const canonicalUrl = absoluteSiteUrl(pathname, siteUrl);
   return {
     openGraph: { title: document.title, description, siteName, url: canonicalUrl, images: [image] },
     twitter: { card: "summary_large_image", title: document.title, description, images: [image] },

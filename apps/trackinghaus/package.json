@@ -13,11 +13,11 @@
     "test:sites": "node --test tests/sites-worker.test.mjs"
   },
   "dependencies": {
-    "@neondatabase/serverless": "^1.1.0",
-    "@vitejs/plugin-react": "5.0.4",
-    "react": "19.2.0",
-    "react-dom": "19.2.0",
-    "resend": "^6.18.1",
-    "vite": "6.4.3"
+    "@neondatabase/serverless": "^1.2.0",
+    "@vitejs/plugin-react": "^6.1.2",
+    "react": "^19.3.0",
+    "react-dom": "^19.3.0",
+    "resend": "^6.32.1",
+    "vite": "^8.3.3"
   }
 }

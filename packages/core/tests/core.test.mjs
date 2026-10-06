@@ -3,7 +3,7 @@ import { mkdtemp, mkdir, writeFile } from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
 import test from "node:test";
-import { parseCaptionMarkdown, parseImageMarkdown } from "../site/markdown.mjs";
+import { parseCaptionMarkdown, parseContentBlocks, parseImageMarkdown } from "../site/markdown.mjs";
 import { createContentRepository, resolveDocumentLinks } from "../site/content.mjs";
 import { buildSocialMetadata, generateRssFeed, generateSitemap, redirectDocument } from "../site/site.mjs";
 
@@ -13,6 +13,37 @@ test("caption links and image titles use the shared safe contract", () => {
   assert.deepEqual(parseCaptionMarkdown("A *quiet* [link](https://example.com)"), [{ text: "A " }, { text: "quiet", italic: true }, { text: " " }, { text: "link", href: "https://example.com" }]);
   assert.equal(parseCaptionMarkdown("[bad](javascript:alert(1))").map((run) => run.text).join(""), "[bad](javascript:alert(1))");
   assert.deepEqual(parseImageMarkdown('![Description](/images/example.jpg "A \\"quoted\\" caption")'), { alt: "Description", src: "/images/example.jpg", title: 'A "quoted" caption' });
+});
+
+test("nested lists retain hierarchy in public HTML and feeds", () => {
+  const paragraphs = [
+    "- Foundation",
+    "  - First detail",
+    "  - Second detail",
+    "- Next foundation",
+  ];
+  assert.deepEqual(parseContentBlocks(paragraphs), [{
+    type: "unordered-list",
+    index: 0,
+    items: [
+      {
+        text: "Foundation",
+        children: [{
+          type: "unordered-list",
+          index: 1,
+          items: [{ text: "First detail" }, { text: "Second detail" }],
+        }],
+      },
+      { text: "Next foundation" },
+    ],
+  }]);
+
+  const feed = generateRssFeed([{ ...post, body: paragraphs.join("\n"), paragraphs }], [], {
+    siteName: "Example",
+    siteUrl: "https://example.com",
+    description: "Writing",
+  });
+  assert.match(feed, /<ul><li>Foundation<ul><li>First detail<\/li><li>Second detail<\/li><\/ul><\/li><li>Next foundation<\/li><\/ul>/);
 });
 
 test("repository factory validates immutable identities and resolves document links", async () => {
@@ -33,6 +64,10 @@ test("feed, sitemap, and redirects are configuration-only and deterministic", ()
   assert.match(feed, /<em>small<\/em>/);
   assert.doesNotMatch(feed, /Thinkinghaus|mxpf/i);
   assert.match(generateSitemap([post], [], { siteUrl: "https://example.com" }), /https:\/\/example\.com\/hello/);
+  const mountedFeed = generateRssFeed([post], [], { siteName: "Example", siteUrl: "https://example.com/writing", description: "Writing" });
+  assert.match(mountedFeed, /<link>https:\/\/example\.com\/writing\/hello<\/link>/);
+  assert.match(mountedFeed, /href="https:\/\/example\.com\/writing\/rss\.xml"/);
+  assert.match(generateSitemap([post], [], { siteUrl: "https://example.com/writing" }), /https:\/\/example\.com\/writing\/hello/);
   const redirect = redirectDocument("/hello.html", { siteName: "Example" });
   assert.match(redirect, /location\.replace\("\/hello\.html" \+ location\.search \+ location\.hash\)/);
   assert.match(redirect, /Moved · Example/);
@@ -56,7 +91,7 @@ test("social metadata uses the installation fallback for image-free posts", () =
     siteUrl: "https://example.com/base/",
     fallbackImage: "/social-card.png",
   });
-  const expected = { url: "https://example.com/social-card.png", alt: "Example social card" };
+  const expected = { url: "https://example.com/base/social-card.png", alt: "Example social card" };
   assert.deepEqual(metadata.openGraph.images, [expected]);
   assert.deepEqual(metadata.twitter.images, [expected]);
   assert.throws(() => buildSocialMetadata(post, { siteName: "Example", siteUrl: "https://example.com", fallbackImage: "javascript:alert(1)" }), /fallback image/);

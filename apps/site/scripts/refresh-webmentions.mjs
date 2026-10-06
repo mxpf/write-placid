@@ -2,7 +2,7 @@ import { readFile, writeFile } from "node:fs/promises";
 import path from "node:path";
 import { pathToFileURL } from "node:url";
 import { projectRoot, readPosts } from "./content.mjs";
-import siteConfig from "../site.config.json" with { type: "json" };
+import { siteConfig } from "./site-config.mjs";
 
 const API_URL = "https://webmention.io/api/mentions.jf2";
 const SITE_URL = siteConfig.url;
