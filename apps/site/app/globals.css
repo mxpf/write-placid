@@ -1,4 +1,5 @@
 @import "@mxpf/write-placid-core/thinkinghaus.css";
+@import "@mxpf/write-placid-core/article-layout.css";
 
 :root {
   --blog-background: var(--th-bg);
@@ -9,7 +10,7 @@
   --blog-rule: color-mix(in srgb, var(--blog-foreground) 18%, transparent);
   --toggle-track: var(--th-border);
   --toggle-thumb: var(--th-text-faint);
-  --reading-measure: 56ch;
+  --reading-measure: 65ch;
   color-scheme: light;
 }
 
@@ -412,6 +413,20 @@ body {
 
 .article-body .article-list li:last-child {
   margin-bottom: 0;
+}
+
+.article-body .article-list .article-list {
+  margin-top: 12px;
+  margin-bottom: 0;
+  padding-inline-start: 1.5em;
+}
+
+.article-body .article-list .article-list li {
+  margin-bottom: 12px;
+}
+
+.article-body .article-list > li:has(> .article-list) + li {
+  margin-top: 32px;
 }
 
 .article-body ul.article-list li::before {

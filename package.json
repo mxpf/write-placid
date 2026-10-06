@@ -1,12 +1,13 @@
 {
   "name": "@mxpf/write-placid-core",
-  "version": "1.5.0",
+  "version": "1.6.0",
   "private": true,
   "type": "module",
   "files": [
     "packages/core/index.mjs",
     "packages/core/site/*.mjs",
     "packages/core/site/*.d.ts",
+    "packages/core/site/*.css",
     "packages/core/theme/*.css",
     "packages/core/theme/*.json",
     "packages/core/studio/studio.css",
@@ -28,6 +29,7 @@
       "types": "./packages/core/site/site.d.ts",
       "default": "./packages/core/site/site.mjs"
     },
+    "./article-layout.css": "./packages/core/site/article-layout.css",
     "./scroll-fade": {
       "types": "./packages/core/site/scroll-fade.d.ts",
       "default": "./packages/core/site/scroll-fade.mjs"
