@@ -2,15 +2,15 @@
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/">
   <channel>
     <title>Write Placid</title>
-    <link>https://example.com/</link>
+    <link>https://maxpfennig.haus/write-placid/</link>
     <description>A small publishing system for writing that deserves a clear, durable home.</description>
     <language>en-US</language>
     <lastBuildDate>Fri, 14 Aug 2026 12:00:00 GMT</lastBuildDate>
-    <atom:link href="https://example.com/rss.xml" rel="self" type="application/rss+xml" />
+    <atom:link href="https://maxpfennig.haus/write-placid/rss.xml" rel="self" type="application/rss+xml" />
     <item>
       <title>A small note</title>
-      <link>https://example.com/a-small-note</link>
-      <guid isPermaLink="true">https://example.com/a-small-note</guid>
+      <link>https://maxpfennig.haus/write-placid/a-small-note</link>
+      <guid isPermaLink="true">https://maxpfennig.haus/write-placid/a-small-note</guid>
       <pubDate>Fri, 14 Aug 2026 12:00:00 GMT</pubDate>
       <description>Writing does not always need a launch plan.</description>
       <content:encoded><![CDATA[<p>Writing does not always need a launch plan.</p>
@@ -19,7 +19,7 @@
     </item>
     <item>
       <title>Now — August 14, 2026</title>
-      <link>https://example.com/now</link>
+      <link>https://maxpfennig.haus/write-placid/now</link>
       <guid isPermaLink="false">write-placid:now:now-20260814</guid>
       <pubDate>Fri, 14 Aug 2026 12:00:00 GMT</pubDate>
       <description>A few things receiving attention right now:</description>
@@ -28,8 +28,8 @@
     </item>
     <item>
       <title>The shape of a note</title>
-      <link>https://example.com/the-shape-of-a-note</link>
-      <guid isPermaLink="true">https://example.com/the-shape-of-a-note</guid>
+      <link>https://maxpfennig.haus/write-placid/the-shape-of-a-note</link>
+      <guid isPermaLink="true">https://maxpfennig.haus/write-placid/the-shape-of-a-note</guid>
       <pubDate>Sat, 08 Aug 2026 12:00:00 GMT</pubDate>
       <description>A note can be small without being unfinished.</description>
       <content:encoded><![CDATA[<p>A note can be small without being unfinished.</p>
@@ -39,8 +39,8 @@
     </item>
     <item>
       <title>Keep the address</title>
-      <link>https://example.com/keep-the-address</link>
-      <guid isPermaLink="true">https://example.com/keep-the-address</guid>
+      <link>https://maxpfennig.haus/write-placid/keep-the-address</link>
+      <guid isPermaLink="true">https://maxpfennig.haus/write-placid/keep-the-address</guid>
       <pubDate>Fri, 24 Jul 2026 12:00:00 GMT</pubDate>
       <description>The web is at its best when a thought has somewhere dependable to live.</description>
       <content:encoded><![CDATA[<p>The web is at its best when a thought has somewhere dependable to live.</p>
@@ -50,25 +50,26 @@
 <p>Choose the public path deliberately. Preserve old paths as aliases. Treat identity as part of the writing rather than an implementation detail.</p>]]></content:encoded>
     </item>
     <item>
-      <title>Publish without performing</title>
-      <link>https://example.com/publish-without-performing</link>
-      <guid isPermaLink="true">https://example.com/publish-without-performing</guid>
+      <title>Publish without performing: a quiet threshold</title>
+      <link>https://maxpfennig.haus/write-placid/publish-without-performing</link>
+      <guid isPermaLink="true">https://maxpfennig.haus/write-placid/publish-without-performing</guid>
       <pubDate>Fri, 03 Jul 2026 12:00:00 GMT</pubDate>
       <description>Publishing does not have to be a performance of certainty.</description>
       <content:encoded><![CDATA[<p>Publishing does not have to be a performance of certainty.</p>
 <p>It can be a way of making thought available: edited enough to respect the reader, open enough to admit that the thinking may continue.</p>
-<ul><li>Keep the claim proportional to what you know.</li><li>Leave room for revision.</li><li>Prefer a useful sentence over a dramatic conclusion.</li></ul>
+<ul><li>Keep the claim proportional to what you know.<ul><li>Name the evidence you actually have.</li><li>Leave uncertainty visible when it matters.</li></ul></li><li>Leave room for revision.</li><li>Prefer a useful sentence over a dramatic conclusion.</li></ul>
 <p>The publish button can be a quiet threshold instead of a stage.</p>]]></content:encoded>
     </item>
     <item>
       <title>A place of your own</title>
-      <link>https://example.com/a-place-of-your-own</link>
-      <guid isPermaLink="true">https://example.com/a-place-of-your-own</guid>
+      <link>https://maxpfennig.haus/write-placid/a-place-of-your-own</link>
+      <guid isPermaLink="true">https://maxpfennig.haus/write-placid/a-place-of-your-own</guid>
       <pubDate>Fri, 12 Jun 2026 12:00:00 GMT</pubDate>
       <description>The useful thing about a personal site is not that it competes with every other place you could publish.</description>
       <content:encoded><![CDATA[<p>The useful thing about a personal site is not that it competes with every other place you could publish.</p>
 <p>It is that it remains yours.</p>
 <p>You can keep the typography plain, the archive legible, the feeds open, and the machinery small enough to understand. You can link outward generously because the work has a home to return to.</p>
+<figure><img src="https://maxpfennig.haus/write-placid/images/write-placid-social-card.png" alt="The words Write Placid set on the template’s warm ivory canvas" loading="lazy" /><figcaption>The default social card also works as an ordinary captioned article image.</figcaption></figure>
 <p>That is enough infrastructure for a durable writing practice.</p>]]></content:encoded>
     </item>
   </channel>

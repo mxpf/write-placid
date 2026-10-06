@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-  <url><loc>https://example.com/</loc></url>
-  <url><loc>https://example.com/now</loc></url>
-  <url><loc>https://example.com/about</loc></url>
-  <url><loc>https://example.com/ai</loc></url>
-  <url><loc>https://example.com/links</loc></url>
-  <url><loc>https://example.com/a-small-note</loc></url>
-  <url><loc>https://example.com/the-shape-of-a-note</loc></url>
-  <url><loc>https://example.com/keep-the-address</loc></url>
-  <url><loc>https://example.com/publish-without-performing</loc></url>
-  <url><loc>https://example.com/a-place-of-your-own</loc></url>
+  <url><loc>https://maxpfennig.haus/write-placid/</loc></url>
+  <url><loc>https://maxpfennig.haus/write-placid/now</loc></url>
+  <url><loc>https://maxpfennig.haus/write-placid/about</loc></url>
+  <url><loc>https://maxpfennig.haus/write-placid/ai</loc></url>
+  <url><loc>https://maxpfennig.haus/write-placid/links</loc></url>
+  <url><loc>https://maxpfennig.haus/write-placid/a-small-note</loc></url>
+  <url><loc>https://maxpfennig.haus/write-placid/the-shape-of-a-note</loc></url>
+  <url><loc>https://maxpfennig.haus/write-placid/keep-the-address</loc></url>
+  <url><loc>https://maxpfennig.haus/write-placid/publish-without-performing</loc></url>
+  <url><loc>https://maxpfennig.haus/write-placid/a-place-of-your-own</loc></url>
 </urlset>
