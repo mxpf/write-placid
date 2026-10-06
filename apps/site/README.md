@@ -10,6 +10,8 @@ Only posts with `status: published` are included in the normal build. `npm run b
 
 Published revisions may include an optional `updatedAt` frontmatter value. The article then shows a quiet “Last edited” note; first publications and untouched posts omit it.
 
+Documents may include an optional, single-line `dek` using safe inline Markdown. It renders below the title and becomes the article’s social and RSS summary; without one, the first body paragraph remains the fallback. The `.article-dek` class is intentionally minimally styled so installations can establish their own hierarchy.
+
 Image-title captions may contain the shared safe inline subset: plain text, italics, and links. Studio and the public HTML/RSS renderer use the same escaping and destination rules; see the [caption format](../studio/docs/caption-format.md).
 
 Set `webmentionEndpoint` in `site.config.json` to enable build-time Webmentions. `npm run refresh:webmentions` updates the checked-in cache under `data/`; readers never contact the Webmention provider directly, and a failed refresh leaves the last good cache intact.

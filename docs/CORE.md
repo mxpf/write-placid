@@ -16,8 +16,8 @@ Downstream repositories should install the verified package artifact attached to
 
 - Package root: package version and public snapshot contract version.
 - `/markdown`: browser-safe inline, image, block, and formatted-caption parsing.
-- `/content`: configurable Node readers plus identity, alias, manifest, stable-path, and document-link validation.
-- `/site`: deterministic RSS, sitemap, alias redirects, and social metadata from injected configuration. `buildSocialMetadata` selects the first image accepted by the shared Markdown contract for Open Graph and Twitter metadata, including its alt text, or uses the installation-supplied fallback image.
+- `/content`: configurable Node readers plus identity, alias, manifest, stable-path, document-link validation, and an optional single-line `dek` preserved across Markdown snapshots.
+- `/site`: deterministic RSS, sitemap, alias redirects, and social metadata from injected configuration. `contentDescription` prefers the dek and falls back to the first body paragraph; RSS and `buildSocialMetadata` share that rule. `buildSocialMetadata` selects the first image accepted by the shared Markdown contract for Open Graph and Twitter metadata, including its alt text, or uses the installation-supplied fallback image.
 - `/article-layout.css`: shared responsive article geometry. It preserves the wide 38/62 frame, opens the intermediate-width brand rail gradually, caps prose at a readable measure, and keeps the standard 112.5% image bleed inside the 24px viewport margin. Installations may override `--reading-measure` while retaining the bleed-safe cap.
 - `/studio/client` and `/studio.css`: shared editor, caption UI, image affordances, save queue, dialogs, and neutral styling. React, React DOM, and Lucide are peer dependencies; fonts and theme overrides remain installation-owned.
 - `/studio/content`, `/studio/editorial`, `/studio/save-state`, `/studio/save-queue`, `/studio/editor-recovery`, `/studio/caption-inline`, `/studio/article-images`, `/studio/rich-text`, and `/studio/caption-editor`: reusable primitives with declarations.

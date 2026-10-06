@@ -61,6 +61,7 @@ function newPost(type: "post" | "now" = "post"): StudioDocument {
     type,
     slug: type === "now" ? nowSlug : "",
     title: type === "now" ? "Now" : "",
+    dek: "",
     date,
     status: "draft",
     publishedAt: "",
@@ -82,6 +83,7 @@ function snapshot(document: StudioDocument | null) {
     id: document.id,
     type: document.type,
     title: document.title,
+    dek: document.dek || "",
     slug: document.slug,
     date: document.date,
     status: document.status,
@@ -1397,6 +1399,16 @@ export function Studio() {
                 placeholder={current.type === "now" ? "Now" : "Untitled"}
                 readOnly={current.type === "now"}
                 onChange={(event) => updateCurrent({ title: smartenQuotes(event.target.value) })}
+              />
+
+              <label className="sr-only" htmlFor="dek-input">Dek</label>
+              <textarea
+                id="dek-input"
+                className="dek-input"
+                rows={2}
+                value={current.dek || ""}
+                placeholder="Optional dek"
+                onChange={(event) => updateCurrent({ dek: smartenQuotes(event.target.value.replace(/\s*\n+\s*/g, " ")) })}
               />
 
               {current.type === "post" && !current.id.startsWith("new:") ? (

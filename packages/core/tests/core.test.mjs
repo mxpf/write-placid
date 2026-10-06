@@ -4,8 +4,8 @@ import os from "node:os";
 import path from "node:path";
 import test from "node:test";
 import { parseCaptionMarkdown, parseContentBlocks, parseImageMarkdown } from "../site/markdown.mjs";
-import { createContentRepository, resolveDocumentLinks } from "../site/content.mjs";
-import { buildSocialMetadata, generateRssFeed, generateSitemap, redirectDocument } from "../site/site.mjs";
+import { createContentRepository, parsePost, resolveDocumentLinks, serializePost } from "../site/content.mjs";
+import { buildSocialMetadata, contentDescription, generateRssFeed, generateSitemap, redirectDocument } from "../site/site.mjs";
 
 const post = { type: "post", id: "550e8400-e29b-41d4-a716-446655440000", publicPath: "hello.md", sourcePath: "content/posts/hello.md", title: "Hello", slug: "hello", aliases: ["/old-hello.html"], date: "2026-01-01", publishedAt: "2026-01-01T00:00:00.000Z", status: "published", body: "A *small* note.", paragraphs: ["A *small* note."] };
 
@@ -44,6 +44,24 @@ test("nested lists retain hierarchy in public HTML and feeds", () => {
     description: "Writing",
   });
   assert.match(feed, /<ul><li>Foundation<ul><li>First detail<\/li><li>Second detail<\/li><\/ul><\/li><li>Next foundation<\/li><\/ul>/);
+});
+
+test("optional deks survive Markdown and lead article summaries", () => {
+  const dek = 'A *quiet* summary with “quotes”.';
+  const parsed = parsePost(serializePost({ ...post, dek }), "hello.md");
+  assert.equal(parsed.dek, dek);
+  assert.match(serializePost({ ...post, dek }), /^dek: "A \*quiet\* summary with “quotes”\."$/m);
+  assert.doesNotMatch(serializePost(post), /^dek:/m);
+  assert.equal(parsePost(serializePost({ ...post, dek: "Line one.\nLine two." }), "hello.md").dek, "Line one. Line two.");
+  assert.equal(contentDescription(parsed), "A quiet summary with “quotes”.");
+
+  const feed = generateRssFeed([parsed], [], { siteName: "Example", siteUrl: "https://example.com", description: "Writing" });
+  assert.match(feed, /<description>A quiet summary with “quotes”\.<\/description>/);
+  assert.match(feed, /<content:encoded><!\[CDATA\[<p class="article-dek">A <em>quiet<\/em> summary with “quotes”\.<\/p>/);
+
+  const social = buildSocialMetadata(parsed, { siteName: "Example", siteUrl: "https://example.com", fallbackImage: "/fallback.png" });
+  assert.equal(social.openGraph.description, "A quiet summary with “quotes”.");
+  assert.equal(social.twitter.description, "A quiet summary with “quotes”.");
 });
 
 test("repository factory validates immutable identities and resolves document links", async () => {

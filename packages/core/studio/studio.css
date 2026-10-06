@@ -439,6 +439,7 @@ button {
 }
 
 .title-input,
+.dek-input,
 .body-input {
   display: block;
   width: 100%;
@@ -461,6 +462,20 @@ button {
 }
 
 .title-input::placeholder {
+  color: var(--placeholder);
+}
+
+.dek-input {
+  min-height: 48px;
+  padding: 0;
+  margin: 0 0 24px;
+  color: var(--muted);
+  font: inherit;
+  line-height: 24px;
+  resize: none;
+}
+
+.dek-input::placeholder {
   color: var(--placeholder);
 }
 

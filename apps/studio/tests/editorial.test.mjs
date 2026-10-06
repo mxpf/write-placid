@@ -142,7 +142,7 @@ test("validates references across the whole repository including private targets
 
 test("snapshot contains published content only and resolves ID links against stable URLs", () => {
   const target = piece("Target", { legacyIds: ["content/posts/legacy.md"], status: "published", aliases: ["/former.html"] });
-  const source = piece("Source", { status: "published", body: `[link](doc:${encodeURIComponent(target.id)}#section)` });
+  const source = piece("Source", { dek: "A *portable* summary.", status: "published", body: `[link](doc:${encodeURIComponent(target.id)}#section)` });
   const secret = piece("Secret");
   const snapshot = buildPublicSnapshot([source, target, secret]);
   assert.equal(snapshot.manifest.version, 1);
@@ -150,6 +150,8 @@ test("snapshot contains published content only and resolves ID links against sta
   assert.equal(snapshot.manifest.redirects["/former.html"], "/target.html");
   assert.equal(snapshot.files[secret.path], undefined);
   assert.match(snapshot.files[source.path], /\[link\]\(\/target.html#section\)/);
+  assert.match(snapshot.files[source.path], /^dek: "A \*portable\* summary\."$/m);
+  assert.equal("dek" in snapshot.manifest.documents[0], false);
   assert.doesNotMatch(JSON.stringify(snapshot), /Original body.*Secret/);
   assert.match(markdownToEditorHtml(source.body), /href="doc:/);
 });

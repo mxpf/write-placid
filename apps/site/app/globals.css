@@ -343,6 +343,10 @@ body {
   text-wrap: balance;
 }
 
+.article-header .article-dek {
+  text-wrap: pretty;
+}
+
 .author-edit-action a {
   text-decoration: underline;
   text-decoration-thickness: 1px;

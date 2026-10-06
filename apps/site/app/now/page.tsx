@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { ArticleBody } from "../ArticleBody";
 import { Footer } from "../Footer";
+import { InlineText } from "../InlineText";
 import { LetterCascade } from "../LetterCascade";
 import { stripInlineMarkdown } from "../inline-markdown";
 import { currentNow } from "../posts";
@@ -10,7 +11,7 @@ import { sitePath } from "../site-path";
 export const metadata: Metadata = {
   title: "Now",
   description: currentNow
-    ? stripInlineMarkdown(currentNow.paragraphs[0])
+    ? stripInlineMarkdown(currentNow.dek || currentNow.paragraphs[0])
     : "What is holding my attention now.",
   alternates: {
     canonical: "/now",
@@ -30,6 +31,7 @@ export default function NowPage() {
         >
           <header className="article-header">
             <h1>Now</h1>
+            {currentNow?.dek ? <p className="article-dek"><InlineText text={currentNow.dek} /></p> : null}
             {currentNow ? <p>{currentNow.date}</p> : null}
             {currentNow ? (
               <p className="author-edit-action" hidden>

@@ -20,6 +20,8 @@ aliases: ["/former-address.html"]
 
 Posts and Now entries additionally carry `date` and `status`. Published material may carry `publishedAt` and `updatedAt`. Pages do not need editorial dates.
 
+Every document may carry an optional, single-line `dek`. It uses the same safe inline Markdown subset as ordinary inline copy: plain text, italics, and links. The dek is presentation content rather than identity, so it does not appear in `identity-manifest.json`. Public renderers place it between the title and article metadata, and use its plain-text form for HTML, Open Graph, Twitter, and RSS descriptions. When it is absent, the first body paragraph remains the summary fallback. Empty deks are omitted when Markdown is serialized.
+
 ## Relationships
 
 Authored links between Write Placid documents use the persistent ID:

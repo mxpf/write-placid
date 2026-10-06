@@ -26,6 +26,7 @@ export declare function loadKdrivePost(ref: KdrivePostRef): Promise<{
     metadata?: Record<string, string>;
     slug: string;
     title: string;
+    dek: string;
     date: string;
     publishedAt: string;
     publicUpdatedAt: string;

@@ -16,7 +16,9 @@ function parseFrontmatter(source) {
     if (separator === -1) continue;
     const key = line.slice(0, separator).trim();
     let value = line.slice(separator + 1).trim();
-    if ((value.startsWith('"') && value.endsWith('"')) || (value.startsWith("'") && value.endsWith("'"))) {
+    if (value.startsWith('"') && value.endsWith('"')) {
+      value = JSON.parse(value);
+    } else if (value.startsWith("'") && value.endsWith("'")) {
       value = value.slice(1, -1);
     }
     metadata[key] = value;
@@ -26,6 +28,10 @@ function parseFrontmatter(source) {
 
 function quote(value) {
   return JSON.stringify(value ?? "");
+}
+
+function normalizeDek(value = "") {
+  return String(value).replace(/\s*\r?\n+\s*/g, " ").trim();
 }
 
 function parseAliases(value = "") {
@@ -85,9 +91,10 @@ export function comparePostsByDate(a, b) {
 export function parsePost(source, filename = "") {
   const { metadata, body } = parseFrontmatter(source);
   const slug = metadata.slug || filename.replace(/\.md$/, "");
+  const dek = normalizeDek(metadata.dek);
   return {
     type: "post", id: metadata.id || "", publicPath: metadata.publicPath || "", sourcePath: `content/posts/${filename}`,
-    title: metadata.title || "Untitled", slug,
+    title: metadata.title || "Untitled", ...(dek ? { dek } : {}), slug,
     aliases: parseAliases(metadata.aliases),
     date: metadata.date || new Date().toISOString().slice(0, 10),
     publishedAt: metadata.publishedAt || "", updatedAt: metadata.updatedAt || "",
@@ -106,9 +113,10 @@ export function parseNowEntry(source, filename = "") {
 export function parsePage(source, filename = "") {
   const { metadata, body } = parseFrontmatter(source);
   const slug = metadata.slug || filename.replace(/\.md$/, "");
+  const dek = normalizeDek(metadata.dek);
   return {
     type: "page", id: metadata.id || "", publicPath: metadata.publicPath || "", sourcePath: `content/pages/${filename}`,
-    title: metadata.title || "Untitled", slug,
+    title: metadata.title || "Untitled", ...(dek ? { dek } : {}), slug,
     aliases: parseAliases(metadata.aliases), body, paragraphs: parseBodyBlocks(body),
   };
 }
@@ -235,6 +243,8 @@ export function resolveDocumentLinks(body, documents) {
 
 export function serializePost(post) {
   const metadata = ["---", `title: ${quote(post.title)}`, `id: ${post.id}`, `publicPath: ${post.publicPath}`, `slug: ${post.slug}`, `date: ${post.date}`, `status: ${post.status === "published" ? "published" : "draft"}`];
+  const dek = normalizeDek(post.dek);
+  if (dek) metadata.splice(2, 0, `dek: ${quote(dek)}`);
   if (post.aliases?.length) metadata.push(`aliases: ${JSON.stringify(post.aliases)}`);
   if (post.publishedAt) metadata.push(`publishedAt: ${post.publishedAt}`);
   if (post.updatedAt) metadata.push(`updatedAt: ${post.updatedAt}`);

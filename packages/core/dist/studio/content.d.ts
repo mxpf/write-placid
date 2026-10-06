@@ -12,6 +12,7 @@ export type WritingDocument = {
     type: "post" | "page" | "now";
     slug: string;
     title: string;
+    dek: string;
     date: string;
     status: "draft" | "published";
     publishedAt: string;

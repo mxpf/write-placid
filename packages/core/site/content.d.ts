@@ -1,4 +1,4 @@
-export type ContentDocument = { type: "post" | "page" | "now"; id: string; publicPath: string; sourcePath: string; title: string; slug: string; aliases: string[]; body: string; paragraphs: string[]; date?: string; status?: "draft" | "published"; publishedAt?: string; updatedAt?: string; source?: { label: string; href: string } };
+export type ContentDocument = { type: "post" | "page" | "now"; id: string; publicPath: string; sourcePath: string; title: string; dek?: string; slug: string; aliases: string[]; body: string; paragraphs: string[]; date?: string; status?: "draft" | "published"; publishedAt?: string; updatedAt?: string; source?: { label: string; href: string } };
 export function calculateReadingTime(body: string): string;
 export function displayDate(value: string): string;
 export function comparePostsByDate(a: ContentDocument, b: ContentDocument): number;

@@ -12,6 +12,7 @@ export type WritingDocument = {
   type: "post" | "page" | "now";
   slug: string;
   title: string;
+  dek: string;
   date: string;
   status: "draft" | "published";
   publishedAt: string;
@@ -57,6 +58,10 @@ function parseFrontmatter(source: string) {
 
 function quote(value: string) {
   return JSON.stringify(value ?? "");
+}
+
+function normalizeDek(value: unknown) {
+  return String(value ?? "").replace(/\s*\r?\n+\s*/g, " ").trim();
 }
 
 function slugify(value: string) {
@@ -114,11 +119,12 @@ export function parseWritingDocument(
     legacyIds: metadata.legacyIds ? JSON.parse(metadata.legacyIds) : [],
     publicPath: metadata.publicPath || path.split("/").at(-1),
     aliases: metadata.aliases ? JSON.parse(metadata.aliases) : [],
-    metadata: Object.fromEntries(Object.entries(metadata).filter(([key]) => !["id", "legacyIds", "aliases", "title", "slug", "date", "status", "publishedAt", "updatedAt", "sourceLabel", "sourceHref", "type", "publicPath"].includes(key))),
+    metadata: Object.fromEntries(Object.entries(metadata).filter(([key]) => !["id", "legacyIds", "aliases", "title", "dek", "slug", "date", "status", "publishedAt", "updatedAt", "sourceLabel", "sourceHref", "type", "publicPath"].includes(key))),
     path: metadata.publicPath && !metadata.publicPath.includes("/") ? snapshotPath(type, metadata.publicPath) : path,
     type,
     slug,
     title: metadata.title || "Untitled",
+    dek: normalizeDek(metadata.dek),
     date: type !== "page" ? metadata.date || new Date().toISOString().slice(0, 10) : "",
     status: type !== "page" && metadata.status === "draft" ? "draft" : "published",
     publishedAt: metadata.publishedAt || "",
@@ -138,6 +144,7 @@ export function parseWritingDocument(
 }
 
 export function serializeWritingDocument(document: WritingDocument) {
+  const dek = normalizeDek(document.dek);
   const metadata = [
     "---",
     `id: ${quote(document.id)}`,
@@ -146,6 +153,7 @@ export function serializeWritingDocument(document: WritingDocument) {
     `aliases: ${JSON.stringify(document.aliases || [])}`,
     ...Object.entries(document.metadata || {}).map(([key, value]) => `${key}: ${quote(value)}`),
     `title: ${quote(document.title.trim() || "Untitled")}`,
+    ...(dek ? [`dek: ${quote(dek)}`] : []),
     `slug: ${document.slug}`,
   ];
 
@@ -218,6 +226,7 @@ export function normalizeIncomingDocument(
     type,
     slug,
     title,
+    dek: normalizeDek(input.dek ?? existing?.dek),
     date:
       type !== "page" ? date : "",
     status:

@@ -52,7 +52,9 @@ function renderListHtml(block) {
 }
 
 function renderPostHtml(post, siteUrl) {
-  const output = parseContentBlocks(post.paragraphs).map((block) => {
+  const dek = post.dek?.replace(/\s+/g, " ").trim();
+  const output = dek ? [`<p class="article-dek">${renderInlineHtml(dek)}</p>`] : [];
+  output.push(...parseContentBlocks(post.paragraphs).map((block) => {
     if (block.type === "heading") return `<h2>${renderInlineHtml(block.text)}</h2>`;
     if (block.type === "blockquote") return `<blockquote><p>${renderInlineHtml(block.text)}</p></blockquote>`;
     if (block.type === "unordered-list" || block.type === "ordered-list") return renderListHtml(block);
@@ -62,7 +64,7 @@ function renderPostHtml(post, siteUrl) {
       return `<figure><img src="${escapeXml(src)}" alt="${escapeXml(block.alt)}" loading="lazy" />${caption}</figure>`;
     }
     return `<p>${renderInlineHtml(block.text)}</p>`;
-  });
+  }));
   if (post.source) output.push(`<p><a href="${escapeXml(post.source.href)}">${escapeXml(post.source.label)}</a></p>`);
   return output.join("\n");
 }
@@ -76,7 +78,7 @@ export function generateRssFeed(posts, nowEntries = [], options) {
     const title = isNow ? `Now — ${displayDate(post.date)}` : post.title;
     const guid = isNow ? `${feedId}:now:${post.slug}` : url;
     const content = renderPostHtml(post, siteUrl).replaceAll("]]>", "]]]]><![CDATA[>");
-    return `    <item>\n      <title>${escapeXml(title)}</title>\n      <link>${url}</link>\n      <guid isPermaLink="${isNow ? "false" : "true"}">${escapeXml(guid)}</guid>\n      <pubDate>${publicationDate(post)}</pubDate>\n      <description>${escapeXml(stripInlineMarkdown(post.paragraphs[0] || ""))}</description>\n      <content:encoded><![CDATA[${content}]]></content:encoded>\n    </item>`;
+    return `    <item>\n      <title>${escapeXml(title)}</title>\n      <link>${url}</link>\n      <guid isPermaLink="${isNow ? "false" : "true"}">${escapeXml(guid)}</guid>\n      <pubDate>${publicationDate(post)}</pubDate>\n      <description>${escapeXml(contentDescription(post))}</description>\n      <content:encoded><![CDATA[${content}]]></content:encoded>\n    </item>`;
   }).join("\n");
   const lastBuildDate = entries.length ? publicationDate(entries[0]) : new Date(0).toUTCString();
   return `<?xml version="1.0" encoding="UTF-8"?>\n<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/">\n  <channel>\n    <title>${escapeXml(siteName)}</title>\n    <link>${absoluteSiteUrl("/", siteUrl)}</link>\n    <description>${escapeXml(description)}</description>\n    <language>${escapeXml(language)}</language>\n    <lastBuildDate>${lastBuildDate}</lastBuildDate>\n    <atom:link href="${escapeXml(absoluteSiteUrl(rssPath, siteUrl))}" rel="self" type="application/rss+xml" />\n${items}\n  </channel>\n</rss>\n`;
@@ -97,6 +99,11 @@ export function firstSafeArticleImage(paragraphs) {
   return null;
 }
 
+/** Use an authored dek as the summary, with the first body paragraph as fallback. */
+export function contentDescription(document) {
+  return stripInlineMarkdown(document.dek?.trim() || document.paragraphs?.[0] || "").replace(/\s+/g, " ").trim();
+}
+
 /**
  * Build portable Open Graph and Twitter metadata from publication content and
  * installation-owned identity/configuration.
@@ -106,7 +113,7 @@ export function buildSocialMetadata(document, { siteName, siteUrl, fallbackImage
   const selectedImage = articleImage || { src: fallbackImage, alt: `${siteName} social card` };
   if (!isSafeImageSrc(selectedImage.src)) throw new Error("The social fallback image must use an HTTPS or root-relative URL.");
   const image = { url: absoluteSiteUrl(selectedImage.src, siteUrl), alt: selectedImage.alt };
-  const description = stripInlineMarkdown(document.paragraphs?.[0] || "");
+  const description = contentDescription(document);
   const canonicalUrl = absoluteSiteUrl(pathname, siteUrl);
   return {
     openGraph: { title: document.title, description, siteName, url: canonicalUrl, images: [image] },

@@ -3,8 +3,8 @@ import { ArticleBody } from "../ArticleBody";
 import { Footer } from "../Footer";
 import { LetterCascade } from "../LetterCascade";
 import { Webmentions } from "../Webmentions";
-import { stripInlineMarkdown } from "../../lib/markdown.mjs";
-import { buildSocialMetadata } from "@mxpf/write-placid-core/site";
+import { buildSocialMetadata, contentDescription } from "@mxpf/write-placid-core/site";
+import { InlineText } from "../InlineText";
 import { getPost, getStandalonePage, posts, standalonePages } from "../posts";
 import { siteConfig } from "../site-config";
 import { sitePath } from "../site-path";
@@ -20,7 +20,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   const content = getPost(slug) || getStandalonePage(slug);
   return {
     title: content?.title,
-    description: content ? stripInlineMarkdown(content.paragraphs[0]) : undefined,
+    description: content ? contentDescription(content) : undefined,
     alternates: content ? { canonical: `/${slug}`, types: { "application/rss+xml": "/rss.xml" } } : undefined,
     ...(content ? buildSocialMetadata(content, { siteName: siteConfig.name, siteUrl: siteConfig.url, fallbackImage: "/og.png", pathname: `/${slug}` }) : {}),
   };
@@ -35,7 +35,7 @@ export default async function PostPage({ params }: PageProps) {
     <main className="site article-page"><div className="article-frame">
       <a className="desktop-brand" href={sitePath("/")}><LetterCascade text={siteConfig.name} /></a>
       <article className="article-column" data-content-id={content.id} data-content-slug={slug} data-content-title={content.title}>
-        <header className="article-header"><h1>{content.title}</h1>{post ? <p>{post.date}</p> : null}{post ? <p>{post.readingTime}</p> : null}<p className="author-edit-action" hidden><a href={siteConfig.studioUrl || sitePath("/")}>Edit</a></p></header>
+        <header className="article-header"><h1>{content.title}</h1>{content.dek ? <p className="article-dek"><InlineText text={content.dek} /></p> : null}{post ? <p>{post.date}</p> : null}{post ? <p>{post.readingTime}</p> : null}<p className="author-edit-action" hidden><a href={siteConfig.studioUrl || sitePath("/")}>Edit</a></p></header>
         <div className="article-body"><ArticleBody paragraphs={content.paragraphs} />{post?.source ? <p className="article-source"><a href={post.source.href}>{post.source.label}</a></p> : null}{post?.updatedAt ? <p className="article-last-edited"><em>Last edited {post.updatedAt}</em></p> : null}</div>
         {post ? <Webmentions slug={slug} /> : null}<Footer showBrand revealAtEnd />
       </article>

@@ -12,6 +12,7 @@ type StudioSource = { label: string; href: string };
 type StudioPost = {
 	type: "post";
 	title: string;
+	dek?: string;
 	slug: string;
 	date: string;
 	publishedAt?: string;
@@ -80,9 +81,10 @@ export class WritePlacidMCP extends McpAgent<Env, Record<string, never>, Props> 
 
 		this.server.tool(
 			"save_write_placid_draft",
-			"Save a complete new essay, fragment, or revision into the private Write Placid Studio library. This never publishes or deletes anything. For a revision, provide the current title or slug so the existing piece is updated instead of duplicated. Send the complete body, not a patch or excerpt.",
+			"Save a complete new essay, fragment, or revision into the private Write Placid Studio library. This never publishes or deletes anything. For a revision, provide the current title or slug so the existing piece is updated instead of duplicated. Send the complete body, not a patch or excerpt. An optional dek is preserved as the article summary.",
 			{
 				title: z.string().trim().min(1).max(200).describe("The title the piece should have after saving."),
+				dek: z.string().trim().max(400).optional().describe("An optional one-line article dek. Omit it to preserve an existing dek; send an empty string to clear it."),
 				body: z.string().max(750_000).describe("The complete article body in Markdown. Italics and inline links are supported."),
 				current_title: z
 					.string()
@@ -104,7 +106,7 @@ export class WritePlacidMCP extends McpAgent<Env, Record<string, never>, Props> 
 				source_label: z.string().trim().max(200).optional(),
 				source_url: z.string().url().max(2_000).optional(),
 			},
-			async ({ title, body, current_title, slug, date, source_label, source_url }) => {
+			async ({ title, dek, body, current_title, slug, date, source_label, source_url }) => {
 				try {
 					const library = await readStudioLibrary(this.env);
 					const posts = (library.documents || []).filter((document) => document.type === "post");
@@ -126,6 +128,7 @@ export class WritePlacidMCP extends McpAgent<Env, Record<string, never>, Props> 
 					const saved = await saveToStudio(this.env, {
 						type: "post",
 						title: title.trim(),
+						dek: dek === undefined ? existing?.dek || "" : dek,
 						slug: existing?.slug || "",
 						date: date || existing?.date || today(),
 						publishedAt: existing?.publishedAt || "",

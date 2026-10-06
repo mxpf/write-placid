@@ -25,6 +25,7 @@ publicPath: "existing-essay.md"
 legacyIds: ["content/posts/existing-essay.md"]
 aliases: ["/former-address.html"]
 title: "An edited title"
+dek: "An optional one-line summary shown below the title."
 slug: existing-essay
 date: 2026-01-01
 status: published
@@ -35,7 +36,7 @@ Article content.
 
 Canonical IDs are immutable UUID-v4 values. Migration adopts existing public UUIDs and assigns UUID-v4 values to private drafts. Historical path-shaped IDs remain in private `legacyIds` provenance and resolve old document references; they are neither canonical IDs nor URL aliases and are excluded from public exports. `publicPath` is a bare persistent snapshot filename, such as `existing-essay.md`. Studio derives the validated repository path from the document type; this field is never an unchecked write target. The explicit `slug` determines the `.html` public URL independently of both filenames. A title change never changes the slug. Studio offers a separate slug control and appends the former URL to aliases when it changes. Aliases and slugs are reserved across drafts and published work; `/now.html` and `/index.html` cannot be claimed by posts/pages. Now entries have distinct IDs and slugs but intentionally share `/now.html`.
 
-Frontmatter uses one field per line, with aliases encoded as a JSON array. Duplicate keys and unsupported multiline fields fail closed instead of silently dropping data. Existing scalar extension fields are retained. Normalize unsupported YAML using a backup before migration.
+Frontmatter uses one field per line, with aliases encoded as a JSON array. `dek` is optional, stays on one line, and supports the shared safe inline Markdown subset. Studio preserves it through KDrive, D1 cache state, snapshots, and Drafts MCP revisions; omitting it keeps older documents backward-compatible. Duplicate keys and unsupported multiline fields fail closed instead of silently dropping data. Existing scalar extension fields are retained. Normalize unsupported YAML using a backup before migration.
 
 Authoring relationships use `[label](doc:<URI-encoded-ID>)`, optionally followed by a fragment. The link dialog offers a document selector. Source links may use the same scheme. Published content cannot reference private or missing documents. Existing ordinary web/relative links remain unchanged; migration does not rewrite their prose or destinations. Convert relationships that should follow future slug changes using the document selector.
 

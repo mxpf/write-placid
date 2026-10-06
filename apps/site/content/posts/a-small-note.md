@@ -1,5 +1,6 @@
 ---
 title: "A small note"
+dek: "A quiet example of the optional summary shown beneath an article title."
 id: 0f62447e-2f77-40c4-98ac-1cd14a443ef5
 publicPath: a-small-note.md
 slug: a-small-note

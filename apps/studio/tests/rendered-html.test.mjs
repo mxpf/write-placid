@@ -48,6 +48,7 @@ test("builds the private Write Placid Studio shell", async () => {
 test("preserves publication Markdown and computes reading time", () => {
   const source = `---
 title: "A quiet test"
+dek: "A short *dek* with a clear promise."
 slug: a-quiet-test
 date: 2026-08-07
 status: draft
@@ -63,12 +64,36 @@ One *small* paragraph with a [link](https://example.com).
     "abc123",
   );
   assert.equal(document.status, "draft");
+  assert.equal(document.dek, "A short *dek* with a clear promise.");
   assert.equal(document.source?.href, "https://example.com");
   assert.equal(document.remoteSha, "abc123");
   assert.equal(parseWritingDocument(serializeWritingDocument(document), document.path).body, document.body);
+  assert.equal(parseWritingDocument(serializeWritingDocument(document), document.path).dek, document.dek);
   assert.match(serializeWritingDocument(document), /^id: "content\/posts\/a-quiet-test.md"$/m);
   assert.equal(isDocumentDirty(document), false);
   assert.equal(calculateReadingTime("word ".repeat(181)), "2 minutes");
+});
+
+test("edits and snapshots preserve an optional one-line dek", async () => {
+  const document = normalizeIncomingDocument({
+    type: "post",
+    title: "A title",
+    dek: "A useful *summary*.",
+    body: "The full article.",
+  });
+  const source = serializeWritingDocument(document);
+  assert.match(source, /^dek: "A useful \*summary\*\."$/m);
+  assert.equal(parseWritingDocument(source, document.path).dek, document.dek);
+  assert.doesNotMatch(serializeWritingDocument({ ...document, dek: "" }), /^dek:/m);
+  assert.equal(normalizeIncomingDocument({ ...document, dek: "Line one.\nLine two." }, document).dek, "Line one. Line two.");
+
+  const [studio, cache] = await Promise.all([
+    readFile(new URL("../../../packages/core/studio/Studio.tsx", import.meta.url), "utf8"),
+    readFile(new URL("../../../packages/core/studio/d1.ts", import.meta.url), "utf8"),
+  ]);
+  assert.match(studio, /className="dek-input"/);
+  assert.match(studio, /updateCurrent\(\{ dek:/);
+  assert.match(cache, /dek: document\.dek/);
 });
 
 test("adds public edit metadata only when revising an existing published post", () => {

@@ -25,6 +25,9 @@ function parseFrontmatter(source) {
 function quote(value) {
     return JSON.stringify(value ?? "");
 }
+function normalizeDek(value) {
+    return String(value ?? "").replace(/\s*\r?\n+\s*/g, " ").trim();
+}
 function slugify(value) {
     return value
         .normalize("NFKD")
@@ -73,11 +76,12 @@ export function parseWritingDocument(source, path, remoteSha = "") {
         legacyIds: metadata.legacyIds ? JSON.parse(metadata.legacyIds) : [],
         publicPath: metadata.publicPath || path.split("/").at(-1),
         aliases: metadata.aliases ? JSON.parse(metadata.aliases) : [],
-        metadata: Object.fromEntries(Object.entries(metadata).filter(([key]) => !["id", "legacyIds", "aliases", "title", "slug", "date", "status", "publishedAt", "updatedAt", "sourceLabel", "sourceHref", "type", "publicPath"].includes(key))),
+        metadata: Object.fromEntries(Object.entries(metadata).filter(([key]) => !["id", "legacyIds", "aliases", "title", "dek", "slug", "date", "status", "publishedAt", "updatedAt", "sourceLabel", "sourceHref", "type", "publicPath"].includes(key))),
         path: metadata.publicPath && !metadata.publicPath.includes("/") ? snapshotPath(type, metadata.publicPath) : path,
         type,
         slug,
         title: metadata.title || "Untitled",
+        dek: normalizeDek(metadata.dek),
         date: type !== "page" ? metadata.date || new Date().toISOString().slice(0, 10) : "",
         status: type !== "page" && metadata.status === "draft" ? "draft" : "published",
         publishedAt: metadata.publishedAt || "",
@@ -95,6 +99,7 @@ export function parseWritingDocument(source, path, remoteSha = "") {
     };
 }
 export function serializeWritingDocument(document) {
+    const dek = normalizeDek(document.dek);
     const metadata = [
         "---",
         `id: ${quote(document.id)}`,
@@ -103,6 +108,7 @@ export function serializeWritingDocument(document) {
         `aliases: ${JSON.stringify(document.aliases || [])}`,
         ...Object.entries(document.metadata || {}).map(([key, value]) => `${key}: ${quote(value)}`),
         `title: ${quote(document.title.trim() || "Untitled")}`,
+        ...(dek ? [`dek: ${quote(dek)}`] : []),
         `slug: ${document.slug}`,
     ];
     if (document.type !== "page") {
@@ -161,6 +167,7 @@ export function normalizeIncomingDocument(input, existing) {
         type,
         slug,
         title,
+        dek: normalizeDek(input.dek ?? existing?.dek),
         date: type !== "page" ? date : "",
         status: type !== "page" && input.status === "published" ? "published" : type === "page" ? "published" : "draft",
         publishedAt: type !== "page" ? String(input.publishedAt || existing?.publishedAt || "") : "",

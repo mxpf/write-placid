@@ -140,6 +140,7 @@ function plainDraft(source: string, name: string, etag: string): WritingDocument
     type: "post",
     slug,
     title,
+    dek: "",
     date: new Date().toISOString().slice(0, 10),
     status: "draft",
     publishedAt: "",

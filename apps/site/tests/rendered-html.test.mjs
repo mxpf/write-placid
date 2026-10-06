@@ -49,6 +49,18 @@ test("static homepage links point directly to exported article files", async () 
   }
 });
 
+test("renders an optional dek and uses it for public descriptions", async () => {
+  const post = (await readPosts()).find((item) => item.dek);
+  assert.ok(post);
+  const html = await (await render(`/${post.slug}`)).text();
+  const plainDek = stripInlineMarkdown(post.dek);
+  assert.match(html, new RegExp(`<p class="article-dek">${plainDek.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}</p>`));
+  assert.ok(html.includes(`<meta name="description" content="${plainDek}"`));
+
+  const feed = generateRssFeed(await readPosts(), await readNowEntries());
+  assert.ok(feed.includes(`<description>${plainDek}</description>`));
+});
+
 test("can prefix internal links for a GitHub project Pages deployment", async () => {
   process.env.NEXT_PUBLIC_PAGES_BASE_PATH = "/write-placid";
   const moduleUrl = new URL("../app/site-path.ts", import.meta.url);
@@ -268,6 +280,7 @@ test("keeps published writing readable and the visual system intentional", async
   assert.match(siteStyles, /\.site \.footer\s*\{[^}]*font-weight: 400/s);
   assert.match(siteStyles, /\.site \.footer-brand\s*\{[^}]*font-weight: 500/s);
   assert.match(siteStyles, /\.site \.article-header h1\s*\{[^}]*font-size: 16px[^}]*font-weight: 400[^}]*line-height: 24px[^}]*text-wrap: balance/s);
+  assert.match(siteStyles, /\.article-header \.article-dek\s*\{[^}]*text-wrap: pretty/s);
   assert.match(siteStyles, /\.article-body p\s*\{[^}]*hanging-punctuation: first[^}]*text-wrap: pretty/s);
   assert.match(siteStyles, /\.site \.article-body h2\s*\{[^}]*margin: 48px 0 24px[^}]*color: var\(--blog-muted\)[^}]*font-size: 12px[^}]*font-weight: 400[^}]*letter-spacing: 0\.06em[^}]*line-height: 24px[^}]*text-transform: uppercase/s);
   assert.match(siteStyles, /\.article-body blockquote\s*\{[^}]*position: relative[^}]*padding: 0 0 0 24px[^}]*margin: 36px 0/s);
@@ -277,6 +290,8 @@ test("keeps published writing readable and the visual system intentional", async
   assert.match(articleBody, /<blockquote key=/);
   assert.match(articleBody, /optical-margin-fallback/);
   assert.match(articlePage, /className="author-edit-action" hidden/);
+  assert.match(articlePage, /className="article-dek"/);
+  assert.match(articlePage, /contentDescription\(content\)/);
   assert.match(authorMode, /write-placid-author-mode/);
   assert.match(authorMode, /location\.hash === "#edit"/);
   assert.match(authorMode, /location\.hash === "#edit-off"/);

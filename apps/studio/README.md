@@ -10,6 +10,7 @@ Studio consumes the versioned `@mxpf/write-placid-core` release for the shared e
 - Studio validates the complete repository and publishes Markdown plus `content/identity-manifest.json` to the configured GitHub root in one non-force Git commit.
 - Drafts can be reordered on desktop without changing public-site ordering.
 - Published revisions receive optional `updatedAt` metadata so the public site can show a quiet “Last edited” note.
+- An optional one-line dek is authored with the title and survives KDrive, D1 cache state, Drafts MCP revisions, and public snapshots.
 - Google Docs synchronization remains optional and detects conflicts when both copies changed.
 - KDrive supports `Drafts`, `Published`, `Pages`, `Now/Drafts`, `Now/Published`, and private `Images`, including nested folders. Fresh inventory and strong ETags prevent stale fallback or competing overwrites.
 - Saving and publishing are distinct. The starter keeps scheduled auto-publication off; set `WRITE_PLACID_AUTO_PUBLISH=1` only for an installation that explicitly wants the schedule to publish.
