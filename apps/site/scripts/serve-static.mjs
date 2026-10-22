@@ -28,7 +28,9 @@ async function findFile(pathname) {
     if (resolved !== root && !resolved.startsWith(`${root}${path.sep}`)) continue;
     try {
       if ((await stat(resolved)).isFile()) return resolved;
-    } catch {}
+    } catch {
+      // Try the next candidate when this path cannot be inspected.
+    }
   }
   return null;
 }
