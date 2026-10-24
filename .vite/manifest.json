@@ -10,8 +10,8 @@
     "file": "write-placid/_next/static/chunks/rolldown-runtime-hePW80VL.js",
     "name": "rolldown-runtime"
   },
-  "_vinext-BCTB1uUU.js": {
-    "file": "write-placid/_next/static/chunks/vinext-BCTB1uUU.js",
+  "_vinext-CsleC0_c.js": {
+    "file": "write-placid/_next/static/chunks/vinext-CsleC0_c.js",
     "name": "vinext",
     "imports": [
       "_rolldown-runtime-hePW80VL.js",
@@ -19,7 +19,7 @@
     ],
     "dynamicImports": [
       "node_modules/vinext/dist/shims/internal/hybrid-client-route-owner.js",
-      "_vinext-BCTB1uUU.js"
+      "_vinext-CsleC0_c.js"
     ]
   },
   "app/Footer.tsx": {
@@ -53,52 +53,52 @@
     ]
   },
   "node_modules/vinext/dist/shims/internal/hybrid-client-route-owner.js": {
-    "file": "write-placid/_next/static/chunks/hybrid-client-route-owner-DNy8h2bH.js",
+    "file": "write-placid/_next/static/chunks/hybrid-client-route-owner-ZgdEJq1T.js",
     "name": "hybrid-client-route-owner",
     "src": "node_modules/vinext/dist/shims/internal/hybrid-client-route-owner.js",
     "isDynamicEntry": true,
     "imports": [
-      "_vinext-BCTB1uUU.js"
+      "_vinext-CsleC0_c.js"
     ]
   },
   "node_modules/vinext/dist/shims/layout-segment-context.js": {
-    "file": "write-placid/_next/static/chunks/layout-segment-context-CZ9z1NTn.js",
+    "file": "write-placid/_next/static/chunks/layout-segment-context-CVx42hZh.js",
     "name": "layout-segment-context",
     "src": "node_modules/vinext/dist/shims/layout-segment-context.js",
     "isDynamicEntry": true,
     "imports": [
       "_rolldown-runtime-hePW80VL.js",
       "_framework-2k-VFE-j.js",
-      "_vinext-BCTB1uUU.js"
+      "_vinext-CsleC0_c.js"
     ]
   },
   "node_modules/vinext/dist/shims/link.js": {
-    "file": "write-placid/_next/static/chunks/link-C7xgk-k4.js",
+    "file": "write-placid/_next/static/chunks/link-BHGkXPbm.js",
     "name": "link",
     "src": "node_modules/vinext/dist/shims/link.js",
     "isDynamicEntry": true,
     "imports": [
       "_rolldown-runtime-hePW80VL.js",
       "_framework-2k-VFE-j.js",
-      "_vinext-BCTB1uUU.js"
+      "_vinext-CsleC0_c.js"
     ],
     "dynamicImports": [
-      "_vinext-BCTB1uUU.js"
+      "_vinext-CsleC0_c.js"
     ]
   },
   "virtual:vinext-app-browser-entry": {
-    "file": "write-placid/_next/static/chunks/index-EXDnYEW9.js",
+    "file": "write-placid/_next/static/chunks/index-ioEikI0V.js",
     "name": "index",
     "src": "virtual:vinext-app-browser-entry",
     "isEntry": true,
     "imports": [
       "_rolldown-runtime-hePW80VL.js",
       "_framework-2k-VFE-j.js",
-      "_vinext-BCTB1uUU.js"
+      "_vinext-CsleC0_c.js"
     ],
     "dynamicImports": [
       "app/Footer.tsx",
-      "_vinext-BCTB1uUU.js",
+      "_vinext-CsleC0_c.js",
       "node_modules/vinext/dist/shims/layout-segment-context.js",
       "app/ScrollFadeImage.tsx",
       "node_modules/vinext/dist/shims/link.js",
