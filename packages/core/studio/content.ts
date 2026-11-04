@@ -24,6 +24,7 @@ export type WritingDocument = {
   };
   remoteSha: string;
   publishedSource: string;
+  publishedRevision: string;
   updatedAt: string;
   googleDocId: string;
   driveRevision: string;
@@ -136,6 +137,7 @@ export function parseWritingDocument(
         : undefined,
     remoteSha,
     publishedSource: source.trim(),
+    publishedRevision: "",
     updatedAt: new Date().toISOString(),
     googleDocId: "",
     driveRevision: "",
@@ -239,6 +241,7 @@ export function normalizeIncomingDocument(
     source: type === "post" ? source : undefined,
     remoteSha: existing?.remoteSha || String(input.remoteSha || ""),
     publishedSource: existing?.publishedSource || String(input.publishedSource || ""),
+    publishedRevision: existing?.publishedRevision || String(input.publishedRevision || ""),
     updatedAt: new Date().toISOString(),
     googleDocId: existing?.googleDocId || String(input.googleDocId || ""),
     driveRevision: existing?.driveRevision || String(input.driveRevision || ""),

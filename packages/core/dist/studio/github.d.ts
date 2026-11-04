@@ -18,6 +18,11 @@ export declare function publishEditorialSnapshot(documents: WritingDocument[]): 
             [k: string]: string;
         };
     };
+    publication: import("./editorial.ts").PublicPublicationManifest;
+    revisions: {
+        [k: string]: string;
+    };
+    changed: boolean;
 }>;
 export declare function publishImageAsset(name: string, bytes: Uint8Array): Promise<void>;
 //# sourceMappingURL=github.d.ts.map

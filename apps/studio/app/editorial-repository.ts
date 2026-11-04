@@ -3,5 +3,5 @@ import { loadKdrivePosts, saveKdrivePost } from "./kdrive";
 import { listDocuments, saveDocument } from "../db/documents";
 
 const repository = createEditorialRepository({ listCachedDocuments: listDocuments, loadCanonicalDocuments: loadKdrivePosts, saveCanonicalDocument: saveKdrivePost, saveCachedDocument: saveDocument });
-export const { readEditorialRepository, saveEditorialDocument, saveIncomingEditorialDocument } = repository;
+export const { readEditorialRepository, saveEditorialDocument, saveIncomingEditorialDocument, reconcileIncomingEditorialDocument } = repository;
 export { EditorialConflictError };

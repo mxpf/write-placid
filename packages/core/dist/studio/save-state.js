@@ -22,6 +22,7 @@ export function acknowledgeSave(latest, saving, saved) {
         identityPersisted: saved.identityPersisted,
         remoteSha: saved.remoteSha,
         publishedSource: saved.publishedSource,
+        publishedRevision: saved.publishedRevision,
         publishedAt: saved.publishedAt,
         publicUpdatedAt: saved.publicUpdatedAt,
         updatedAt: saved.updatedAt,

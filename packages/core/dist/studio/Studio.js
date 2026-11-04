@@ -34,6 +34,7 @@ function newPost(type = "post") {
         body: "",
         remoteSha: "",
         publishedSource: "",
+        publishedRevision: "",
         updatedAt: new Date().toISOString(),
         googleDocId: "",
         driveRevision: "",
@@ -519,7 +520,7 @@ export function Studio() {
             const response = await fetch("/api/content/publish", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ id: document.id }),
+                body: JSON.stringify({ document }),
             });
             const result = (await response.json());
             if (!response.ok || !result.document) {
@@ -567,7 +568,7 @@ export function Studio() {
             const controller = new AbortController();
             const timeout = window.setTimeout(() => controller.abort(), 8000);
             try {
-                const response = await fetch(`/api/content/live?id=${encodeURIComponent(document.id)}`, {
+                const response = await fetch(`/api/content/live?id=${encodeURIComponent(document.id)}&revision=${encodeURIComponent(document.publishedRevision)}`, {
                     cache: "no-store",
                     signal: controller.signal,
                 });

@@ -540,12 +540,24 @@ test("offers recoverable deletion for saved posts", async () => {
 });
 
 test("keeps publishing status responsive while live verification runs", async () => {
-  const studio = await readFile(new URL("../../../packages/core/studio/Studio.tsx", import.meta.url), "utf8");
+  const [studio, publishRoute, liveRoute, legacyPostsRoute] = await Promise.all([
+    readFile(new URL("../../../packages/core/studio/Studio.tsx", import.meta.url), "utf8"),
+    readFile(new URL("../app/api/content/publish/route.ts", import.meta.url), "utf8"),
+    readFile(new URL("../app/api/content/live/route.ts", import.meta.url), "utf8"),
+    readFile(new URL("../app/api/posts/route.ts", import.meta.url), "utf8"),
+  ]);
   assert.doesNotMatch(studio, /setSaveState\("Updating live…"\)/);
+  assert.match(studio, /JSON\.stringify\(\{ document \}\)/);
+  assert.match(studio, /revision=\$\{encodeURIComponent\(document\.publishedRevision\)\}/);
   assert.match(studio, /const controller = new AbortController\(\)/);
   assert.match(studio, /signal: controller\.signal/);
   assert.match(studio, /controller\.abort\(\)/);
   assert.match(studio, /window\.clearTimeout\(timeout\)/);
+  assert.match(publishRoute, /reconcileIncomingEditorialDocument\(input\.document\)/);
+  assert.match(liveRoute, /write-placid-publication\.json/);
+  assert.match(liveRoute, /livePublicationMatches/);
+  assert.doesNotMatch(liveRoute, /html\.includes\(document\.title\)/);
+  assert.match(legacyPostsRoute, /posts:/);
 });
 
 test("reorders drafts without disturbing the rest of the library", async () => {

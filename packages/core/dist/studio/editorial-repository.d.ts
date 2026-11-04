@@ -9,8 +9,11 @@ export declare class EditorialConflictError extends Error {
 }
 /** Canonical-first repository orchestration with immutable identity and URL-history checks. */
 export declare function createEditorialRepository(dependencies: EditorialRepositoryDependencies): {
-    readEditorialRepository: () => Promise<WritingDocument[]>;
+    readEditorialRepository: (options?: {
+        refreshIds?: Iterable<string>;
+    }) => Promise<WritingDocument[]>;
     saveEditorialDocument: (document: WritingDocument, previous?: WritingDocument) => Promise<WritingDocument>;
     saveIncomingEditorialDocument: (input: Partial<WritingDocument>) => Promise<WritingDocument>;
+    reconcileIncomingEditorialDocument: (input: Partial<WritingDocument>) => Promise<WritingDocument>;
 };
 //# sourceMappingURL=editorial-repository.d.ts.map

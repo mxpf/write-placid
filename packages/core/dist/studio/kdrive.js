@@ -137,6 +137,7 @@ function plainDraft(source, name, etag) {
         body: source.replace(/^#\s+.+\n+/, "").trim(),
         remoteSha: etag,
         publishedSource: "",
+        publishedRevision: "",
         updatedAt: new Date().toISOString(),
         googleDocId: "",
         driveRevision: "",
@@ -239,13 +240,19 @@ export async function saveKdrivePost(document, previous) {
     document.kdrivePath = destination;
     document.kdriveEtag = response.headers.get("ETag") || "";
     document.identityPersisted = true;
-    // Some WebDAV servers omit ETag on PUT. Read the authoritative new revision.
-    if (!document.kdriveEtag) {
-        const updated = await kdriveFetch(`${config.root}/${destination}`, { method: "GET" });
-        if (await updated.text() !== serializeWritingDocument(document))
-            throw new Error("The saved file changed in KDrive. Reload before editing.");
-        document.kdriveEtag = updated.headers.get("ETag") || "";
+    // A successful PUT is not enough: read back the exact canonical bytes before
+    // acknowledging the save. This catches proxies or connectors that accept a
+    // request while retaining a different revision.
+    const updated = await kdriveFetch(`${config.root}/${destination}`, {
+        method: "GET",
+        headers: document.kdriveEtag ? { "If-Match": document.kdriveEtag } : {},
+    });
+    if (await updated.text() !== serializeWritingDocument(document)) {
+        throw new Error("KDrive did not retain the exact saved revision. Your editor changes are still unpublished; reload only after copying them.");
     }
+    document.kdriveEtag = updated.headers.get("ETag") || document.kdriveEtag;
+    if (!document.kdriveEtag)
+        throw new Error("KDrive saved the file but did not provide a revision. Reload before editing again.");
 }
 export async function deleteKdrivePost(document) {
     const config = configuration();

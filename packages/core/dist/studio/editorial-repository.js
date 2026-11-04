@@ -4,9 +4,12 @@ export class EditorialConflictError extends Error {
 }
 /** Canonical-first repository orchestration with immutable identity and URL-history checks. */
 export function createEditorialRepository(dependencies) {
-    async function readEditorialRepository() {
+    async function readEditorialRepository(options = {}) {
         const cached = await dependencies.listCachedDocuments();
-        const canonical = await dependencies.loadCanonicalDocuments(cached);
+        const refreshIds = new Set(options.refreshIds || []);
+        const canonical = await dependencies.loadCanonicalDocuments(refreshIds.size
+            ? cached.filter((document) => !refreshIds.has(document.id))
+            : cached);
         const byId = new Map(cached.map((document) => [document.id, document]));
         for (const document of canonical) {
             if (!document.identityPersisted)
@@ -70,6 +73,33 @@ export function createEditorialRepository(dependencies) {
         await dependencies.saveCachedDocument(document);
         return document;
     }
-    return { readEditorialRepository, saveEditorialDocument, saveIncomingEditorialDocument };
+    /**
+     * Reconcile the exact editor revision at the publication boundary. The
+     * target is always read from KDrive rather than D1. A matching strong ETag
+     * permits repair of a cache/body mismatch; a newer canonical revision still
+     * fails closed as a real concurrent edit.
+     */
+    async function reconcileIncomingEditorialDocument(input) {
+        if (!input.id || input.id.startsWith("new:")) {
+            throw new EditorialConflictError("Save this piece before publishing it.");
+        }
+        const repository = await readEditorialRepository({ refreshIds: [input.id] });
+        const current = repository.find((item) => item.id === input.id || item.legacyIds?.includes(input.id || ""));
+        if (!current)
+            throw new EditorialConflictError("This piece no longer exists. Reload Studio before publishing.");
+        const { document, alreadySaved, error } = planSave(input, current);
+        const sameCanonicalRevision = Boolean(input.kdriveEtag && input.kdriveEtag === current.kdriveEtag);
+        if (error && !sameCanonicalRevision)
+            throw new EditorialConflictError(error);
+        if (!alreadySaved) {
+            assertValidRepository([...repository.filter((item) => item.id !== document.id), document]);
+            await dependencies.saveCanonicalDocument(document, current);
+            await dependencies.saveCachedDocument(document);
+            return document;
+        }
+        await dependencies.saveCachedDocument(current);
+        return current;
+    }
+    return { readEditorialRepository, saveEditorialDocument, saveIncomingEditorialDocument, reconcileIncomingEditorialDocument };
 }
 //# sourceMappingURL=editorial-repository.js.map

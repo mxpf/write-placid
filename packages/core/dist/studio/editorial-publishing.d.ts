@@ -17,5 +17,10 @@ export declare function publishEditorialRepository(documents: WritingDocument[],
             [k: string]: string;
         };
     };
+    publication: import("./editorial.ts").PublicPublicationManifest;
+    revisions: {
+        [k: string]: string;
+    };
+    changed: boolean;
 }>;
 //# sourceMappingURL=editorial-publishing.d.ts.map

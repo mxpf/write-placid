@@ -1,5 +1,27 @@
 import { snapshotPath, serializeWritingDocument, type WritingDocument } from "./content.ts";
 
+export const publicPublicationManifestPath = "public/write-placid-publication.json";
+
+export type PublicPublicationManifest = {
+  version: 1;
+  documents: { id: string; path: string; url: string; revision: string }[];
+};
+
+export function publicRevisionForDocument(publication: Partial<PublicPublicationManifest> | null, id: string) {
+  return publication?.version === 1
+    ? publication.documents?.find((document) => document.id === id)?.revision || ""
+    : "";
+}
+
+export function livePublicationMatches(pageAvailable: boolean, publication: Partial<PublicPublicationManifest> | null, id: string, revision: string) {
+  return Boolean(pageAvailable && revision && publicRevisionForDocument(publication, id) === revision);
+}
+
+async function sha256(value: string) {
+  const digest = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(value));
+  return [...new Uint8Array(digest)].map((byte) => byte.toString(16).padStart(2, "0")).join("");
+}
+
 export function publicUrl(document: WritingDocument) {
   return document.type === "now" ? "/now.html" : `/${document.slug}.html`;
 }
@@ -94,4 +116,25 @@ export function buildPublicSnapshot(documents: WritingDocument[]) {
   };
   files["content/identity-manifest.json"] = `${JSON.stringify(manifest, null, 2)}\n`;
   return { manifest, files };
+}
+
+/** Add a public, non-sensitive revision index used to verify static deployment. */
+export async function buildPublishablePublicSnapshot(documents: WritingDocument[]) {
+  const snapshot = buildPublicSnapshot(documents);
+  const published = documents
+    .filter((document) => document.status === "published")
+    .sort((a, b) => a.path.localeCompare(b.path));
+  const publicationDocuments = await Promise.all(published.map(async (document) => ({
+    id: document.id,
+    path: document.path,
+    url: publicUrl(document),
+    revision: await sha256(snapshot.files[document.path]),
+  })));
+  const publication: PublicPublicationManifest = { version: 1, documents: publicationDocuments };
+  snapshot.files[publicPublicationManifestPath] = `${JSON.stringify(publication, null, 2)}\n`;
+  return {
+    ...snapshot,
+    publication,
+    revisions: Object.fromEntries(publicationDocuments.map((document) => [document.id, document.revision])),
+  };
 }

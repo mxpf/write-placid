@@ -24,6 +24,7 @@ export type WritingDocument = {
     };
     remoteSha: string;
     publishedSource: string;
+    publishedRevision: string;
     updatedAt: string;
     googleDocId: string;
     driveRevision: string;

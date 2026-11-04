@@ -1,4 +1,17 @@
 import { snapshotPath, serializeWritingDocument } from "./content.js";
+export const publicPublicationManifestPath = "public/write-placid-publication.json";
+export function publicRevisionForDocument(publication, id) {
+    return publication?.version === 1
+        ? publication.documents?.find((document) => document.id === id)?.revision || ""
+        : "";
+}
+export function livePublicationMatches(pageAvailable, publication, id, revision) {
+    return Boolean(pageAvailable && revision && publicRevisionForDocument(publication, id) === revision);
+}
+async function sha256(value) {
+    const digest = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(value));
+    return [...new Uint8Array(digest)].map((byte) => byte.toString(16).padStart(2, "0")).join("");
+}
 export function publicUrl(document) {
     return document.type === "now" ? "/now.html" : `/${document.slug}.html`;
 }
@@ -115,5 +128,25 @@ export function buildPublicSnapshot(documents) {
     };
     files["content/identity-manifest.json"] = `${JSON.stringify(manifest, null, 2)}\n`;
     return { manifest, files };
+}
+/** Add a public, non-sensitive revision index used to verify static deployment. */
+export async function buildPublishablePublicSnapshot(documents) {
+    const snapshot = buildPublicSnapshot(documents);
+    const published = documents
+        .filter((document) => document.status === "published")
+        .sort((a, b) => a.path.localeCompare(b.path));
+    const publicationDocuments = await Promise.all(published.map(async (document) => ({
+        id: document.id,
+        path: document.path,
+        url: publicUrl(document),
+        revision: await sha256(snapshot.files[document.path]),
+    })));
+    const publication = { version: 1, documents: publicationDocuments };
+    snapshot.files[publicPublicationManifestPath] = `${JSON.stringify(publication, null, 2)}\n`;
+    return {
+        ...snapshot,
+        publication,
+        revisions: Object.fromEntries(publicationDocuments.map((document) => [document.id, document.revision])),
+    };
 }
 //# sourceMappingURL=editorial.js.map

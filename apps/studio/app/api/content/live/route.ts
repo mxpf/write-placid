@@ -1,5 +1,5 @@
-import { displayDate } from "../../../content";
 import { authorizeStudioRequest } from "../../../server-auth";
+import { livePublicationMatches, publicRevisionForDocument, type PublicPublicationManifest } from "../../../editorial";
 import { findDocument } from "../../../../db/documents";
 import { studioConfig } from "../../../studio-config";
 
@@ -19,17 +19,30 @@ export async function GET(request: Request) {
     return Response.json({ error: "That piece could not be found." }, { status: 404 });
   }
 
+  const requestedRevision = url.searchParams.get("revision") || "";
+  if (document.status === "published" && (!document.publishedRevision || requestedRevision !== document.publishedRevision)) {
+    return Response.json({ live: false, error: "The requested publication revision is not the verified Studio revision." }, { status: 409 });
+  }
+
   const liveUrl = new URL(livePath(document.type, document.slug), studioConfig.siteUrl);
   liveUrl.searchParams.set("studio-check", document.updatedAt);
-  const response = await fetch(liveUrl, { cache: "no-store", redirect: "follow" });
+  const publicationUrl = new URL("/write-placid-publication.json", studioConfig.siteUrl);
+  publicationUrl.searchParams.set("studio-check", document.updatedAt);
+  const [response, publicationResponse] = await Promise.all([
+    fetch(liveUrl, { cache: "no-store", redirect: "follow" }),
+    fetch(publicationUrl, { cache: "no-store", redirect: "follow" }),
+  ]);
+  const publication = publicationResponse.ok
+    ? await publicationResponse.json() as Partial<PublicPublicationManifest>
+    : null;
+  const publicRevision = publicRevisionForDocument(publication, document.id);
   if (document.type !== "page" && document.status === "draft") {
-    return Response.json({ live: response.status === 404, url: liveUrl.toString() });
+    return Response.json({ live: response.status === 404 && !publicRevision, url: liveUrl.toString() });
   }
-  const html = response.ok ? await response.text() : "";
-  const expectedDate = document.type !== "page" ? displayDate(document.date) : "";
-  const live =
-    response.ok &&
-    html.includes(document.title) &&
-    (!expectedDate || html.includes(expectedDate));
-  return Response.json({ live, url: liveUrl.toString(), expectedDate });
+  return Response.json({
+    live: livePublicationMatches(response.ok, publication, document.id, document.publishedRevision),
+    url: liveUrl.toString(),
+    expectedRevision: document.publishedRevision,
+    publicRevision,
+  });
 }

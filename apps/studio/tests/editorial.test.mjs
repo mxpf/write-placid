@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 import { normalizeIncomingDocument, parseWritingDocument, serializeWritingDocument } from "../app/content.ts";
-import { buildPublicSnapshot, validateRepository } from "../app/editorial.ts";
+import { buildPublicSnapshot, livePublicationMatches, validateRepository } from "../app/editorial.ts";
 import { planEditorialMigration } from "../app/editorial-migration.ts";
 import { editorialLocation, loadKdrivePost, loadKdrivePosts, listKdrivePostRefs, saveKdrivePost, loadKdriveImage } from "../app/kdrive.ts";
 import { publishEditorialSnapshot, publishImageAsset } from "../app/github.ts";
@@ -51,24 +51,33 @@ test("a warm editorial library can validate, save and export images under a 50-s
   process.env.WRITE_PLACID_PUBLIC_CONTRACT_VERSION = "1";
   const cached = Array.from({ length: 60 }, (_, index) => piece(`Piece ${index}`, { status: "published", kdrivePath: `Published/piece-${index}.md`, kdriveEtag: `v${index}` }));
   let requests = 0;
+  let savedSource = "";
+  let publicationSource = "";
+  let branchHead = "head";
   t.mock.method(globalThis, "fetch", async (url, init) => {
     if (++requests > 50) throw new Error("Too many subrequests by single Worker invocation");
     const path = new URL(url).pathname;
     if (new URL(url).hostname === "kdrive.example") {
       if (init.method === "PROPFIND") return new Response(inventoryXml(path.replace("/Editorial/", ""), cached));
       if (init.method === "MKCOL") return new Response(null, { status: 405 });
-      if (init.method === "PUT") { assert.equal(init.headers["If-Match"], "v0"); return new Response(null, { headers: { ETag: "saved" } }); }
+      if (init.method === "PUT") { assert.equal(init.headers["If-Match"], "v0"); savedSource = String(init.body); return new Response(null, { headers: { ETag: "saved" } }); }
       if (path.includes("/Images/")) return new Response(new Uint8Array([1, 2, 3]));
       const document = cached.find(item => `/Editorial/${item.kdrivePath}` === path);
-      return new Response(serializeWritingDocument(document));
+      return new Response(savedSource && document?.id === cached[0].id ? savedSource : serializeWritingDocument(document), { headers: { ETag: savedSource && document?.id === cached[0].id ? "saved" : document?.kdriveEtag || "" } });
     }
+    if (path.includes("/contents/") && path.includes("write-placid-publication.json")) return Response.json({ type: "file", path, sha: "publication", content: Buffer.from(publicationSource).toString("base64") });
     if (path.includes("/contents/")) return init.method === "PUT" ? Response.json({}) : new Response(null, { status: 404 });
-    if (path.includes("/git/ref/heads/")) return Response.json({ object: { sha: "head" } });
+    if (path.includes("/git/ref/heads/")) return Response.json({ object: { sha: branchHead } });
     if (path.endsWith("/git/commits/head")) return Response.json({ tree: { sha: "old-tree" } });
+    if (path.endsWith("/git/commits/new-commit")) return Response.json({ tree: { sha: "new-tree" } });
     if (path.endsWith("/git/trees/old-tree")) return Response.json({ tree: [], truncated: false });
-    if (path.endsWith("/git/trees")) return Response.json({ sha: "new-tree" });
+    if (path.endsWith("/git/trees")) {
+      const body = JSON.parse(init.body);
+      publicationSource = body.tree.find(item => item.path.endsWith("write-placid-publication.json")).content;
+      return Response.json({ sha: "new-tree" });
+    }
     if (path.endsWith("/git/commits")) return Response.json({ sha: "new-commit" });
-    if (path.includes("/git/refs/heads/")) return Response.json({});
+    if (path.includes("/git/refs/heads/")) { branchHead = "new-commit"; return Response.json({}); }
     assert.fail(`Unexpected request: ${path}`);
   });
   await assert.rejects(loadKdrivePosts(), /Too many subrequests/);
@@ -82,13 +91,48 @@ test("a warm editorial library can validate, save and export images under a 50-s
     await publishImageAsset(name, image.bytes);
   }
   await publishEditorialSnapshot(repository.map(item => item.id === changed.id ? changed : item));
-  assert.ok(requests <= 25, `Expected headroom for redirects and D1, used ${requests}`);
+  assert.ok(requests <= 30, `Expected headroom for redirects and D1, used ${requests}`);
 });
 
 test("a failed inventory never falls back to stale cached writing", async (t) => {
   configureKdrive();
   t.mock.method(globalThis, "fetch", async () => new Response("Unavailable", { status: 503 }));
   await assert.rejects(loadKdrivePosts([piece("Cached", { kdrivePath: "Drafts/cached.md", kdriveEtag: "v1" })]), /503/);
+});
+
+test("publication reconciliation repairs a D1 and KDrive body mismatch only at the same canonical revision", async () => {
+  const { createEditorialRepository } = await import("../../../packages/core/dist/studio/editorial-repository.js");
+  const { withEditBase } = await import("../app/save-state.ts");
+  const cached = withEditBase(piece("Exact editor revision", {
+    body: "The complete editor revision, including its closing line.",
+    status: "published",
+    kdrivePath: "Published/exact-editor-revision.md",
+    kdriveEtag: '"same-revision"',
+  }));
+  const canonical = {
+    ...cached,
+    editBase: undefined,
+    body: "A partial canonical revision.",
+    publishedSource: "",
+  };
+  let saved;
+  const repository = createEditorialRepository({
+    listCachedDocuments: async () => [cached],
+    loadCanonicalDocuments: async (reusable) => {
+      assert.equal(reusable.some((document) => document.id === cached.id), false);
+      return [{ ...canonical }];
+    },
+    saveCanonicalDocument: async (document, previous) => {
+      assert.equal(previous.body, canonical.body);
+      saved = { ...document, kdriveEtag: '"next-revision"' };
+      Object.assign(document, saved);
+    },
+    saveCachedDocument: async () => {},
+  });
+  const reconciled = await repository.reconcileIncomingEditorialDocument(cached);
+  assert.equal(saved.body, cached.body);
+  assert.equal(reconciled.body, cached.body);
+  assert.equal(reconciled.kdriveEtag, '"next-revision"');
 });
 
 test("identity and public filename survive title changes, folder moves, and explicit slug changes", () => {
@@ -229,12 +273,15 @@ test("recursive WebDAV inventory includes nested editorial files and ignores Res
 test("folder moves forbid overwrites and use the moved file's revision for saving", async (t) => {
   configureKdrive();
   const requests = [];
-  t.mock.method(globalThis, "fetch", async (url, init) => {
-    requests.push({ url, ...init });
-    return new Response(null, { status: init.method === "MKCOL" ? 405 : 200, headers: { ETag: '"moved"' } });
-  });
   const previous = piece("Old", { kdrivePath: "Drafts/Nested/name.md", kdriveEtag: '"old"' });
   const document = { ...previous, status: "published" };
+  let storedSource = serializeWritingDocument(previous);
+  t.mock.method(globalThis, "fetch", async (url, init) => {
+    requests.push({ url, ...init });
+    if (init.method === "MKCOL") return new Response(null, { status: 405 });
+    if (init.method === "PUT") storedSource = String(init.body);
+    return new Response(init.method === "GET" ? storedSource : null, { status: 200, headers: { ETag: '"moved"' } });
+  });
   await saveKdrivePost(document, previous);
   const move = requests.find((request) => request.method === "MOVE");
   assert.equal(move.headers.Overwrite, "F");
@@ -266,15 +313,23 @@ test("Git snapshot publishes content, removals and redirects in one non-force co
   process.env.WRITE_PLACID_PUBLIC_CONTRACT_VERSION = "1";
   process.env.WRITE_PLACID_GITHUB_TOKEN = "test";
   const requests = [];
+  let publicationSource = "";
+  let branchHead = "head";
   t.mock.method(globalThis, "fetch", async (url, init) => {
     requests.push({ url, ...init });
     const path = new URL(url).pathname;
     let response;
-    if (path.includes("/git/ref/")) response = { object: { sha: "head" } };
+    if (path.includes("/contents/") && path.includes("write-placid-publication.json")) response = { type: "file", path, sha: "publication", content: Buffer.from(publicationSource).toString("base64") };
+    else if (path.includes("/git/ref/heads/")) response = { object: { sha: branchHead } };
     else if (path.endsWith("/git/commits/head")) response = { tree: { sha: "tree" } };
+    else if (path.endsWith("/git/commits/new-commit")) response = { tree: { sha: "new-tree" } };
     else if (path.endsWith("/git/trees/tree")) response = { truncated: false, tree: [{ path: "apps/site/content/posts/removed.md", type: "blob", sha: "old" }, { path: "apps/site/app/page.tsx", type: "blob", sha: "code" }] };
-    else if (path.endsWith("/git/trees")) response = { sha: "new-tree" };
+    else if (path.endsWith("/git/trees")) {
+      publicationSource = JSON.parse(init.body).tree.find(item => item.path.endsWith("write-placid-publication.json")).content;
+      response = { sha: "new-tree" };
+    }
     else if (path.endsWith("/git/commits")) response = { sha: "new-commit" };
+    else if (path.includes("/git/refs/heads/") && init.method === "PATCH") { branchHead = "new-commit"; response = {}; }
     else response = {};
     return Response.json(response);
   });
@@ -286,9 +341,40 @@ test("Git snapshot publishes content, removals and redirects in one non-force co
   assert.ok(tree.tree.some((item) => item.path === "apps/site/content/identity-manifest.json"));
   assert.ok(tree.tree.some((item) => item.path === "apps/site/content/posts/removed.md" && item.sha === null));
   assert.ok(!tree.tree.some((item) => item.path === "apps/site/app/page.tsx"));
-  assert.deepEqual(JSON.parse(requests.at(-1).body), { sha: "new-commit", force: false });
+  const refUpdate = requests.find((item) => item.method === "PATCH");
+  assert.deepEqual(JSON.parse(refUpdate.body), { sha: "new-commit", force: false });
   assert.equal(document.id.length, 36);
   assert.match(document.publishedSource, /^id:/m);
+  assert.match(document.publishedRevision, /^[a-f0-9]{64}$/);
+});
+
+test("changed editorial content fails instead of accepting a stale unchanged public branch", async (t) => {
+  process.env.WRITE_PLACID_PUBLIC_CONTRACT_VERSION = "1";
+  process.env.WRITE_PLACID_GITHUB_TOKEN = "test";
+  const document = piece("Changed", { status: "published", body: "The intended new revision." });
+  document.publishedSource = serializeWritingDocument({ ...document, body: "The stale public revision." });
+  const mutations = [];
+  t.mock.method(globalThis, "fetch", async (url, init) => {
+    const path = new URL(url).pathname;
+    if (init.method) mutations.push(init.method);
+    if (path.includes("/git/ref/heads/")) return Response.json({ object: { sha: "stale-head" } });
+    if (path.endsWith("/git/commits/stale-head")) return Response.json({ tree: { sha: "stale-tree" } });
+    if (path.endsWith("/git/trees/stale-tree")) return Response.json({ tree: [], truncated: false });
+    if (path.endsWith("/git/trees")) return Response.json({ sha: "stale-tree" });
+    assert.fail(`Unexpected request: ${path}`);
+  });
+  await assert.rejects(publishEditorialSnapshot([document]), /did not advance/);
+  assert.deepEqual(mutations, ["POST"]);
+  assert.equal(document.publishedSource.includes("stale public revision"), true);
+});
+
+test("live publication requires the exact exported revision instead of matching stale title or date", () => {
+  const id = crypto.randomUUID();
+  const revision = "a".repeat(64);
+  const stale = { version: 1, documents: [{ id, path: "content/posts/test.md", url: "/test.html", revision: "b".repeat(64) }] };
+  assert.equal(livePublicationMatches(true, stale, id, revision), false);
+  assert.equal(livePublicationMatches(true, null, id, revision), false);
+  assert.equal(livePublicationMatches(true, { ...stale, documents: [{ ...stale.documents[0], revision }] }, id, revision), true);
 });
 
 test("published path, slug and aliases override a cached pending rename", () => {
@@ -393,10 +479,13 @@ test("two edits across background publishing preserve both edits and use fresh c
   configureKdrive();
   const opened = withEditBase(piece("Repeat", { status: "published", kdrivePath: "Published/repeat.md", kdriveEtag: "v1" }));
   const sent = [];
+  let storedSource = serializeWritingDocument(opened);
+  let revision = 1;
   t.mock.method(globalThis, "fetch", async (_url, init) => {
     if (init.method === "MKCOL") return new Response(null, { status: 405 });
     sent.push(init);
-    return new Response(null, { headers: { ETag: `v${sent.length + 1}` } });
+    if (init.method === "PUT") { storedSource = String(init.body); revision += 1; }
+    return new Response(init.method === "GET" ? storedSource : null, { headers: { ETag: `v${revision}` } });
   });
   const first = normalizeIncomingDocument({ ...opened, body: "First edit" }, opened);
   await saveKdrivePost(first, opened);
@@ -406,8 +495,9 @@ test("two edits across background publishing preserve both edits and use fresh c
   assert.equal(validateSaveRevision(nextInput, afterPublishing), null);
   const second = normalizeIncomingDocument(nextInput, afterPublishing);
   await saveKdrivePost(second, afterPublishing);
-  assert.equal(sent[1].headers["If-Match"], "publisher-v3");
-  assert.equal(parseWritingDocument(sent[1].body, second.path).body, nextInput.body);
+  const puts = sent.filter((request) => request.method === "PUT");
+  assert.equal(puts[1].headers["If-Match"], "publisher-v3");
+  assert.equal(parseWritingDocument(puts[1].body, second.path).body, nextInput.body);
   assert.equal(second.publicUpdatedAt, afterPublishing.publicUpdatedAt);
 });
 

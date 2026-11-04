@@ -50,7 +50,7 @@ Never-published drafts can be deleted after a D1 recovery copy is created. Forme
 
 ## Public handoff
 
-Authenticated `GET /api/content/snapshot` produces `{manifest, files}` without publishing. The `files` object maps repository-relative filenames to UTF-8 strings. It includes published Markdown and `content/identity-manifest.json`:
+Authenticated `GET /api/content/snapshot` produces `{manifest, publication, revisions, files}` without publishing. The `files` object maps repository-relative filenames to UTF-8 strings. It includes published Markdown, `content/identity-manifest.json`, and the public deployment-verification file `public/write-placid-publication.json`:
 
 ```json
 {
@@ -77,9 +77,11 @@ Only published identities and aliases appear in this public manifest. Private co
 4. Produce all HTML, feeds, navigation, indexes, sitemap entries, redirects, and assets at build time. Require no KDrive credentials or requests at public request time.
 5. Rebuild on changes to Markdown or the identity manifest. The contents of a single Git commit are one complete snapshot.
 
-Studio replaces managed Markdown and the manifest in one Git tree/commit, updating the branch without force. Existing code and unrelated repository files are untouched by that publisher. A public Markdown file missing from the canonical graph blocks publishing; only a known canonical document moved to Drafts may be removed. Concurrent Git writes cannot be overwritten. If the resulting tree is unchanged, no commit is created. Referenced KDrive images are copied using the existing asset workflow before that content commit; already-public assets remain valid if no KDrive copy exists.
+Studio replaces managed Markdown, the identity manifest, and the revision index in one Git tree/commit, updating the branch without force. Before advancing the branch, it verifies the candidate commit's complete tree and exact revision-index bytes. It then verifies that the configured branch points to that commit. Changed editorial content is an error if the branch does not advance. Existing code and unrelated repository files are untouched by that publisher. A public Markdown file missing from the canonical graph blocks publishing; only a known canonical document moved to Drafts may be removed. Concurrent Git writes cannot be overwritten. If a genuinely unchanged snapshot is republished, no commit is created. Referenced KDrive images are copied using the existing asset workflow before that content commit; already-public assets remain valid if no KDrive copy exists.
 
-The manual Publish action and the five-minute scheduler publish the complete validated Published set. Opening Studio only refreshes the cache. Saving within Published can therefore go live at the next scheduled run, as in the previous KDrive integration. Reconciliation reads all documents with at most five simultaneous file reads; large libraries may eventually need a durable indexed validation pipeline. There is no cross-file WebDAV transaction: a concurrent external edit after validation may require the next reconciliation; ETags protect content writes and each exported Git snapshot is internally validated.
+The manual Publish action sends the exact current editor revision to the server, refreshes that document from KDrive, conditionally reconciles it, verifies the KDrive readback byte-for-byte, and then publishes the complete validated Published set. A matching strong ETag can repair a D1/KDrive body mismatch; a newer KDrive revision remains a conflict. Opening Studio only refreshes the cache. Saving within Published can therefore go live at the next scheduled run, as in the previous KDrive integration. Reconciliation reads all documents with at most five simultaneous file reads; large libraries may eventually need a durable indexed validation pipeline. There is no cross-file WebDAV transaction: a concurrent external edit after validation may require the next reconciliation; ETags protect content writes and each exported Git snapshot is internally validated.
+
+Studio reports `Live now` only when the deployed site's `write-placid-publication.json` contains the exact SHA-256 revision exported for that document and the public page is available. Matching an older page's title or date is never sufficient. Failed publication leaves the editor revision dirty and surfaces the publication error. Authenticated `GET /api/posts` remains as a read-only compatibility view for older Drafts MCP clients; new integrations use `GET /api/content`.
 
 ## Rollout and migration
 

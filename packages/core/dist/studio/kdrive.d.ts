@@ -35,6 +35,7 @@ export declare function loadKdrivePost(ref: KdrivePostRef): Promise<{
         label: string;
         href: string;
     };
+    publishedRevision: string;
     updatedAt: string;
     googleDocId: string;
     driveRevision: string;

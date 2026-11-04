@@ -1,5 +1,8 @@
 import { serializeWritingDocument as serializeCanonical } from "./content.ts";
-import { buildPublicSnapshot } from "./editorial.ts";
+import {
+  buildPublishablePublicSnapshot,
+  publicPublicationManifestPath,
+} from "./editorial.ts";
 import {
   parseWritingDocument,
   type WritingDocument,
@@ -99,10 +102,12 @@ function encodeBytesBase64(bytes: Uint8Array) {
   return btoa(binary);
 }
 
-async function readGithubFile(pathname: string) {
+async function readGithubFile(pathname: string, ref = branch, write = false) {
   const target = repositoryPath(pathname);
   const file = await githubFetch<GithubFile>(
-    `/contents/${encodePath(target)}?ref=${encodeURIComponent(branch)}`,
+    `/contents/${encodePath(target)}?ref=${encodeURIComponent(ref)}`,
+    {},
+    { write },
   );
   if (!file?.content) throw new Error(`Could not read ${pathname}.`);
   return {
@@ -148,7 +153,11 @@ export function assertPublicContract() {
 /** One Git commit is the handoff boundary; no public runtime KDrive access. */
 export async function publishEditorialSnapshot(documents: WritingDocument[]) {
   assertPublicContract();
-  const snapshot = buildPublicSnapshot(documents);
+  const snapshot = await buildPublishablePublicSnapshot(documents);
+  const expectedSnapshotChange = documents.some((document) => {
+    const expected = document.status === "published" ? serializeCanonical(document).trim() : "";
+    return document.publishedSource.trim() !== expected;
+  });
   const ref = await githubFetch<{ object: { sha: string } }>(`/git/ref/heads/${encodeURIComponent(branch)}`, {}, { write: true });
   if (!ref) throw new Error("Could not read the public branch.");
   const commit = await githubFetch<{ tree: { sha: string } }>(`/git/commits/${ref.object.sha}`, {}, { write: true });
@@ -163,21 +172,35 @@ export async function publishEditorialSnapshot(documents: WritingDocument[]) {
     }
   }
   const nextTree = await githubFetch<{ sha: string }>("/git/trees", { method: "POST", body: JSON.stringify({ base_tree: commit!.tree.sha, tree: entries }) }, { write: true });
-  if (nextTree!.sha === commit!.tree.sha) {
+  const publicationSource = snapshot.files[publicPublicationManifestPath];
+  const verifyCommit = async (commitSha: string, expectedTreeSha: string) => {
+    const candidate = await githubFetch<{ tree: { sha: string } }>(`/git/commits/${commitSha}`, {}, { write: true });
+    if (candidate?.tree.sha !== expectedTreeSha) throw new Error("GitHub did not retain the complete intended publication tree.");
+    const publishedManifest = await readGithubFile(publicPublicationManifestPath, commitSha, true);
+    if (publishedManifest.source !== publicationSource) throw new Error("GitHub did not retain the intended publication content hashes.");
+  };
+  const acknowledge = (commitSha: string) => {
     for (const document of documents) {
       document.publishedSource = document.status === "published" ? serializeCanonical(document) : "";
-      document.remoteSha = document.status === "published" ? ref.object.sha : "";
+      document.publishedRevision = document.status === "published" ? snapshot.revisions[document.id] || "" : "";
+      document.remoteSha = document.status === "published" ? commitSha : "";
     }
-    return { commit: ref.object.sha, manifest: snapshot.manifest };
+  };
+  if (nextTree!.sha === commit!.tree.sha) {
+    if (expectedSnapshotChange) throw new Error("The public branch did not advance for changed editorial content. Nothing was marked live.");
+    await verifyCommit(ref.object.sha, commit!.tree.sha);
+    acknowledge(ref.object.sha);
+    return { commit: ref.object.sha, manifest: snapshot.manifest, publication: snapshot.publication, revisions: snapshot.revisions, changed: false };
   }
   const nextCommit = await githubFetch<{ sha: string }>("/git/commits", { method: "POST", body: JSON.stringify({ message: "Publish validated Write Placid editorial snapshot", tree: nextTree!.sha, parents: [ref.object.sha] }) }, { write: true });
+  // Verify the complete candidate commit before advancing main. Only the ref
+  // update below can trigger the public build.
+  await verifyCommit(nextCommit!.sha, nextTree!.sha);
   await githubFetch(`/git/refs/heads/${encodeURIComponent(branch)}`, { method: "PATCH", body: JSON.stringify({ sha: nextCommit!.sha, force: false }) }, { write: true });
-  for (const document of documents) {
-    // The comparison baseline retains ID links, while public files contain resolved URLs.
-    document.publishedSource = document.status === "published" ? serializeCanonical(document) : "";
-    document.remoteSha = document.status === "published" ? nextCommit!.sha : "";
-  }
-  return { commit: nextCommit!.sha, manifest: snapshot.manifest };
+  const publishedRef = await githubFetch<{ object: { sha: string } }>(`/git/ref/heads/${encodeURIComponent(branch)}`, {}, { write: true });
+  if (publishedRef?.object.sha !== nextCommit!.sha) throw new Error("GitHub did not advance the configured public branch to the verified snapshot.");
+  acknowledge(nextCommit!.sha);
+  return { commit: nextCommit!.sha, manifest: snapshot.manifest, publication: snapshot.publication, revisions: snapshot.revisions, changed: true };
 }
 
 export async function publishImageAsset(name: string, bytes: Uint8Array) {
