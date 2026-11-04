@@ -9,5 +9,6 @@ export declare function planSave(input: Partial<WritingDocument>, existing?: Wri
     document: WritingDocument;
     alreadySaved: boolean;
     error: string | null;
+    rebased: boolean;
 };
 //# sourceMappingURL=save-state.d.ts.map

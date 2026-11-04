@@ -1,4 +1,6 @@
 import { type WritingDocument } from "./content.ts";
+export declare class KdriveRevisionConflictError extends Error {
+}
 export type KdrivePostRef = {
     folder: string;
     type: WritingDocument["type"];

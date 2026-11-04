@@ -102,3 +102,18 @@ test("a retry can acknowledge identical writing without overwriting a genuinely 
   assert.equal(recovered.editBase, original.editBase);
   assert.match(validateSaveRevision(recovered, canonical), /different writing/);
 });
+
+test("a stale editor safely rebases changes to different authoring fields", () => {
+  const opened = piece();
+  const local = { ...opened, body: "A local body edit." };
+  const remote = { ...opened, title: "Renamed remotely", kdriveEtag: "remote" };
+  const planned = planSave(local, remote);
+  assert.equal(planned.error, null);
+  assert.equal(planned.rebased, true);
+  assert.equal(planned.document.title, remote.title);
+  assert.equal(planned.document.body, local.body);
+
+  const overlapping = planSave(local, { ...remote, body: "A different remote body edit." });
+  assert.match(overlapping.error, /different writing/);
+  assert.equal(overlapping.rebased, false);
+});

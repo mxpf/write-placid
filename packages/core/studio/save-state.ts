@@ -1,4 +1,4 @@
-import { normalizeIncomingDocument, serializeWritingDocument, type WritingDocument } from "./content.ts";
+import { normalizeIncomingDocument, parseWritingDocument, serializeWritingDocument, type WritingDocument } from "./content.ts";
 
 /** Publishing timestamps are server-owned and are not competing author edits. */
 export function editableSource(document: WritingDocument) {
@@ -40,8 +40,56 @@ export function validateSaveRevision(input: Partial<WritingDocument>, existing?:
   return null;
 }
 
+const mergeableFields = ["title", "dek", "slug", "date", "status", "body", "source"] as const;
+
+function sameValue(left: unknown, right: unknown) {
+  return JSON.stringify(left) === JSON.stringify(right);
+}
+
+/**
+ * Rebase an editor revision only when its changes and the canonical changes
+ * touch different author-controlled fields. A body changed on both sides is
+ * deliberately left as a conflict rather than guessed at line-by-line.
+ */
+function rebaseNonOverlappingEdits(input: Partial<WritingDocument>, existing: WritingDocument) {
+  if (!input.editBase) return null;
+  let base: WritingDocument;
+  try {
+    base = parseWritingDocument(input.editBase, existing.path);
+  } catch {
+    return null;
+  }
+  const merged: Partial<WritingDocument> = { ...input };
+  let localChanged = false;
+  for (const field of mergeableFields) {
+    const before = base[field];
+    const local = input[field] ?? (field === "source" ? undefined : before);
+    const remote = existing[field];
+    const changedLocally = !sameValue(local, before);
+    const changedRemotely = !sameValue(remote, before);
+    localChanged ||= changedLocally;
+    if (changedLocally && changedRemotely && !sameValue(local, remote)) return null;
+    (merged as Record<string, unknown>)[field] = changedLocally ? local : remote;
+  }
+  if (!localChanged) return null;
+  return { ...merged, editBase: editableSource(existing), kdriveEtag: existing.kdriveEtag };
+}
+
 export function planSave(input: Partial<WritingDocument>, existing?: WritingDocument) {
-  const document = normalizeIncomingDocument({ ...input, ...(existing ? { id: existing.id } : {}) }, existing);
-  const alreadySaved = Boolean(existing && editableSource(document) === editableSource(existing));
-  return { document, alreadySaved, error: alreadySaved ? null : validateSaveRevision(input, existing) };
+  let candidate = input;
+  let document = normalizeIncomingDocument({ ...candidate, ...(existing ? { id: existing.id } : {}) }, existing);
+  let alreadySaved = Boolean(existing && editableSource(document) === editableSource(existing));
+  let error = alreadySaved ? null : validateSaveRevision(candidate, existing);
+  let rebased = false;
+  if (error && existing) {
+    const merged = rebaseNonOverlappingEdits(input, existing);
+    if (merged) {
+      candidate = merged;
+      document = normalizeIncomingDocument({ ...candidate, id: existing.id }, existing);
+      alreadySaved = editableSource(document) === editableSource(existing);
+      error = alreadySaved ? null : validateSaveRevision(candidate, existing);
+      rebased = !error;
+    }
+  }
+  return { document, alreadySaved, error, rebased };
 }

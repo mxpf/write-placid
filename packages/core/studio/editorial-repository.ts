@@ -1,5 +1,6 @@
 import type { WritingDocument } from "./content.ts";
 import { assertValidRepository } from "./editorial.ts";
+import { KdriveRevisionConflictError } from "./kdrive.ts";
 import { editableSource, planSave } from "./save-state.ts";
 
 export type EditorialRepositoryDependencies = {
@@ -35,6 +36,7 @@ export function createEditorialRepository(dependencies: EditorialRepositoryDepen
         Object.assign(document, {
           remoteSha: previous.remoteSha,
           publishedSource: previous.publishedSource,
+          publishedRevision: previous.publishedRevision,
           googleDocId: previous.googleDocId,
           driveRevision: previous.driveRevision,
           driveSyncedBody: previous.driveSyncedBody,
@@ -66,18 +68,25 @@ export function createEditorialRepository(dependencies: EditorialRepositoryDepen
   }
 
   async function saveIncomingEditorialDocument(input: Partial<WritingDocument>) {
-    const repository = await readEditorialRepository();
-    const current = repository.find((item) => item.id === input.id || item.legacyIds?.includes(input.id || ""));
-    const { document, alreadySaved, error } = planSave(input, current);
-    if (current && alreadySaved) {
-      await dependencies.saveCachedDocument(current);
-      return current;
+    for (let attempt = 0; attempt < 2; attempt += 1) {
+      const repository = await readEditorialRepository(attempt && input.id ? { refreshIds: [input.id] } : {});
+      const current = repository.find((item) => item.id === input.id || item.legacyIds?.includes(input.id || ""));
+      const { document, alreadySaved, error } = planSave(input, current);
+      if (current && alreadySaved) {
+        await dependencies.saveCachedDocument(current);
+        return current;
+      }
+      if (error) throw new EditorialConflictError(error);
+      assertValidRepository([...repository.filter((item) => item.id !== document.id), document]);
+      try {
+        await dependencies.saveCanonicalDocument(document, current);
+        await dependencies.saveCachedDocument(document);
+        return document;
+      } catch (error) {
+        if (!(error instanceof KdriveRevisionConflictError) || attempt) throw error;
+      }
     }
-    if (error) throw new EditorialConflictError(error);
-    assertValidRepository([...repository.filter((item) => item.id !== document.id), document]);
-    await dependencies.saveCanonicalDocument(document, current);
-    await dependencies.saveCachedDocument(document);
-    return document;
+    throw new EditorialConflictError("This piece changed while Studio was saving it. Your edits are still in this tab; try Update again.");
   }
 
   /**

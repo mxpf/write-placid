@@ -1,6 +1,8 @@
 import { parseWritingDocument, serializeWritingDocument, } from "./content.js";
 import { imageContentType, validImageName } from "./image-files.js";
 const defaultRoot = "/Writing/Write Placid";
+export class KdriveRevisionConflictError extends Error {
+}
 function configuration() {
     const url = process.env.WRITE_PLACID_KDRIVE_WEBDAV_URL?.trim().replace(/\/+$/, "");
     const username = process.env.WRITE_PLACID_KDRIVE_USERNAME?.trim();
@@ -40,6 +42,9 @@ async function kdriveFetch(pathname, init, allowNotFound = false) {
     if (allowNotFound && response.status === 404)
         return null;
     if (!response.ok) {
+        if (response.status === 412) {
+            throw new KdriveRevisionConflictError(`KDrive returned 412 because the revision changed while Studio was accessing ${pathname}.`);
+        }
         throw new Error(`KDrive returned ${response.status} while accessing ${pathname}.`);
     }
     return response;

@@ -135,6 +135,40 @@ test("publication reconciliation repairs a D1 and KDrive body mismatch only at t
   assert.equal(reconciled.kdriveEtag, '"next-revision"');
 });
 
+test("an incoming save retries a KDrive race and preserves non-overlapping remote edits", async () => {
+  const { createEditorialRepository } = await import("../../../packages/core/dist/studio/editorial-repository.js");
+  const { KdriveRevisionConflictError } = await import("../app/kdrive.ts");
+  const { withEditBase } = await import("../app/save-state.ts");
+  const opened = withEditBase(piece("Original title", { kdrivePath: "Published/original-title.md", kdriveEtag: '"first"' }));
+  const remote = { ...opened, title: "Remote title", kdriveEtag: '"second"', publishedRevision: "published-revision" };
+  const input = { ...opened, body: "The local browser edit." };
+  let reads = 0;
+  let writes = 0;
+  let saved;
+  const repository = createEditorialRepository({
+    listCachedDocuments: async () => [{ ...opened, publishedRevision: "published-revision" }],
+    loadCanonicalDocuments: async (reusable) => {
+      reads += 1;
+      if (reads === 1) return [{ ...opened }];
+      assert.equal(reusable.length, 0);
+      return [{ ...remote, publishedRevision: "" }];
+    },
+    saveCanonicalDocument: async (document, previous) => {
+      writes += 1;
+      if (writes === 1) throw new KdriveRevisionConflictError("KDrive changed");
+      assert.equal(previous.kdriveEtag, '"second"');
+      saved = { ...document };
+    },
+    saveCachedDocument: async () => {},
+  });
+  const result = await repository.saveIncomingEditorialDocument(input);
+  assert.equal(reads, 2);
+  assert.equal(writes, 2);
+  assert.equal(saved.title, remote.title);
+  assert.equal(saved.body, input.body);
+  assert.equal(result.publishedRevision, "published-revision");
+});
+
 test("identity and public filename survive title changes, folder moves, and explicit slug changes", () => {
   const original = piece("Original", { kdrivePath: "Drafts/Notes/file.md" });
   const titled = normalizeIncomingDocument({ ...original, title: "New title" }, original);

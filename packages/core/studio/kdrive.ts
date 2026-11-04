@@ -7,6 +7,8 @@ import { imageContentType, validImageName } from "./image-files.ts";
 
 const defaultRoot = "/Writing/Write Placid";
 
+export class KdriveRevisionConflictError extends Error {}
+
 export type KdrivePostRef = {
   folder: string;
   type: WritingDocument["type"];
@@ -55,6 +57,9 @@ async function kdriveFetch(pathname: string, init: RequestInit, allowNotFound = 
   });
   if (allowNotFound && response.status === 404) return null;
   if (!response.ok) {
+    if (response.status === 412) {
+      throw new KdriveRevisionConflictError(`KDrive returned 412 because the revision changed while Studio was accessing ${pathname}.`);
+    }
     throw new Error(`KDrive returned ${response.status} while accessing ${pathname}.`);
   }
   return response;
