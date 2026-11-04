@@ -39,6 +39,8 @@ type GithubDirectoryEntry = {
   sha: string;
 };
 
+export type PublicationAssets = Record<string, Uint8Array>;
+
 function githubHeaders(write = false) {
   const token = process.env.WRITE_PLACID_GITHUB_TOKEN?.trim();
   if (write && !token) {
@@ -102,6 +104,13 @@ function encodeBytesBase64(bytes: Uint8Array) {
   return btoa(binary);
 }
 
+function publicImagePath(name: string) {
+  if (!/^[a-z0-9][a-z0-9._-]*\.(?:jpe?g|png|webp|gif)$/i.test(name)) {
+    throw new Error("That image name is invalid.");
+  }
+  return `public/images/${name}`;
+}
+
 async function readGithubFile(pathname: string, ref = branch, write = false) {
   const target = repositoryPath(pathname);
   const file = await githubFetch<GithubFile>(
@@ -151,19 +160,42 @@ export function assertPublicContract() {
 }
 
 /** One Git commit is the handoff boundary; no public runtime KDrive access. */
-export async function publishEditorialSnapshot(documents: WritingDocument[]) {
+export async function publishEditorialSnapshot(
+  documents: WritingDocument[],
+  options: { assets?: PublicationAssets } = {},
+) {
   assertPublicContract();
   const snapshot = await buildPublishablePublicSnapshot(documents);
-  const expectedSnapshotChange = documents.some((document) => {
+  const expectedEditorialChange = documents.some((document) => {
     const expected = document.status === "published" ? serializeCanonical(document).trim() : "";
     return document.publishedSource.trim() !== expected;
   });
+  const assets = Object.entries(options.assets || {}).map(([name, bytes]) => ({
+    path: repositoryPath(publicImagePath(name)),
+    bytes,
+  }));
+  if (new Set(assets.map((asset) => asset.path)).size !== assets.length) {
+    throw new Error("Duplicate publication image names are not allowed.");
+  }
   const ref = await githubFetch<{ object: { sha: string } }>(`/git/ref/heads/${encodeURIComponent(branch)}`, {}, { write: true });
   if (!ref) throw new Error("Could not read the public branch.");
   const commit = await githubFetch<{ tree: { sha: string } }>(`/git/commits/${ref.object.sha}`, {}, { write: true });
   const tree = await githubFetch<{ tree: { path: string; type: string; sha: string }[]; truncated: boolean }>(`/git/trees/${commit!.tree.sha}?recursive=1`, {}, { write: true });
   if (!tree || tree.truncated) throw new Error("Could not inspect the complete public snapshot.");
-  const entries: { path: string; mode: string; type: string; content?: string; sha?: null }[] = Object.entries(snapshot.files).map(([path, content]) => ({ path: repositoryPath(path), mode: "100644", type: "blob", content }));
+  const currentTree = new Map(tree.tree.map((entry) => [entry.path, entry.sha]));
+  const assetBlobs = await Promise.all(assets.map(async (asset) => {
+    const blob = await githubFetch<{ sha: string }>("/git/blobs", {
+      method: "POST",
+      body: JSON.stringify({ content: encodeBytesBase64(asset.bytes), encoding: "base64" }),
+    }, { write: true });
+    if (!blob?.sha) throw new Error(`GitHub did not retain the publication image ${documentPath(asset.path)}.`);
+    return { path: asset.path, sha: blob.sha };
+  }));
+  const expectedSnapshotChange = expectedEditorialChange || assetBlobs.some((asset) => currentTree.get(asset.path) !== asset.sha);
+  const entries: { path: string; mode: string; type: string; content?: string; sha?: string | null }[] = [
+    ...Object.entries(snapshot.files).map(([path, content]) => ({ path: repositoryPath(path), mode: "100644", type: "blob", content })),
+    ...assetBlobs.map((asset) => ({ path: asset.path, mode: "100644", type: "blob", sha: asset.sha })),
+  ];
   for (const entry of tree.tree) {
     const path = documentPath(entry.path);
     if (/^content\/(posts|pages|now)\/[^/]+\.md$/.test(path) && !(path in snapshot.files)) {
@@ -204,10 +236,7 @@ export async function publishEditorialSnapshot(documents: WritingDocument[]) {
 }
 
 export async function publishImageAsset(name: string, bytes: Uint8Array) {
-  if (!/^[a-z0-9][a-z0-9._-]*\.(?:jpe?g|png|webp|gif)$/i.test(name)) {
-    throw new Error("That image name is invalid.");
-  }
-  const path = repositoryPath(`public/images/${name}`);
+  const path = repositoryPath(publicImagePath(name));
   const current = await githubFetch<GithubFile>(
     `/contents/${encodePath(path)}?ref=${encodeURIComponent(branch)}`,
     {},

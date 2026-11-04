@@ -1,8 +1,11 @@
 import { type WritingDocument } from "./content.ts";
+export type PublicationAssets = Record<string, Uint8Array>;
 export declare function loadPublishedDocuments(): Promise<WritingDocument[]>;
 export declare function assertPublicContract(): void;
 /** One Git commit is the handoff boundary; no public runtime KDrive access. */
-export declare function publishEditorialSnapshot(documents: WritingDocument[]): Promise<{
+export declare function publishEditorialSnapshot(documents: WritingDocument[], options?: {
+    assets?: PublicationAssets;
+}): Promise<{
     commit: string;
     manifest: {
         version: number;

@@ -309,7 +309,7 @@ test("publishing is gated before any GitHub mutation", async (t) => {
   await assert.rejects(publishEditorialSnapshot([piece("A")]), /contract v1/);
 });
 
-test("Git snapshot publishes content, removals and redirects in one non-force commit", async (t) => {
+test("Git snapshot publishes content, images, removals and redirects in one non-force commit", async (t) => {
   process.env.WRITE_PLACID_PUBLIC_CONTRACT_VERSION = "1";
   process.env.WRITE_PLACID_GITHUB_TOKEN = "test";
   const requests = [];
@@ -324,6 +324,7 @@ test("Git snapshot publishes content, removals and redirects in one non-force co
     else if (path.endsWith("/git/commits/head")) response = { tree: { sha: "tree" } };
     else if (path.endsWith("/git/commits/new-commit")) response = { tree: { sha: "new-tree" } };
     else if (path.endsWith("/git/trees/tree")) response = { truncated: false, tree: [{ path: "apps/site/content/posts/removed.md", type: "blob", sha: "old" }, { path: "apps/site/app/page.tsx", type: "blob", sha: "code" }] };
+    else if (path.endsWith("/git/blobs")) response = { sha: "image-blob" };
     else if (path.endsWith("/git/trees")) {
       publicationSource = JSON.parse(init.body).tree.find(item => item.path.endsWith("write-placid-publication.json")).content;
       response = { sha: "new-tree" };
@@ -334,13 +335,18 @@ test("Git snapshot publishes content, removals and redirects in one non-force co
     return Response.json(response);
   });
   const document = piece("A", { status: "published", aliases: ["/old.html"] });
-  const result = await publishEditorialSnapshot([document, piece("Removed", { path: "content/posts/removed.md" })]);
+  const result = await publishEditorialSnapshot(
+    [document, piece("Removed", { path: "content/posts/removed.md" })],
+    { assets: { "diagram.png": new Uint8Array([1, 2, 3]) } },
+  );
   assert.equal(result.commit, "new-commit");
   const tree = JSON.parse(requests.find((item) => item.url.endsWith("/git/trees")).body);
   assert.equal(tree.base_tree, "tree");
   assert.ok(tree.tree.some((item) => item.path === "apps/site/content/identity-manifest.json"));
+  assert.ok(tree.tree.some((item) => item.path === "apps/site/public/images/diagram.png" && item.sha === "image-blob"));
   assert.ok(tree.tree.some((item) => item.path === "apps/site/content/posts/removed.md" && item.sha === null));
   assert.ok(!tree.tree.some((item) => item.path === "apps/site/app/page.tsx"));
+  assert.ok(!requests.some((item) => item.url.includes("/contents/apps/site/public/images/")), "Images must not advance the branch separately");
   const refUpdate = requests.find((item) => item.method === "PATCH");
   assert.deepEqual(JSON.parse(refUpdate.body), { sha: "new-commit", force: false });
   assert.equal(document.id.length, 36);

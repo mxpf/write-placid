@@ -67,6 +67,12 @@ function encodeBytesBase64(bytes) {
     }
     return btoa(binary);
 }
+function publicImagePath(name) {
+    if (!/^[a-z0-9][a-z0-9._-]*\.(?:jpe?g|png|webp|gif)$/i.test(name)) {
+        throw new Error("That image name is invalid.");
+    }
+    return `public/images/${name}`;
+}
 async function readGithubFile(pathname, ref = branch, write = false) {
     const target = repositoryPath(pathname);
     const file = await githubFetch(`/contents/${encodePath(target)}?ref=${encodeURIComponent(ref)}`, {}, { write });
@@ -105,13 +111,20 @@ export function assertPublicContract() {
     }
 }
 /** One Git commit is the handoff boundary; no public runtime KDrive access. */
-export async function publishEditorialSnapshot(documents) {
+export async function publishEditorialSnapshot(documents, options = {}) {
     assertPublicContract();
     const snapshot = await buildPublishablePublicSnapshot(documents);
-    const expectedSnapshotChange = documents.some((document) => {
+    const expectedEditorialChange = documents.some((document) => {
         const expected = document.status === "published" ? serializeCanonical(document).trim() : "";
         return document.publishedSource.trim() !== expected;
     });
+    const assets = Object.entries(options.assets || {}).map(([name, bytes]) => ({
+        path: repositoryPath(publicImagePath(name)),
+        bytes,
+    }));
+    if (new Set(assets.map((asset) => asset.path)).size !== assets.length) {
+        throw new Error("Duplicate publication image names are not allowed.");
+    }
     const ref = await githubFetch(`/git/ref/heads/${encodeURIComponent(branch)}`, {}, { write: true });
     if (!ref)
         throw new Error("Could not read the public branch.");
@@ -119,7 +132,21 @@ export async function publishEditorialSnapshot(documents) {
     const tree = await githubFetch(`/git/trees/${commit.tree.sha}?recursive=1`, {}, { write: true });
     if (!tree || tree.truncated)
         throw new Error("Could not inspect the complete public snapshot.");
-    const entries = Object.entries(snapshot.files).map(([path, content]) => ({ path: repositoryPath(path), mode: "100644", type: "blob", content }));
+    const currentTree = new Map(tree.tree.map((entry) => [entry.path, entry.sha]));
+    const assetBlobs = await Promise.all(assets.map(async (asset) => {
+        const blob = await githubFetch("/git/blobs", {
+            method: "POST",
+            body: JSON.stringify({ content: encodeBytesBase64(asset.bytes), encoding: "base64" }),
+        }, { write: true });
+        if (!blob?.sha)
+            throw new Error(`GitHub did not retain the publication image ${documentPath(asset.path)}.`);
+        return { path: asset.path, sha: blob.sha };
+    }));
+    const expectedSnapshotChange = expectedEditorialChange || assetBlobs.some((asset) => currentTree.get(asset.path) !== asset.sha);
+    const entries = [
+        ...Object.entries(snapshot.files).map(([path, content]) => ({ path: repositoryPath(path), mode: "100644", type: "blob", content })),
+        ...assetBlobs.map((asset) => ({ path: asset.path, mode: "100644", type: "blob", sha: asset.sha })),
+    ];
     for (const entry of tree.tree) {
         const path = documentPath(entry.path);
         if (/^content\/(posts|pages|now)\/[^/]+\.md$/.test(path) && !(path in snapshot.files)) {
@@ -164,10 +191,7 @@ export async function publishEditorialSnapshot(documents) {
     return { commit: nextCommit.sha, manifest: snapshot.manifest, publication: snapshot.publication, revisions: snapshot.revisions, changed: true };
 }
 export async function publishImageAsset(name, bytes) {
-    if (!/^[a-z0-9][a-z0-9._-]*\.(?:jpe?g|png|webp|gif)$/i.test(name)) {
-        throw new Error("That image name is invalid.");
-    }
-    const path = repositoryPath(`public/images/${name}`);
+    const path = repositoryPath(publicImagePath(name));
     const current = await githubFetch(`/contents/${encodePath(path)}?ref=${encodeURIComponent(branch)}`, {}, { allowNotFound: true, write: true });
     const content = encodeBytesBase64(bytes);
     if (current?.content?.replace(/\s/g, "") === content)
