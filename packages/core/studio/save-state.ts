@@ -46,6 +46,15 @@ function sameValue(left: unknown, right: unknown) {
   return JSON.stringify(left) === JSON.stringify(right);
 }
 
+/** True only when expanded preserves every original character in order. */
+function isInsertionOnly(original: string, expanded: string) {
+  let cursor = 0;
+  for (const character of expanded) {
+    if (character === original[cursor]) cursor += 1;
+  }
+  return cursor === original.length;
+}
+
 /**
  * Rebase an editor revision only when its changes and the canonical changes
  * touch different author-controlled fields. A body changed on both sides is
@@ -68,7 +77,9 @@ function rebaseNonOverlappingEdits(input: Partial<WritingDocument>, existing: Wr
     const changedLocally = !sameValue(local, before);
     const changedRemotely = !sameValue(remote, before);
     localChanged ||= changedLocally;
-    if (changedLocally && changedRemotely && !sameValue(local, remote)) return null;
+    if (changedLocally && changedRemotely && !sameValue(local, remote)) {
+      if (field !== "body" || !isInsertionOnly(String(remote), String(local))) return null;
+    }
     (merged as Record<string, unknown>)[field] = changedLocally ? local : remote;
   }
   if (!localChanged) return null;

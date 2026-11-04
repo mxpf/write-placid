@@ -117,3 +117,16 @@ test("a stale editor safely rebases changes to different authoring fields", () =
   assert.match(overlapping.error, /different writing/);
   assert.equal(overlapping.rebased, false);
 });
+
+test("a stale body can recover insertion-only edits without removing canonical writing", () => {
+  const opened = piece();
+  const remote = { ...opened, body: "Canonical writing that changed after the tab opened.", kdriveEtag: "remote" };
+  const inserted = planSave({ ...opened, body: `So there I was. ${remote.body}` }, remote);
+  assert.equal(inserted.error, null);
+  assert.equal(inserted.rebased, true);
+  assert.equal(inserted.document.body, `So there I was. ${remote.body}`);
+
+  const replacement = planSave({ ...opened, body: "Canonical writing rewritten in the browser." }, remote);
+  assert.match(replacement.error, /different writing/);
+  assert.equal(replacement.rebased, false);
+});
