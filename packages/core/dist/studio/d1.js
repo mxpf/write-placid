@@ -66,8 +66,27 @@ export function createD1Store(options) {
         await getD1().batch(items.map((document, index) => getD1().prepare(insertDoNothingSql).bind(...values(document, index)))); }
     async function deleteDocument(id) { const document = await findDocument(id); if (!document)
         return; const deletedAt = now(); await getD1().batch([getD1().prepare("INSERT INTO deleted_documents (id,document_json,deleted_at) VALUES (?,?,?)").bind(`${deletedAt}:${document.id}`, JSON.stringify(document), deletedAt), getD1().prepare("DELETE FROM documents WHERE id=?").bind(document.id)]); return document; }
+    async function deletePrivateDraft(document) {
+        await ensureSchema();
+        const db = getD1();
+        const deletedAt = now();
+        const recoveryId = `${deletedAt}:${document.id}`;
+        const condition = `id=? AND updated_at=? AND type<>'page' AND status='draft'
+      AND published_at='' AND published_source='' AND remote_sha=''
+      AND COALESCE(json_extract(editorial_json, '$.publishedRevision'), '')=''
+      AND COALESCE(json_array_length(editorial_json, '$.aliases'), 0)=0`;
+        const results = await db.batch([
+            db.prepare(`INSERT INTO deleted_documents (id,document_json,deleted_at)
+        SELECT ?,?,? FROM documents WHERE ${condition}`)
+                .bind(recoveryId, JSON.stringify(document), deletedAt, document.id, document.updatedAt),
+            db.prepare(`DELETE FROM documents WHERE ${condition}
+        AND EXISTS (SELECT 1 FROM deleted_documents WHERE id=?) RETURNING id`)
+                .bind(document.id, document.updatedAt, recoveryId),
+        ]);
+        return results[1].results?.[0]?.id === document.id;
+    }
     async function getSyncCursor(key) { await ensureSchema(); const result = await getD1().prepare("SELECT value FROM sync_state WHERE key=?").bind(key).first(); const cursor = Number.parseInt(result?.value || "0", 10); return Number.isSafeInteger(cursor) && cursor >= 0 ? cursor : 0; }
     async function setSyncCursor(key, cursor) { await ensureSchema(); await getD1().prepare("INSERT INTO sync_state (key,value) VALUES (?,?) ON CONFLICT(key) DO UPDATE SET value=excluded.value").bind(key, String(cursor)).run(); }
-    return { ensureSchema, listDocuments, findDocument, findDocumentByPath, saveDocument, savePrivateDraft, cacheDocuments, replaceDocument, reorderDraftDocuments, seedDocuments, deleteDocument, getSyncCursor, setSyncCursor };
+    return { ensureSchema, listDocuments, findDocument, findDocumentByPath, saveDocument, savePrivateDraft, cacheDocuments, replaceDocument, reorderDraftDocuments, seedDocuments, deleteDocument, deletePrivateDraft, getSyncCursor, setSyncCursor };
 }
 //# sourceMappingURL=d1.js.map

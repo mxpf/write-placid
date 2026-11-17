@@ -30,6 +30,7 @@ export declare function createD1Store(options: D1StoreOptions): {
     reorderDraftDocuments: (ids: string[]) => Promise<void>;
     seedDocuments: (items: WritingDocument[]) => Promise<void>;
     deleteDocument: (id: string) => Promise<WritingDocument | undefined>;
+    deletePrivateDraft: (document: WritingDocument) => Promise<boolean>;
     getSyncCursor: (key: string) => Promise<number>;
     setSyncCursor: (key: string, cursor: number) => Promise<void>;
 };
