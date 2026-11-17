@@ -7,7 +7,7 @@ Write Placid is an open-source template for publishing your own writing. Start w
 ## What is included
 
 - [**Site**](apps/site/README.md) builds a static website from Markdown. It includes essays, standalone pages, an RSS feed, and a `/now` page for your latest update.
-- [**Studio**](apps/studio/README.md) is an optional private editor that works on phones. It stores writing in Cloudflare D1 by default. kDrive storage and Google Docs sync are optional. When you publish, Studio sends the Markdown files to GitHub.
+- [**Studio**](apps/studio/README.md) is an optional private editor that works on phones. It can store private drafts in Cloudflare D1. kDrive storage and Google Docs sync are optional. When publishing is enabled, Studio sends the Markdown files to GitHub.
 - [**Drafts MCP**](apps/drafts-mcp/README.md) lets a compatible AI assistant save a complete draft or revision to Studio. Studio handles publishing and deletion.
 - [**Trackinghaus**](apps/trackinghaus/README.md) is an optional public dashboard that shows weekly page-view counts.
 
@@ -16,6 +16,14 @@ The public site serves static files, so readers can visit it when Studio is offl
 | Studio editor | Trackinghaus dashboard |
 | --- | --- |
 | ![Write Placid Studio](docs/studio-editor.png) | ![Trackinghaus weekly reading](docs/trackinghaus-desktop.png) |
+
+## Demo Studio
+
+The demo Studio requires an approved Cloudflare Access sign-in. You can open it from an article's **Edit** link after adding `#edit` to the article's address. [Open the demo Studio](https://write-placid-studio.maxpfennighaus.workers.dev/).
+
+Choose **New piece** to create a private draft. Studio saves changes automatically. Wait for **Saved online** before closing the tab. You can reopen the draft in a fresh tab. **Delete** removes it from the library and keeps a private recovery copy.
+
+Publishing is disabled in the demo, so the **Publish** button is hidden.
 
 ## Start locally
 
