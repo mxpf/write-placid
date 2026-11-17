@@ -1,7 +1,7 @@
 import { authorizeStudioRequest } from "../../../server-auth";
 import { livePublicationMatches, publicRevisionForDocument, type PublicPublicationManifest } from "../../../editorial";
 import { findDocument } from "../../../../db/documents";
-import { studioConfig } from "../../../studio-config";
+import { liveCheckUrl, studioConfig } from "../../../studio-config";
 
 function livePath(type: "post" | "page" | "now", slug: string) {
   return type === "now" ? "/now.html" : `/${slug}.html`;
@@ -24,10 +24,8 @@ export async function GET(request: Request) {
     return Response.json({ live: false, error: "The requested publication revision is not the verified Studio revision." }, { status: 409 });
   }
 
-  const liveUrl = new URL(livePath(document.type, document.slug), studioConfig.siteUrl);
-  liveUrl.searchParams.set("studio-check", document.updatedAt);
-  const publicationUrl = new URL("/write-placid-publication.json", studioConfig.siteUrl);
-  publicationUrl.searchParams.set("studio-check", document.updatedAt);
+  const liveUrl = liveCheckUrl(studioConfig.siteUrl, livePath(document.type, document.slug), document.updatedAt);
+  const publicationUrl = liveCheckUrl(studioConfig.siteUrl, "/write-placid-publication.json", document.updatedAt);
   const [response, publicationResponse] = await Promise.all([
     fetch(liveUrl, { cache: "no-store", redirect: "follow" }),
     fetch(publicationUrl, { cache: "no-store", redirect: "follow" }),
