@@ -12,8 +12,8 @@
 	"dependencies": {
 		"@cloudflare/workers-oauth-provider": "^1.2.2",
 		"@modelcontextprotocol/sdk": "^1.32.1",
-		"agents": "^0.26.0",
-		"zod": "^4.6.5"
+		"agents": "^0.29.0",
+		"zod": "4.6.6"
 	},
 	"devDependencies": {
 		"@types/node": "^26.6.4",
