@@ -6,8 +6,8 @@
     "node": ">=22.13.0"
   },
   "scripts": {
-    "dev": "WRANGLER_LOG_PATH=.wrangler/wrangler.log vite dev",
-    "build": "WRANGLER_LOG_PATH=.wrangler/wrangler.log vite build",
+    "dev": "vite dev",
+    "build": "vite build",
     "start": "WRANGLER_LOG_PATH=.wrangler/wrangler.log vinext start",
     "deploy": "npm run build && wrangler deploy --config wrangler.cloudflare.jsonc --keep-vars",
     "test": "npm run build && node --test tests/*.test.mjs",
