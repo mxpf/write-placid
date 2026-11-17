@@ -1,29 +1,31 @@
 # Write Placid
 
-An open-source, self-owned publishing system for quiet writing. [See the live template](https://maxpfennig.haus/write-placid/).
-
-Make Placid and Write Placid established a shared publishing foundation later used by [maxpfennig.haus](https://maxpfennig.haus) and [Thinkinghaus](https://thinking.haus). Write Placid uses the open-source Instrument Sans family and ships with sample content that is safe to replace.
+Write Placid is an open-source template for publishing your own writing. Start with a public site and add a private editor or analytics if you need them. The template comes with sample writing you can replace. [See the live demo](https://maxpfennig.haus/write-placid/).
 
 ![Write Placid publication](docs/site-desktop.png)
 
 ## What is included
 
-- **[Site](apps/site/README.md)** — a fast public home for essays, pages, links, RSS, a single current `/now` entry, revision dates, and optional cached Webmentions.
-- **[Studio](apps/studio/README.md)** — a private, phone-friendly rich-text editor. A basic setup stores writing in Cloudflare D1; when optional KDrive is enabled, KDrive becomes the canonical editorial source and D1 keeps supporting cache and private state. Studio can also bridge Google Docs and publish validated Markdown snapshots through GitHub.
-- **[Drafts MCP](apps/drafts-mcp/README.md)** — an optional private bridge that lets a compatible AI assistant save a complete draft or revision to Studio without permission to publish or delete.
-- **[Trackinghaus](apps/trackinghaus/README.md)** — optional, public, aggregate-only weekly analytics for the publication.
+- [**Site**](apps/site/README.md) builds a static website from Markdown. It includes essays, standalone pages, an RSS feed, and a `/now` page for your latest update.
+- [**Studio**](apps/studio/README.md) is an optional private editor that works on phones. It stores writing in Cloudflare D1 by default. kDrive storage and Google Docs sync are optional. When you publish, Studio sends the Markdown files to GitHub.
+- [**Drafts MCP**](apps/drafts-mcp/README.md) lets a compatible AI assistant save a complete draft or revision to Studio. Studio handles publishing and deletion.
+- [**Trackinghaus**](apps/trackinghaus/README.md) is an optional public dashboard that shows weekly page-view counts.
 
-The pieces remain separate on purpose. A static public site has a much smaller failure surface than a CMS. Studio can be unavailable without taking the writing down. Tracking can be omitted entirely.
+The public site serves static files, so readers can visit it when Studio is offline.
 
-Write Placid owns the reusable publishing foundation as the versioned `@mxpf/write-placid-core` package. Downstream installations pin an immutable release while keeping their own content, brand, fonts, service bindings, and deployment identity. This preserves the project’s chronology: Make Placid and Write Placid preceded the later sites that use the foundation, including Thinkinghaus. See [Write Placid Core](docs/CORE.md) and the [parity ledger](docs/PARITY.md).
-
-| Private Studio | Aggregate-only Trackinghaus |
+| Studio editor | Trackinghaus dashboard |
 | --- | --- |
 | ![Write Placid Studio](docs/studio-editor.png) | ![Trackinghaus weekly reading](docs/trackinghaus-desktop.png) |
 
 ## Start locally
 
-Requirements: Node.js 22.13 or newer.
+You’ll need Git and Node.js 22.13 or newer. `npm run setup` installs dependencies for all four apps.
+
+If you’re using PowerShell on Windows with Git Bash installed, set npm to use Bash before running the preview commands.
+
+```powershell
+$env:npm_config_script_shell = 'C:\Program Files\Git\bin\bash.exe'
+```
 
 ```bash
 git clone https://github.com/mxpf/write-placid.git
@@ -32,27 +34,28 @@ npm run setup
 npm run dev:site
 ```
 
-Open [localhost:3000](http://localhost:3000). Follow the [site content contract](apps/site/docs/content-contract.md) when replacing the sample Markdown in [`apps/site/content`](apps/site/content), then edit [`apps/site/site.config.json`](apps/site/site.config.json).
+Open the local URL printed in your terminal. Replace the sample Markdown in [`apps/site/content`](apps/site/content) and set your site’s name, description, and URL in [`apps/site/site.config.json`](apps/site/site.config.json). The [content guide](apps/site/docs/content-contract.md) explains how to keep links working when you edit or move a page.
 
-For the private [Studio](apps/studio/README.md), [Trackinghaus](apps/trackinghaus/README.md), and optional [Drafts MCP](apps/drafts-mcp/README.md), follow the [operator’s manual](docs/SETUP.md).
+The [setup guide](docs/SETUP.md) covers publishing to GitHub Pages and configuring the optional apps. To preview Studio or Trackinghaus locally, use `npm run dev:studio` or `npm run dev:tracking`.
 
-## Useful commands
+## Run the checks
+
+Install Chromium for the browser tests after running setup. Then run the project checks and Site lint from the repository root.
 
 ```bash
-npm run dev:site       # public publication
-npm run dev:studio     # private editor
-npm run dev:tracking   # aggregate analytics dashboard
-npm run check          # config, builds, browser accessibility, tests, and type checks
+npm exec --prefix apps/site -- playwright install chromium
+npm run check
+npm run lint --prefix apps/site
 ```
 
-## A small design position
+On Windows, run the full `npm run check` in a Linux environment such as WSL. The static export step currently expects Unix-style paths.
 
-Write Placid is deliberately super normal. It uses a restrained type scale, ordinary links, generous space, and very little interface decoration. The system is meant to help a person return to the writing, not admire the publishing machinery.
+## Design and shared code
 
-Color follows [Thinkinghaus palette v0.6](docs/DESIGN.md), pinned locally and applied through semantic roles across the reader, Studio, Trackinghaus, and authorization UI.
+The design keeps the focus on the writing with simple typography, underlined links, and generous spacing. It uses Instrument Sans and the [Thinkinghaus color palette](docs/DESIGN.md).
+
+Make Placid and Write Placid laid the groundwork for [maxpfennig.haus](https://maxpfennig.haus) and Max Pfennighaus’s publication, [Thinkinghaus](https://thinking.haus). Other sites can use a specific release of `@mxpf/write-placid-core` and keep their own content, design, and hosting. See the [core package guide](docs/CORE.md) and [Thinkinghaus parity notes](docs/PARITY.md).
 
 ## Ownership
 
-The code is available under the [MIT License](LICENSE). Instrument Sans is covered by the [SIL Open Font License](docs/Instrument-Sans-OFL.txt). Your writing remains yours.
-
-Thinkinghaus is Max Pfennighaus’s publication and uses the shared publishing foundation established by Make Placid and Write Placid.
+The code uses the [MIT License](LICENSE). Instrument Sans uses the [SIL Open Font License](docs/Instrument-Sans-OFL.txt). Your writing remains yours.
