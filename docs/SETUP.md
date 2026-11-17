@@ -1,6 +1,6 @@
 # Set up Write Placid
 
-Start with the public site. Add Studio for private editing, Drafts MCP for saving drafts from an AI assistant, or Trackinghaus for readership counts as needed.
+Start with the public site. Add Studio for private editing, Drafts MCP for creating and updating private drafts from an AI assistant, or Trackinghaus for readership counts as needed.
 
 ## 1. Make a copy and preview it
 
@@ -112,30 +112,46 @@ Follow the [Google Docs setup guide](../apps/studio/google-apps-script/README.md
 
 ## 5. Add Drafts MCP
 
-Deploy Drafts MCP in the same Cloudflare account as Studio so the Workers can connect directly. The tool saves complete drafts and revisions to Studio.
+Drafts MCP lets a compatible AI assistant create and update private drafts in Studio. The tool cannot publish or delete writing, or update pieces with publication history.
 
-From `apps/drafts-mcp`, create its Workers KV namespace.
+### Use the demo Drafts MCP
+
+Add [the demo Drafts MCP address](https://write-placid-drafts-mcp.maxpfennighaus.workers.dev/mcp) to your compatible AI assistant, then sign in with the approved Cloudflare Access account and approve the connection. The demo has its own Worker, sign-in app, storage, and credentials. It connects only to the demo Studio.
+
+Use `save_write_placid_draft` with a title and the complete body in Markdown. Send the whole draft rather than a patch or excerpt.
+
+To update a private draft, send its exact `slug` or `current_title` along with the complete revised body. To rename it, put the new name in `title`. Studio keeps the draft's identity, so the update changes the same draft. If several pieces share a title, use the slug. A missing draft or conflicting title and slug returns an error.
+
+Studio checks for competing edits before saving. If it reports a conflict, reopen the draft and compare the writing before trying again. You can reopen a saved draft in a fresh Studio tab. To remove it, use Studio's **Delete** button, which keeps a private recovery copy.
+
+Keep the [demo Studio settings](#3-add-studio) in place. Publishing stays disabled and **Publish** stays hidden.
+
+### Set up your own connection
+
+Deploy Drafts MCP in the same Cloudflare account as your Studio so the Workers can connect directly. Give each installation its own Worker, sign-in app, OAuth storage, and credentials.
+
+From `apps/drafts-mcp`, create a separate Workers KV namespace for the connection.
 
 ```bash
 npx wrangler kv namespace create OAUTH_KV
 ```
 
-Replace the placeholder KV ID in `wrangler.jsonc` and set the `STUDIO` binding’s `service` to the deployed Studio Worker name. Keep the populated config out of public Git.
+Choose a Worker name for your connection in `wrangler.jsonc`, replace the placeholder KV ID, and set the `STUDIO` binding’s `service` to your deployed Studio Worker name. Keep the populated config out of public Git.
 
-Create a [Cloudflare Access OIDC application](https://developers.cloudflare.com/cloudflare-one/access-controls/applications/http-apps/saas-apps/generic-oidc-saas/) for Drafts MCP. Use the Drafts MCP public URL with `/callback` appended as the redirect URL. Allow your email address and include the email and profile scopes.
+Create a [Cloudflare Access OIDC application](https://developers.cloudflare.com/cloudflare-one/access-controls/applications/http-apps/saas-apps/generic-oidc-saas/) for Drafts MCP. Use the Drafts MCP public URL with `/callback` appended as the redirect URL. Allow your email address and include the `openid`, `email`, and `profile` scopes.
 
 Use `npx wrangler secret put NAME` to add each value to the Worker. The [example file](../apps/drafts-mcp/.dev.vars.example) lists the setting names.
 
 - Use the `ACCESS_*` settings for the client ID, client secret, authorization URL, token URL, and public keys URL.
 - Set `ALLOWED_EMAIL` to your email and generate a separate random value for `COOKIE_ENCRYPTION_KEY`.
-- Set `STUDIO_API_TOKEN` to the same value as Studio’s `WRITE_PLACID_INTERNAL_TOKEN`.
+- Set `STUDIO_API_TOKEN` to the same value as Studio’s `WRITE_PLACID_INTERNAL_TOKEN`. Keep this value unique to that Studio and Drafts MCP connection.
 
 ```bash
 npm run cf-typegen
 npm run deploy
 ```
 
-Use the deployed Drafts MCP URL with `/mcp` appended in your compatible AI assistant.
+Use the deployed Drafts MCP URL with `/mcp` appended in your compatible AI assistant, then sign in and approve the connection. The [Drafts MCP README](../apps/drafts-mcp/README.md) explains the draft fields and save checks.
 
 ## 6. Check the setup
 
@@ -149,4 +165,6 @@ npm run lint --prefix apps/site
 
 Open the public homepage, an article, and the RSS feed over HTTPS. If you added Studio, sign in, save a draft, and reopen it in a fresh tab. With the demo's settings, **Publish** stays hidden. Check that **Delete** removes the draft and keeps a private recovery copy. If publishing is enabled for your own site, verify the article and feed after a test publication.
 
-If you added Drafts MCP, save a draft through your assistant and check it in Studio. If you added Trackinghaus, confirm the dashboard shows page-view counts for your publication.
+If you added Drafts MCP, create a private draft through your assistant, then update it using its slug and the complete revised body. Reopen Studio in a fresh tab and confirm there is one draft with the updated writing. With the demo's settings, **Publish** stays hidden.
+
+If you added Trackinghaus, confirm the dashboard shows page-view counts for your publication.
