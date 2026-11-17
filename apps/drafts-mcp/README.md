@@ -6,7 +6,9 @@ An optional connection that lets a compatible AI assistant save private writing 
 
 The `save_write_placid_draft` tool sends a title and the complete body in Markdown to Studio. Send the whole draft, not a patch or an excerpt. You can also supply a date and a source link. A source needs both `source_label` and `source_url`.
 
-Use the current tool to create new drafts. Open Studio to revise an existing draft. The tool accepts `current_title` and `slug`, but its save request does not yet include what Studio needs to update an existing draft safely.
+To update a private draft, send its exact `slug` or its `current_title` along with the complete new body. To rename it, put the new name in `title`. If several pieces share a title, use the slug. A missing draft, conflicting title and slug, or piece with publication history returns an error.
+
+Updates keep the draft's identity and use Studio's saved version to check for competing edits. If Studio reports a conflict, reopen the draft and compare the writing before trying again.
 
 A successful save returns the title, slug, and status. Open the connected Studio to read the draft and reopen it in a fresh tab. Drafts are stored by Studio.
 
@@ -45,6 +47,7 @@ From `apps/drafts-mcp`, install dependencies and run the type check.
 ```bash
 npm ci
 npm run type-check
+npm test
 ```
 
 For your own configured Worker, generate its types and deploy.
@@ -54,4 +57,4 @@ npm run cf-typegen
 npm run deploy
 ```
 
-To check a new connection, save a new private draft through the assistant and reopen it in Studio. With the demo settings, **Publish** stays hidden. Revise the draft in Studio, and use **Delete** there if you want to remove it.
+To check a new connection, save a new private draft through the assistant, revise it using its slug, and reopen it in Studio. Confirm the same draft contains the changes. With the demo settings, **Publish** stays hidden. Use Studio's **Delete** button if you want to remove the draft.
