@@ -26,11 +26,15 @@ If you assign a custom domain to this repository, configure it in Pages settings
 
 ## 3. Add Studio
 
-Studio is a private editor. It runs on Cloudflare Workers, stores writing in D1 by default, and uses Cloudflare Access for sign-in.
+Studio is a private editor on Cloudflare Workers. It uses Cloudflare Access for sign-in. The demo stores private drafts in D1.
+
+The hosted demo lets approved users create a piece, wait for **Saved online**, and reopen it in a fresh tab. **Delete** removes a private draft from the library and keeps a private recovery copy. Publishing is disabled and **Publish** is hidden. [Open the demo Studio](https://write-placid-studio.maxpfennighaus.workers.dev/).
+
+For a setup like the demo, set `WRITE_PLACID_STUDIO_D1_PREVIEW` to `1` and `WRITE_PLACID_AUTO_PUBLISH` to `0`, with kDrive disconnected. Keep `WRITE_PLACID_GITHUB_TOKEN` and `WRITE_PLACID_PUBLIC_CONTRACT_VERSION` unset so publishing stays disabled.
 
 To preview Studio locally, copy [`apps/studio/.env.example`](../apps/studio/.env.example) to `apps/studio/.env.local`. Set `NEXT_PUBLIC_SITE_URL` to the address printed by `npm run dev:site`. From the repository root, run `npm run dev:studio` and open the address it prints.
 
-For a hosted Studio, work from `apps/studio`. Sign in to Wrangler and create a database.
+To set up your own hosted Studio, work from `apps/studio`. Sign in to Wrangler and create a database.
 
 ```bash
 npx wrangler login
@@ -50,7 +54,7 @@ Create a [Cloudflare Access application](https://developers.cloudflare.com/cloud
 | `CLOUDFLARE_ACCESS_TEAM_DOMAIN` | Your Access team URL |
 | `CLOUDFLARE_ACCESS_AUD` | The audience tag for the Studio application |
 | `WRITE_PLACID_STUDIO_EMAIL` | The email allowed to use Studio |
-| `WRITE_PLACID_GITHUB_TOKEN` | A fine-grained token limited to your publication repository with read and write access to Contents |
+| `WRITE_PLACID_GITHUB_TOKEN` | For publishing, a fine-grained token limited to your publication repository with read and write access to Contents |
 | `WRITE_PLACID_INTERNAL_TOKEN` | A separate random value. Use it for the Drafts MCP connection if you add that app. |
 
 Set these as Worker variables. The [Studio example file](../apps/studio/.env.example) lists the names and sample values.
@@ -62,7 +66,8 @@ Set these as Worker variables. The [Studio example file](../apps/studio/.env.exa
 | `WRITE_PLACID_GITHUB_OWNER` and `WRITE_PLACID_GITHUB_REPO` | The owner and name of your publication repository |
 | `WRITE_PLACID_GITHUB_BRANCH` | `main` for the included Pages workflow |
 | `WRITE_PLACID_GITHUB_CONTENT_ROOT` | `apps/site` for this repository |
-| `WRITE_PLACID_AUTO_PUBLISH` | `0` to publish manually. Use `1` only when you want the kDrive schedule to publish automatically. |
+| `WRITE_PLACID_STUDIO_D1_PREVIEW` | `1` for private draft storage in D1 with kDrive disconnected, as in the demo |
+| `WRITE_PLACID_AUTO_PUBLISH` | `0` turns off scheduled publishing. Use `1` only when you want the kDrive schedule to publish automatically. |
 
 From `apps/studio`, generate Worker types and deploy.
 
@@ -71,9 +76,11 @@ npm run types
 npm run deploy
 ```
 
-For a new setup, set the Worker variable `WRITE_PLACID_PUBLIC_CONTRACT_VERSION` to `1` once Site and Studio are deployed. Studio needs this setting to publish. If you’re moving an existing library to kDrive, follow the migration steps below first.
+For a Studio that will publish to your own site, set the Worker variable `WRITE_PLACID_PUBLIC_CONTRACT_VERSION` to `1` once Site and Studio are deployed. Studio needs this setting and the GitHub token to publish. If you’re moving an existing library to kDrive, follow the migration steps below first.
 
 Set `studioUrl` in `apps/site/site.config.json` to the protected Studio URL and republish the site. Open the public site with `#edit` at the end of its address to show edit links in that browser. Add `#edit-off` to hide them again.
+
+The included Pages workflow also accepts a `WRITE_PLACID_STUDIO_URL` repository variable for the Studio address used by **Edit** links.
 
 ### Use kDrive for writing storage
 
@@ -140,4 +147,6 @@ npm run check
 npm run lint --prefix apps/site
 ```
 
-Open the public homepage, an article, and the RSS feed over HTTPS. If you added Studio, sign in, save a draft, and verify the article and feed after a test publication. If you added Drafts MCP, save a draft through your assistant and check it in Studio. If you added Trackinghaus, confirm the dashboard shows page-view counts for your publication.
+Open the public homepage, an article, and the RSS feed over HTTPS. If you added Studio, sign in, save a draft, and reopen it in a fresh tab. With the demo's settings, **Publish** stays hidden. Check that **Delete** removes the draft and keeps a private recovery copy. If publishing is enabled for your own site, verify the article and feed after a test publication.
+
+If you added Drafts MCP, save a draft through your assistant and check it in Studio. If you added Trackinghaus, confirm the dashboard shows page-view counts for your publication.
