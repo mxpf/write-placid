@@ -1,6 +1,7 @@
 const selectColumns = "id,path,type,slug,editorial_json,title,date,status,published_at,public_updated_at,body,source_label,source_href,remote_sha,published_source,updated_at,sort_order,google_doc_id,drive_revision,drive_synced_body";
-const insertSql = `INSERT INTO documents (${selectColumns}) VALUES (${Array(20).fill("?").join(",")}) ON CONFLICT(id) DO UPDATE SET path=excluded.path,type=excluded.type,slug=excluded.slug,editorial_json=excluded.editorial_json,title=excluded.title,date=excluded.date,status=excluded.status,published_at=excluded.published_at,public_updated_at=excluded.public_updated_at,body=excluded.body,source_label=excluded.source_label,source_href=excluded.source_href,remote_sha=excluded.remote_sha,published_source=excluded.published_source,updated_at=excluded.updated_at,google_doc_id=excluded.google_doc_id,drive_revision=excluded.drive_revision,drive_synced_body=excluded.drive_synced_body`;
-const insertDoNothingSql = `INSERT INTO documents (${selectColumns}) VALUES (${Array(20).fill("?").join(",")}) ON CONFLICT(id) DO NOTHING`;
+const insertValuesSql = `INSERT INTO documents (${selectColumns}) VALUES (${Array(20).fill("?").join(",")})`;
+const insertSql = `${insertValuesSql} ON CONFLICT(id) DO UPDATE SET path=excluded.path,type=excluded.type,slug=excluded.slug,editorial_json=excluded.editorial_json,title=excluded.title,date=excluded.date,status=excluded.status,published_at=excluded.published_at,public_updated_at=excluded.public_updated_at,body=excluded.body,source_label=excluded.source_label,source_href=excluded.source_href,remote_sha=excluded.remote_sha,published_source=excluded.published_source,updated_at=excluded.updated_at,google_doc_id=excluded.google_doc_id,drive_revision=excluded.drive_revision,drive_synced_body=excluded.drive_synced_body`;
+const insertDoNothingSql = `${insertValuesSql} ON CONFLICT(id) DO NOTHING`;
 const replaceSql = `${insertSql},sort_order=excluded.sort_order`;
 /** D1 persistence with request-time binding lookup and injected private document mapping. */
 export function createD1Store(options) {
@@ -30,8 +31,11 @@ export function createD1Store(options) {
         const editorial = JSON.parse(String(row.editorial_json || "{}"));
         return { ...editorial, id: String(row.id), path, type: row.type, slug: String(row.slug), title: String(row.title), dek: String(editorial.dek || ""), date: String(row.date), status: row.status, publishedAt: String(row.published_at), publicUpdatedAt: String(row.public_updated_at), body: String(row.body), source: row.source_label && row.source_href ? { label: String(row.source_label), href: String(row.source_href) } : undefined, remoteSha: String(row.remote_sha), publishedSource: String(row.published_source), publishedRevision: String(editorial.publishedRevision || ""), updatedAt: String(row.updated_at), googleDocId: String(row.google_doc_id || mapGoogleDoc(path)), driveRevision: String(row.drive_revision), driveSyncedBody: String(row.drive_synced_body) };
     }
+    function editorialJson(document) {
+        return JSON.stringify({ publicPath: document.publicPath, legacyIds: document.legacyIds || [], aliases: document.aliases || [], kdrivePath: document.kdrivePath, kdriveEtag: document.kdriveEtag, identityPersisted: document.identityPersisted, metadata: document.metadata, dek: document.dek, publishedRevision: document.publishedRevision });
+    }
     function values(document, sortOrder = 0) {
-        return [document.id, document.path, document.type, document.slug, JSON.stringify({ publicPath: document.publicPath, legacyIds: document.legacyIds || [], aliases: document.aliases || [], kdrivePath: document.kdrivePath, kdriveEtag: document.kdriveEtag, identityPersisted: document.identityPersisted, metadata: document.metadata, dek: document.dek, publishedRevision: document.publishedRevision }), document.title, document.date, document.status, document.publishedAt, document.publicUpdatedAt, document.body, document.source?.label || "", document.source?.href || "", document.remoteSha, document.publishedSource, document.updatedAt, sortOrder, document.googleDocId || mapGoogleDoc(document.path), document.driveRevision, document.driveSyncedBody];
+        return [document.id, document.path, document.type, document.slug, editorialJson(document), document.title, document.date, document.status, document.publishedAt, document.publicUpdatedAt, document.body, document.source?.label || "", document.source?.href || "", document.remoteSha, document.publishedSource, document.updatedAt, sortOrder, document.googleDocId || mapGoogleDoc(document.path), document.driveRevision, document.driveSyncedBody];
     }
     async function listDocuments() { await ensureSchema(); const rows = await getD1().prepare(`SELECT ${selectColumns} FROM documents ORDER BY type ASC,sort_order ASC,date DESC`).all(); return (rows.results || []).map(fromRow); }
     async function findDocument(id) { await ensureSchema(); const row = await getD1().prepare(`SELECT ${selectColumns} FROM documents WHERE id=? LIMIT 1`).bind(id).first(); if (row)
@@ -39,6 +43,21 @@ export function createD1Store(options) {
         throw new Error(`Legacy identity collision: ${id}`); return aliases[0]; }
     async function findDocumentByPath(path) { await ensureSchema(); const row = await getD1().prepare(`SELECT ${selectColumns} FROM documents WHERE path=? LIMIT 1`).bind(path).first(); return row ? fromRow(row) : undefined; }
     async function saveDocument(document, sortOrder = 0) { await ensureSchema(); await getD1().prepare(insertSql).bind(...values(document, sortOrder)).run(); return document; }
+    async function savePrivateDraft(document, previous) {
+        await ensureSchema();
+        const db = getD1();
+        const statement = previous
+            ? db.prepare(`
+          UPDATE documents
+          SET slug=?, editorial_json=?, title=?, date=?, body=?, source_label=?, source_href=?, updated_at=?
+          WHERE id=? AND updated_at=? AND type<>'page' AND status='draft'
+            AND published_at='' AND published_source='' AND remote_sha=''
+            AND COALESCE(json_extract(editorial_json, '$.publishedRevision'), '')=''
+          RETURNING id
+        `).bind(document.slug, editorialJson(document), document.title, document.date, document.body, document.source?.label || "", document.source?.href || "", document.updatedAt, document.id, previous.updatedAt)
+            : db.prepare(`${insertValuesSql} ON CONFLICT DO NOTHING RETURNING id`).bind(...values(document));
+        return Boolean(await statement.first());
+    }
     async function cacheDocuments(items) { if (!items.length)
         return; await ensureSchema(); await getD1().batch(items.map((document) => getD1().prepare(insertSql).bind(...values(document)))); }
     async function replaceDocument(previousId, document, sortOrder = 0) { await ensureSchema(); const current = await getD1().prepare("SELECT sort_order FROM documents WHERE id=? LIMIT 1").bind(previousId).first(); await getD1().batch([getD1().prepare("DELETE FROM documents WHERE id=?").bind(previousId), getD1().prepare(replaceSql).bind(...values(document, current?.sort_order ?? sortOrder))]); return document; }
@@ -51,6 +70,6 @@ export function createD1Store(options) {
         return; const deletedAt = now(); await getD1().batch([getD1().prepare("INSERT INTO deleted_documents (id,document_json,deleted_at) VALUES (?,?,?)").bind(`${deletedAt}:${document.id}`, JSON.stringify(document), deletedAt), getD1().prepare("DELETE FROM documents WHERE id=?").bind(document.id)]); return document; }
     async function getSyncCursor(key) { await ensureSchema(); const result = await getD1().prepare("SELECT value FROM sync_state WHERE key=?").bind(key).first(); const cursor = Number.parseInt(result?.value || "0", 10); return Number.isSafeInteger(cursor) && cursor >= 0 ? cursor : 0; }
     async function setSyncCursor(key, cursor) { await ensureSchema(); await getD1().prepare("INSERT INTO sync_state (key,value) VALUES (?,?) ON CONFLICT(key) DO UPDATE SET value=excluded.value").bind(key, String(cursor)).run(); }
-    return { ensureSchema, listDocuments, findDocument, findDocumentByPath, saveDocument, cacheDocuments, replaceDocument, reorderDraftDocuments, seedDocuments, deleteDocument, getSyncCursor, setSyncCursor };
+    return { ensureSchema, listDocuments, findDocument, findDocumentByPath, saveDocument, savePrivateDraft, cacheDocuments, replaceDocument, reorderDraftDocuments, seedDocuments, deleteDocument, getSyncCursor, setSyncCursor };
 }
 //# sourceMappingURL=d1.js.map

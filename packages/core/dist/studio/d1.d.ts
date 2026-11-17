@@ -24,6 +24,7 @@ export declare function createD1Store(options: D1StoreOptions): {
     findDocument: (id: string) => Promise<WritingDocument>;
     findDocumentByPath: (path: string) => Promise<WritingDocument | undefined>;
     saveDocument: (document: WritingDocument, sortOrder?: number) => Promise<WritingDocument>;
+    savePrivateDraft: (document: WritingDocument, previous?: WritingDocument) => Promise<boolean>;
     cacheDocuments: (items: WritingDocument[]) => Promise<void>;
     replaceDocument: (previousId: string, document: WritingDocument, sortOrder?: number) => Promise<WritingDocument>;
     reorderDraftDocuments: (ids: string[]) => Promise<void>;
