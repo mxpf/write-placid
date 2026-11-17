@@ -1,82 +1,100 @@
-# Write Placid operator’s manual
+# Set up Write Placid
 
-Start with the public site. Add Studio and Trackinghaus only if you need them.
+Start with the public site. Add Studio for private editing, Drafts MCP for saving drafts from an AI assistant, or Trackinghaus for readership counts as needed.
 
-## 1. Make the repository yours
+## 1. Make a copy and preview it
 
-Use GitHub’s **Use this template** button, or fork the repository. Keep it private while entering credentials; the finished code can be public because credentials remain in host secrets.
+On GitHub, choose **Use this template** or fork the repository, then clone your copy. You’ll need Git and Node.js 22.13 or newer. For PowerShell on Windows, follow the [Git Bash setup in the README](../README.md#start-locally).
 
-Run:
+From the root of your copy, run the setup and start the Site preview.
 
 ```bash
 npm run setup
-npm run check:config
+npm run dev:site
 ```
 
-## 2. Configure and publish the site
+Open the local URL printed in the terminal. Use the app’s example file to make an ignored local environment file. Put hosted tokens and passwords in your hosting service’s secret settings.
 
-Edit `apps/site/site.config.json`. At minimum, change `name`, `description`, and `url`. Optional author fields add person metadata and a `rel=me` link. Set `webmentionEndpoint` only if you want cached Webmentions. Replace the sample Markdown in:
+## 2. Publish the public site
 
-- `apps/site/content/posts`
-- `apps/site/content/pages`
-- `apps/site/content/now`
+1. Set `name`, `description`, and `url` in [`apps/site/site.config.json`](../apps/site/site.config.json). Replace the sample Markdown in [`apps/site/content`](../apps/site/content). Essays go in `posts`, standalone pages in `pages`, and `/now` updates in `now`. Follow the [content guide](../apps/site/docs/content-contract.md) to keep page links and document IDs working.
+2. In the [Publish site workflow](../.github/workflows/publish-site.yml), set `PAGES_BASE_PATH` and `NEXT_PUBLIC_PAGES_BASE_PATH` to the path where your site will live, such as `/my-publication`. Set both to `""` for a site at the root of a domain. Set `WRITE_PLACID_SITE_URL` to the full public URL, including the path if there is one. The workflow uses this URL in place of `site.config.json`’s `url` during the build.
+3. Push to `main` or run **Publish site** from the **Actions** tab. The workflow runs the checks and writes the built site to `gh-pages`. It also runs daily to refresh Webmentions if you set `webmentionEndpoint`.
+4. In **Settings → Pages**, choose **Deploy from a branch** and select `gh-pages` with `/(root)`. Check that Pages has deployed the branch before opening the site. If the branch updates but the site doesn’t, follow [GitHub’s branch publishing troubleshooting](https://docs.github.com/en/pages/getting-started-with-github-pages/configuring-a-publishing-source-for-your-github-pages-site#troubleshooting-publishing-from-a-branch).
 
-For a CI-hosted demo that should keep the neutral template configuration in Git, set `WRITE_PLACID_SITE_URL` to the deployed public base URL. It overrides `url` only for that build and is applied consistently to metadata, feeds, discovery files, structured data, and Webmention targets.
+If you assign a custom domain to this repository, configure it in Pages settings and keep a [`CNAME` file](https://docs.github.com/en/pages/configuring-a-custom-domain-for-your-github-pages-site/managing-a-custom-domain-for-your-github-pages-site) with the hostname in `apps/site/public` so it stays in the built site. For a project served under an existing profile site’s domain, keep the project’s path in the workflow and let it [inherit the domain](https://docs.github.com/en/pages/configuring-a-custom-domain-for-your-github-pages-site/about-custom-domains-and-github-pages#using-a-custom-domain-across-multiple-repositories). Turn on [Enforce HTTPS](https://docs.github.com/en/pages/getting-started-with-github-pages/securing-your-github-pages-site-with-https) in the project’s Pages settings.
 
-The included GitHub Actions workflow builds `apps/site` and publishes its static export to the `gh-pages` branch on each push to `main`. It also runs daily so an enabled Webmention cache can refresh without a content change. A temporary Webmention failure does not block publication. In repository settings, set Pages to deploy from the `gh-pages` branch. The workflow’s `PAGES_BASE_PATH` values default to `/write-placid` for this template repository; change them to your repository path, or to an empty value when deploying at the root of a custom domain. Add a `CNAME` file under `apps/site/public` only when using a custom domain.
+## 3. Add Studio
 
-## 3. Add the private Studio
+Studio is a private editor. It runs on Cloudflare Workers, stores writing in D1 by default, and uses Cloudflare Access for sign-in.
 
-Studio runs on Cloudflare Workers, uses D1, and should be protected by Cloudflare Access.
+To preview Studio locally, copy [`apps/studio/.env.example`](../apps/studio/.env.example) to `apps/studio/.env.local`. Set `NEXT_PUBLIC_SITE_URL` to the address printed by `npm run dev:site`. From the repository root, run `npm run dev:studio` and open the address it prints.
+
+For a hosted Studio, work from `apps/studio`. Sign in to Wrangler and create a database.
 
 ```bash
-cd apps/studio
 npx wrangler login
 npx wrangler d1 create write-placid-studio
 ```
 
-Copy the returned database ID into `wrangler.cloudflare.jsonc`, replacing the all-zero placeholder. Then apply the migrations:
+Replace the placeholder database ID in `wrangler.cloudflare.jsonc` with the ID Wrangler returns. Keep the populated config out of public Git. Set up the tables in the new hosted database with the included migrations.
 
 ```bash
 npx wrangler d1 migrations apply write-placid-studio --remote --config wrangler.cloudflare.jsonc
 ```
 
-Copy `.env.example` to `.env.local` for local development. For production, add every sensitive value with `npx wrangler secret put NAME --config wrangler.cloudflare.jsonc`. Use a fine-grained GitHub token limited to your publication repository with **Contents: read and write**.
+Create a [Cloudflare Access application](https://developers.cloudflare.com/cloudflare-one/access-controls/applications/http-apps/self-hosted-public-app/) for the Studio hostname and allow your email address. Add the following values to the Worker as secrets. From `apps/studio`, use `npx wrangler secret put NAME --config wrangler.cloudflare.jsonc`, replacing `NAME` with each setting.
 
-Create a Cloudflare Access self-hosted application for the Studio Worker and restrict it to your email. Set `CLOUDFLARE_ACCESS_TEAM_DOMAIN`, `CLOUDFLARE_ACCESS_AUD`, and `WRITE_PLACID_STUDIO_EMAIL` as Worker secrets. Generate `WRITE_PLACID_INTERNAL_TOKEN` with `openssl rand -hex 32` even if you are not using the Drafts MCP yet.
+| Secret | What to put in it |
+| --- | --- |
+| `CLOUDFLARE_ACCESS_TEAM_DOMAIN` | Your Access team URL |
+| `CLOUDFLARE_ACCESS_AUD` | The audience tag for the Studio application |
+| `WRITE_PLACID_STUDIO_EMAIL` | The email allowed to use Studio |
+| `WRITE_PLACID_GITHUB_TOKEN` | A fine-grained token limited to your publication repository with read and write access to Contents |
+| `WRITE_PLACID_INTERNAL_TOKEN` | A separate random value. Use it for the Drafts MCP connection if you add that app. |
 
-Set `NEXT_PUBLIC_PUBLICATION_NAME` and `NEXT_PUBLIC_SITE_URL` as non-secret Worker variables, then:
+Set these as Worker variables. The [Studio example file](../apps/studio/.env.example) lists the names and sample values.
+
+| Setting | What to put in it |
+| --- | --- |
+| `NEXT_PUBLIC_PUBLICATION_NAME` | The name of your publication |
+| `NEXT_PUBLIC_SITE_URL` | The full URL of your public site |
+| `WRITE_PLACID_GITHUB_OWNER` and `WRITE_PLACID_GITHUB_REPO` | The owner and name of your publication repository |
+| `WRITE_PLACID_GITHUB_BRANCH` | `main` for the included Pages workflow |
+| `WRITE_PLACID_GITHUB_CONTENT_ROOT` | `apps/site` for this repository |
+| `WRITE_PLACID_AUTO_PUBLISH` | `0` to publish manually. Use `1` only when you want the kDrive schedule to publish automatically. |
+
+From `apps/studio`, generate Worker types and deploy.
 
 ```bash
 npm run types
 npm run deploy
 ```
 
-Keep `WRITE_PLACID_GITHUB_CONTENT_ROOT=apps/site` for this monorepo. Studio uses logical document paths such as `content/posts/example.md` internally and adds that repository prefix only at the GitHub boundary.
+For a new setup, set the Worker variable `WRITE_PLACID_PUBLIC_CONTRACT_VERSION` to `1` once Site and Studio are deployed. Studio needs this setting to publish. If you’re moving an existing library to kDrive, follow the migration steps below first.
 
-Return to `apps/site/site.config.json` and set `studioUrl` to the protected Worker URL. Visiting the public site with `#edit` once enables private edit links in that browser; `#edit-off` removes them.
+Set `studioUrl` in `apps/site/site.config.json` to the protected Studio URL and republish the site. Open the public site with `#edit` at the end of its address to show edit links in that browser. Add `#edit-off` to hide them again.
 
-### Optional Google Docs sync
+Studio’s live check currently looks for the article and the publication record at the root of the public domain. If the site is under a path such as `/my-publication`, open the live article yourself to confirm the update.
 
-Follow `apps/studio/google-apps-script/README.md`. The bridge secret belongs in both Apps Script properties and `WRITE_PLACID_DRIVE_BRIDGE_SECRET`.
+### Use kDrive for writing storage
 
-### Optional KDrive repository
+If you already have writing in Studio or on the public site, back up D1, kDrive, and Git before switching storage. Follow the [migration guide](../apps/studio/docs/editorial-contract.md) to review and verify the move before enabling publishing.
 
-Create `Drafts`, `Published`, `Pages`, `Now/Drafts`, `Now/Published`, and `Images` folders under a private KDrive root. Configure `WRITE_PLACID_KDRIVE_WEBDAV_URL`, `WRITE_PLACID_KDRIVE_USERNAME`, and `WRITE_PLACID_KDRIVE_ROOT` as Worker variables, then add the KDrive application password as the `WRITE_PLACID_KDRIVE_APP_PASSWORD` Worker secret. Do not commit a live username, URL, password, or private path.
+Create `Drafts`, `Published`, `Pages`, `Now/Drafts`, `Now/Published`, and `Images` under a private kDrive folder. Set `WRITE_PLACID_KDRIVE_WEBDAV_URL`, `WRITE_PLACID_KDRIVE_USERNAME`, and `WRITE_PLACID_KDRIVE_ROOT` in the Worker, and add your application password as the `WRITE_PLACID_KDRIVE_APP_PASSWORD` secret. Keep private connection details out of Git.
 
-When all four KDrive values are present, KDrive becomes the editorial source of truth and D1 supports caching, ordering, bridge state, and recoverable deletion. Reconciliation always starts from a fresh inventory and reuses cached bodies only for an exact path/type/status/strong-ETag match. It never falls back to stale cached writing after an inventory failure.
+With kDrive connected, Studio keeps your writing there and uses D1 for cached data, draft order, sync records, and recovery copies.
 
-For a new empty installation, enable public snapshot contract version `1` after both Site and Studio are deployed. For an existing installation, follow `apps/studio/docs/editorial-contract.md`: back up D1/KDrive/Git, enable migration mode, review the dry-run digest and mapping, apply conditionally, verify readback and the snapshot, then enable the contract.
+### Sync with Google Docs
 
-`WRITE_PLACID_AUTO_PUBLISH=0` preserves manual publication. Set it to `1` only if scheduled saves in Published should go live automatically. The schedule still records started/completed/failed/skipped lifecycle evidence when automatic publication is off.
+Follow the [Google Docs setup guide](../apps/studio/google-apps-script/README.md) to deploy the Apps Script. Add its URL as `WRITE_PLACID_DRIVE_BRIDGE_URL` and store the same bridge secret in Apps Script and in Studio’s `WRITE_PLACID_DRIVE_BRIDGE_SECRET`.
 
 ## 4. Add Trackinghaus
 
-Import this repository into Vercel and set the project’s root directory to `apps/trackinghaus`. Provision a Neon Postgres database and run `apps/trackinghaus/db/schema.sql` once.
-
-Copy `apps/trackinghaus/.env.example` into Vercel’s environment variables. The required values identify one publication and its allowed origins. Resend settings are optional and only power the weekly email.
-
-After deployment, put the dashboard URL and tracker URLs into `apps/site/site.config.json`:
+1. Import your repository into Vercel and set the project’s [root directory](https://vercel.com/docs/monorepos) to `apps/trackinghaus`.
+2. Create a Neon Postgres database, run [`apps/trackinghaus/db/schema.sql`](../apps/trackinghaus/db/schema.sql) once, and add the connection string as `DATABASE_URL` in Vercel.
+3. Set `TRACKINGHAUS_SITE_KEY`, `TRACKINGHAUS_SITE_NAME`, and `TRACKINGHAUS_ALLOWED_ORIGINS` in Vercel. For a site at `https://example.com/my-publication/`, use `https://example.com` as the allowed origin. The [Trackinghaus example file](../apps/trackinghaus/.env.example) also lists settings for the time zone and optional weekly email.
+4. Deploy Trackinghaus, then add its URLs to `apps/site/site.config.json` and republish the site. Use the same `trackingSiteKey` as `TRACKINGHAUS_SITE_KEY` in Vercel.
 
 ```json
 {
@@ -87,25 +105,41 @@ After deployment, put the dashboard URL and tracker URLs into `apps/site/site.co
 }
 ```
 
-## 5. Add the Drafts MCP
+## 5. Add Drafts MCP
 
-This is optional. It requires the Studio and must run in the same Cloudflare account so its `STUDIO` service binding can reach the Studio Worker without public HTTP.
+Deploy Drafts MCP in the same Cloudflare account as Studio so the Workers can connect directly. The tool saves complete drafts and revisions to Studio.
+
+From `apps/drafts-mcp`, create its Workers KV namespace.
 
 ```bash
-cd apps/drafts-mcp
 npx wrangler kv namespace create OAUTH_KV
 ```
 
-Replace the all-zero KV ID in `wrangler.jsonc`. Confirm the service name matches the deployed Studio Worker. Set the Access OAuth values, `COOKIE_ENCRYPTION_KEY`, `ALLOWED_EMAIL`, and `STUDIO_API_TOKEN` with `wrangler secret put`; the last value must equal Studio’s `WRITE_PLACID_INTERNAL_TOKEN`.
+Replace the placeholder KV ID in `wrangler.jsonc` and set the `STUDIO` binding’s `service` to the deployed Studio Worker name. Keep the populated config out of public Git.
 
-Run `npm run cf-typegen`, then deploy. The exposed tool saves complete drafts and revisions only.
+Create a [Cloudflare Access OIDC application](https://developers.cloudflare.com/cloudflare-one/access-controls/applications/http-apps/saas-apps/generic-oidc-saas/) for Drafts MCP. Use the Drafts MCP public URL with `/callback` appended as the redirect URL. Allow your email address and include the email and profile scopes.
 
-## 6. Verify before sharing
+Use `npx wrangler secret put NAME` to add each value to the Worker. The [example file](../apps/drafts-mcp/.dev.vars.example) lists the setting names.
 
-From the repository root:
+- Use the `ACCESS_*` settings for the client ID, client secret, authorization URL, token URL, and public keys URL.
+- Set `ALLOWED_EMAIL` to your email and generate a separate random value for `COOKIE_ENCRYPTION_KEY`.
+- Set `STUDIO_API_TOKEN` to the same value as Studio’s `WRITE_PLACID_INTERNAL_TOKEN`.
 
 ```bash
-npm run check
+npm run cf-typegen
+npm run deploy
 ```
 
-Also verify one complete path manually: create a draft in Studio, publish it, wait for GitHub Pages, open the live article, check RSS, and confirm Trackinghaus receives only an aggregate count.
+Use the deployed Drafts MCP URL with `/mcp` appended in your compatible AI assistant.
+
+## 6. Check the setup
+
+From the repository root, install Chromium for the browser checks and run the project checks and Site lint. On Windows, run the full check in a Linux environment such as WSL because the static export step expects Unix-style paths.
+
+```bash
+npm exec --prefix apps/site -- playwright install chromium
+npm run check
+npm run lint --prefix apps/site
+```
+
+Open the public homepage, an article, and the RSS feed over HTTPS. If you added Studio, sign in, save a draft, and verify the article and feed after a test publication. If you added Drafts MCP, save a draft through your assistant and check it in Studio. If you added Trackinghaus, confirm the dashboard shows page-view counts for your publication.
