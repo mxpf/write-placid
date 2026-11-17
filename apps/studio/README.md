@@ -22,6 +22,18 @@ The demo uses these settings.
 
 Turning off scheduled publishing alone does not disable manual publishing. The [setup guide](../../docs/SETUP.md#3-add-studio) covers the full Studio setup.
 
+### Demo Drafts MCP
+
+The demo has a separate Drafts MCP Worker connected only to this Studio, with its own sign-in app, storage, and credentials. Add the MCP address in the [demo connection guide](../../README.md#demo-drafts-mcp) to a compatible AI assistant, then sign in with the approved Cloudflare Access account and approve the connection.
+
+Use `save_write_placid_draft` with a title and the complete body in Markdown. To update a private draft, send its exact `slug` or `current_title` and the complete revised body. Put the new name in `title` to rename it. Studio updates the same draft and keeps its identity.
+
+If several pieces share a title, use the slug. A missing draft, conflicting title and slug, or piece with publication history returns an error. Studio checks for competing edits before saving. If it reports a conflict, reopen the draft and compare the writing before trying again.
+
+Reopen Studio in a fresh tab to read the updated draft. Drafts MCP cannot publish or delete writing. Use Studio's **Delete** button to remove a private draft and keep a private recovery copy. Publishing stays disabled and **Publish** stays hidden.
+
+The [Drafts MCP README](../drafts-mcp/README.md) explains the draft fields and how to set up your own connection.
+
 ## How it works
 
 - The demo stores private drafts in D1. With kDrive connected, Studio keeps writing there and uses D1 for cached data, draft order, sync records, and recovery copies.
@@ -32,7 +44,7 @@ Turning off scheduled publishing alone does not disable manual publishing. The [
 - KDrive supports `Drafts`, `Published`, `Pages`, `Now/Drafts`, `Now/Published`, and private `Images`, including nested folders. Fresh inventory and strong ETags prevent stale fallback or competing overwrites.
 - Saving and publishing are distinct. The starter keeps scheduled auto-publication off; set `WRITE_PLACID_AUTO_PUBLISH=1` only for an installation that explicitly wants the schedule to publish.
 
-kDrive, Google Docs, and Drafts MCP are optional. The demo uses D1 and Cloudflare Access. Publishing to your own site also needs GitHub access and the publishing settings below.
+kDrive, Google Docs, and Drafts MCP are optional. The demo uses D1, Cloudflare Access, and its separate Drafts MCP connection. Publishing to your own site also needs GitHub access and the publishing settings below.
 
 ## Local development
 
@@ -54,7 +66,7 @@ For private drafts with publishing disabled, use the demo settings above. The ex
 - `WRITE_PLACID_AUTO_PUBLISH=0` turns off scheduled publishing. Use `1` only when you want the kDrive schedule to publish automatically.
 - `WRITE_PLACID_KDRIVE_*` values enable optional KDrive WebDAV synchronization.
 - `WRITE_PLACID_DRIVE_BRIDGE_*` values enable optional Google Docs synchronization.
-- `WRITE_PLACID_INTERNAL_TOKEN` authorizes the private Drafts MCP service binding.
+- `WRITE_PLACID_INTERNAL_TOKEN` authorizes the private Drafts MCP connection. It must match that Worker's `STUDIO_API_TOKEN` and be unique to the connection.
 - Cloudflare Access uses `CLOUDFLARE_ACCESS_TEAM_DOMAIN`, `CLOUDFLARE_ACCESS_AUD`, and `WRITE_PLACID_STUDIO_EMAIL`.
 
 Never commit credentials, live database IDs, private document IDs, or populated environment files.
