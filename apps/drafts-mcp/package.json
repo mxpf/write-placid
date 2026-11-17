@@ -18,7 +18,7 @@
 	"devDependencies": {
 		"@types/node": "^26.6.4",
 		"typescript": "6.0.3",
-		"wrangler": "^4.147.0"
+		"wrangler": "^4.154.0"
 	},
 	"overrides": {
 		"agents": {
