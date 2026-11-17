@@ -48,6 +48,7 @@ jobs:
       PAGES_BASE_PATH: /write-placid
       NEXT_PUBLIC_PAGES_BASE_PATH: /write-placid
       WRITE_PLACID_SITE_URL: https://maxpfennig.haus/write-placid
+      WRITE_PLACID_STUDIO_URL: ${{ vars.WRITE_PLACID_STUDIO_URL }}
     defaults:
       run:
         working-directory: apps/site
