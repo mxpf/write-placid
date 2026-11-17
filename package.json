@@ -160,7 +160,7 @@
     "check:a11y": "npm run test:a11y --prefix apps/site",
     "check:studio": "npm test --prefix apps/studio",
     "check:tracking": "npm test --prefix apps/trackinghaus",
-    "check:mcp": "npm run type-check --prefix apps/drafts-mcp",
+    "check:mcp": "npm run type-check --prefix apps/drafts-mcp && npm test --prefix apps/drafts-mcp",
     "build:core": "node apps/studio/node_modules/typescript/bin/tsc -p packages/core/tsconfig.json",
     "check:core": "npm run build:core && node --test packages/core/tests/*.test.mjs",
     "pack:core": "npm pack --pack-destination artifacts/core",

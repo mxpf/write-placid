@@ -4,40 +4,13 @@ import { McpAgent } from "agents/mcp";
 import { z } from "zod";
 import { handleAccessRequest } from "./access-handler";
 import type { Props } from "./workers-oauth-utils";
+import { prepareDraft, type StudioPost } from "./draft";
 
 const STUDIO_ORIGIN = "https://studio.internal";
-
-type StudioSource = { label: string; href: string };
-
-type StudioPost = {
-	type: "post";
-	title: string;
-	dek?: string;
-	slug: string;
-	date: string;
-	publishedAt?: string;
-	status: "draft" | "published";
-	body: string;
-	source?: StudioSource;
-};
 
 type StudioLibrary = {
 	documents?: StudioPost[];
 };
-
-function today(): string {
-	return new Date().toISOString().slice(0, 10);
-}
-
-function slugify(value: string): string {
-	return value
-		.normalize("NFKD")
-		.replace(/[\u0300-\u036f]/g, "")
-		.toLowerCase()
-		.replace(/[^a-z0-9]+/g, "-")
-		.replace(/^-+|-+$/g, "")
-		.slice(0, 80);
-}
 
 async function readStudioLibrary(env: Env): Promise<StudioLibrary> {
 	const response = await env.STUDIO.fetch(new Request(`${STUDIO_ORIGIN}/api/content`, {
@@ -81,7 +54,7 @@ export class WritePlacidMCP extends McpAgent<Env, Record<string, never>, Props> 
 
 		this.server.tool(
 			"save_write_placid_draft",
-			"Save a complete new essay, fragment, or revision into the private Write Placid Studio library. This never publishes or deletes anything. For a revision, provide the current title or slug so the existing piece is updated instead of duplicated. Send the complete body, not a patch or excerpt. An optional dek is preserved as the article summary.",
+			"Save a complete new essay, fragment, or private draft revision into Write Placid Studio. This never publishes, deletes, or changes previously published writing. For a revision, provide the current title or exact slug. Send the complete body, not a patch or excerpt. An optional dek is preserved as the article summary.",
 			{
 				title: z.string().trim().min(1).max(200).describe("The title the piece should have after saving."),
 				dek: z.string().trim().max(400).optional().describe("An optional one-line article dek. Omit it to preserve an existing dek; send an empty string to clear it."),
@@ -106,36 +79,10 @@ export class WritePlacidMCP extends McpAgent<Env, Record<string, never>, Props> 
 				source_label: z.string().trim().max(200).optional(),
 				source_url: z.string().url().max(2_000).optional(),
 			},
-			async ({ title, dek, body, current_title, slug, date, source_label, source_url }) => {
+			async (input) => {
 				try {
 					const library = await readStudioLibrary(this.env);
-					const posts = (library.documents || []).filter((document) => document.type === "post");
-					const requestedSlug = slug ? slugify(slug) : "";
-					const lookupTitle = (current_title || title).trim().toLocaleLowerCase();
-					const existing = posts.find(
-						(post) =>
-							(requestedSlug && post.slug === requestedSlug) ||
-							post.title.trim().toLocaleLowerCase() === lookupTitle,
-					);
-
-					if ((source_label && !source_url) || (!source_label && source_url)) {
-						throw new Error("A source needs both a label and a URL.");
-					}
-
-					const source = source_label && source_url
-						? { label: source_label, href: source_url }
-						: existing?.source;
-					const saved = await saveToStudio(this.env, {
-						type: "post",
-						title: title.trim(),
-						dek: dek === undefined ? existing?.dek || "" : dek,
-						slug: existing?.slug || "",
-						date: date || existing?.date || today(),
-						publishedAt: existing?.publishedAt || "",
-						status: existing?.status || "draft",
-						body,
-						...(source ? { source } : {}),
-					});
+					const saved = await saveToStudio(this.env, prepareDraft(input, library.documents || []));
 
 					return {
 						content: [
