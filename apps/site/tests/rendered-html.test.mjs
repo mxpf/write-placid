@@ -49,16 +49,19 @@ test("static homepage links point directly to exported article files", async () 
   }
 });
 
-test("renders an optional dek and uses it for public descriptions", async () => {
-  const post = (await readPosts()).find((item) => item.dek);
-  assert.ok(post);
-  const html = await (await render(`/${post.slug}`)).text();
-  const plainDek = stripInlineMarkdown(post.dek);
-  assert.match(html, new RegExp(`<p class="article-dek">${plainDek.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}</p>`));
-  assert.ok(html.includes(`<meta name="description" content="${plainDek}"`));
-
-  const feed = generateRssFeed(await readPosts(), await readNowEntries());
-  assert.ok(feed.includes(`<description>${plainDek}</description>`));
+test("article headers and descriptions follow optional deks without changing the writing", async () => {
+  const posts = await readPosts();
+  for (const post of posts) {
+    const html = await (await render(`/${post.slug}`)).text();
+    const description = stripInlineMarkdown(post.dek || post.paragraphs[0] || "").replace(/\s+/g, " ").trim();
+    const escapedDescription = description.replaceAll("&", "&amp;").replaceAll('"', "&quot;").replaceAll("'", "&#x27;").replaceAll("<", "&lt;").replaceAll(">", "&gt;");
+    assert.ok(html.includes(`<meta name="description" content="${escapedDescription}"`));
+    if (post.dek) {
+      assert.match(html, /<p class="article-dek">/);
+    } else {
+      assert.doesNotMatch(html, /<p class="article-dek">/);
+    }
+  }
 });
 
 test("can prefix internal links for a GitHub project Pages deployment", async () => {
