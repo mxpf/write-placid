@@ -58,7 +58,7 @@ Set these as Worker variables. The [Studio example file](../apps/studio/.env.exa
 | Setting | What to put in it |
 | --- | --- |
 | `NEXT_PUBLIC_PUBLICATION_NAME` | The name of your publication |
-| `NEXT_PUBLIC_SITE_URL` | The full URL of your public site |
+| `NEXT_PUBLIC_SITE_URL` | The full URL of your public site, including any path such as `/my-publication/` |
 | `WRITE_PLACID_GITHUB_OWNER` and `WRITE_PLACID_GITHUB_REPO` | The owner and name of your publication repository |
 | `WRITE_PLACID_GITHUB_BRANCH` | `main` for the included Pages workflow |
 | `WRITE_PLACID_GITHUB_CONTENT_ROOT` | `apps/site` for this repository |
@@ -74,8 +74,6 @@ npm run deploy
 For a new setup, set the Worker variable `WRITE_PLACID_PUBLIC_CONTRACT_VERSION` to `1` once Site and Studio are deployed. Studio needs this setting to publish. If you’re moving an existing library to kDrive, follow the migration steps below first.
 
 Set `studioUrl` in `apps/site/site.config.json` to the protected Studio URL and republish the site. Open the public site with `#edit` at the end of its address to show edit links in that browser. Add `#edit-off` to hide them again.
-
-Studio’s live check currently looks for the article and the publication record at the root of the public domain. If the site is under a path such as `/my-publication`, open the live article yourself to confirm the update.
 
 ### Use kDrive for writing storage
 

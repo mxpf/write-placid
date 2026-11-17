@@ -1,7 +1,7 @@
 import { displayDate } from "../../../content";
 import { authorizeStudioRequest } from "../../../server-auth";
 import { findDocument } from "../../../../db/documents";
-import { studioConfig } from "../../../studio-config";
+import { liveCheckUrl, studioConfig } from "../../../studio-config";
 
 function livePath(type: "post" | "page" | "now", slug: string) {
   return type === "now" ? "/now.html" : `/${slug}.html`;
@@ -19,8 +19,7 @@ export async function GET(request: Request) {
     return Response.json({ error: "That piece could not be found." }, { status: 404 });
   }
 
-  const liveUrl = new URL(livePath(document.type, document.slug), studioConfig.siteUrl);
-  liveUrl.searchParams.set("studio-check", document.updatedAt);
+  const liveUrl = liveCheckUrl(studioConfig.siteUrl, livePath(document.type, document.slug), document.updatedAt);
   const response = await fetch(liveUrl, { cache: "no-store", redirect: "follow" });
   if (document.type !== "page" && document.status === "draft") {
     return Response.json({ live: response.status === 404, url: liveUrl.toString() });
