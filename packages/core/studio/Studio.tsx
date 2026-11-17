@@ -218,7 +218,7 @@ function LibrarySection({
   );
 }
 
-export function Studio() {
+export function Studio({ publishingEnabled = true }: { publishingEnabled?: boolean } = {}) {
   const [documents, setDocuments] = useState<StudioDocument[]>([]);
   const [current, setCurrent] = useState<StudioDocument | null>(null);
   const [saveState, setSaveState] = useState<SaveState>("Loading…");
@@ -1301,14 +1301,16 @@ export function Studio() {
               <span className="theme-sun" aria-hidden="true">☀︎</span>
               <span className="theme-moon" aria-hidden="true">☾</span>
             </button>
-            <button
-              className="publish-button"
-              type="button"
-              disabled={publishDisabled}
-              onClick={publishCurrent}
-            >
-              {publishLabel}
-            </button>
+            {publishingEnabled ? (
+              <button
+                className="publish-button"
+                type="button"
+                disabled={publishDisabled}
+                onClick={publishCurrent}
+              >
+                {publishLabel}
+              </button>
+            ) : null}
           </div>
         </div>
       </header>
