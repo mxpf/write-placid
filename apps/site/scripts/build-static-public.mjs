@@ -1,9 +1,10 @@
 import { buildStaticPublic } from "@mxpf/write-placid-core/static-public";
+import { fileURLToPath } from "node:url";
 import config from "../site.config.json" with { type: "json" };
 
 const result = await buildStaticPublic({
-  sourceDirectory: new URL("../dist/client", import.meta.url).pathname,
-  outputDirectory: new URL("../dist/static-public", import.meta.url).pathname,
+  sourceDirectory: fileURLToPath(new URL("../dist/client", import.meta.url)),
+  outputDirectory: fileURLToPath(new URL("../dist/static-public", import.meta.url)),
   publicBasePath: process.env.NEXT_PUBLIC_PAGES_BASE_PATH || "",
   canvasColor: config.staticPublic.canvasColor,
   colorScheme: config.staticPublic.colorScheme,

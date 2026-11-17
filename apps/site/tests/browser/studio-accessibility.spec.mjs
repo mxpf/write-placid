@@ -1,8 +1,6 @@
 import AxeBuilder from "@axe-core/playwright";
 import { expect, test } from "@playwright/test";
 
-test.use({ baseURL: "http://127.0.0.1:4174" });
-
 function formatViolations(violations) {
   return violations.map((violation) => ({
     id: violation.id,

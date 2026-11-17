@@ -161,7 +161,7 @@
     "check:studio": "npm test --prefix apps/studio",
     "check:tracking": "npm test --prefix apps/trackinghaus",
     "check:mcp": "npm run type-check --prefix apps/drafts-mcp",
-    "build:core": "apps/studio/node_modules/.bin/tsc -p packages/core/tsconfig.json",
+    "build:core": "node apps/studio/node_modules/typescript/bin/tsc -p packages/core/tsconfig.json",
     "check:core": "npm run build:core && node --test packages/core/tests/*.test.mjs",
     "pack:core": "npm pack --pack-destination artifacts/core",
     "check": "npm run check:core && npm run check:config && npm run check:site && npm run check:a11y && npm run check:studio && npm run check:tracking && npm run check:mcp"

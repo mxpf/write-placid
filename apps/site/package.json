@@ -14,7 +14,7 @@
     "build:staging": "INCLUDE_DRAFTS=1 node scripts/generate-posts.mjs && WRANGLER_LOG_PATH=.wrangler/wrangler.log vite build",
     "refresh:webmentions": "node scripts/refresh-webmentions.mjs",
     "prebuild:pages": "node scripts/clean-static-export.mjs && node scripts/generate-posts.mjs",
-    "build:pages": "STATIC_EXPORT=1 vite build && node scripts/add-cached-stylesheet-alias.mjs && node scripts/generate-redirects.mjs",
+    "build:pages": "node scripts/build-pages.mjs && node scripts/add-cached-stylesheet-alias.mjs && node scripts/generate-redirects.mjs",
     "build:static-public": "npm run build:pages && node scripts/build-static-public.mjs",
     "preview:static-public": "node scripts/serve-static.mjs dist/static-public 4173",
     "test:a11y": "npm run build:static-public && playwright test",

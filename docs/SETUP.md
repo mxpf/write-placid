@@ -132,7 +132,7 @@ Use the deployed Drafts MCP URL with `/mcp` appended in your compatible AI assis
 
 ## 6. Check the setup
 
-From the repository root, install Chromium for the browser checks and run the project checks and Site lint. On Windows, run the full check in a Linux environment such as WSL because the static export step expects Unix-style paths.
+From the repository root, install Chromium for the browser checks and run the project checks and Site lint. These commands work in PowerShell on Windows and in the default shell on macOS and Linux. Browser tests choose their own local ports, so other previews can stay open.
 
 ```bash
 npm exec --prefix apps/site -- playwright install chromium

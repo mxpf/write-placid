@@ -22,6 +22,10 @@ for (const route of publicRoutes) {
   test(`${route} has no detectable WCAG A or AA violations`, async ({ page }) => {
     await page.goto(route);
     await expect(page.locator("main")).toBeVisible();
+    await page.evaluate(async () => {
+      await document.fonts.ready;
+      await Promise.allSettled(document.getAnimations().map((animation) => animation.finished));
+    });
     const results = await new AxeBuilder({ page })
       .withTags(["wcag2a", "wcag2aa", "wcag21aa", "wcag22aa"])
       .analyze();

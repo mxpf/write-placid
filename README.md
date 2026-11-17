@@ -48,7 +48,7 @@ npm run check
 npm run lint --prefix apps/site
 ```
 
-On Windows, run the full `npm run check` in a Linux environment such as WSL. The static export step currently expects Unix-style paths.
+The checks run in PowerShell on Windows and in the default shell on macOS and Linux. Browser tests choose their own local ports, so other previews can stay open.
 
 ## Design and shared code
 
