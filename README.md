@@ -21,13 +21,13 @@ The public site serves static files, so readers can visit it when Studio is offl
 
 ## Demo Studio
 
-The demo Studio requires an approved Cloudflare Access sign-in. You can open it from an article's **Edit** link after adding `#edit` to the article's address. [Open the demo Studio](https://write-placid-studio.maxpfennighaus.workers.dev/).
+The demo Studio and Drafts MCP run 1.7.1. Studio requires an approved Cloudflare Access sign-in. You can open it from an article's **Edit** link after adding `#edit` to the article's address. [Open the demo Studio](https://write-placid-studio.maxpfennighaus.workers.dev/).
 
 Choose **New piece** to create a private draft. Studio saves changes automatically. Wait for **Saved online** before closing the tab. You can reopen the draft in a fresh tab. **Delete** removes it from the library and keeps a private recovery copy.
 
 Use **Optional dek** below the title to add a one-line summary. Studio keeps it on one line and saves it with the private draft. You can edit it later or leave it empty.
 
-Publishing is disabled in the demo, so the **Publish** button is hidden.
+After deploying 1.7.1, we checked private draft saves and updates, summaries, reopening in fresh tabs, and keeping recovery copies after **Delete**. Publishing stays disabled in the demo, so the **Publish** button is hidden.
 
 ### Demo Drafts MCP
 

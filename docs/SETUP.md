@@ -28,7 +28,7 @@ If you assign a custom domain to this repository, configure it in Pages settings
 
 Studio is a private editor on Cloudflare Workers. It uses Cloudflare Access for sign-in. The demo stores private drafts in D1.
 
-The hosted demo lets approved users create a piece, wait for **Saved online**, and reopen it in a fresh tab. **Delete** removes a private draft from the library and keeps a private recovery copy. Publishing is disabled and **Publish** is hidden. [Open the demo Studio](https://write-placid-studio.maxpfennighaus.workers.dev/).
+The hosted demo Studio runs 1.7.1. Approved users can create a piece, wait for **Saved online**, and reopen it in a fresh tab. **Delete** removes a private draft from the library and keeps a private recovery copy. Publishing is disabled and **Publish** is hidden. [Open the demo Studio](https://write-placid-studio.maxpfennighaus.workers.dev/).
 
 Use **Optional dek** below the title to add a one-line summary. Studio joins line breaks into one line and saves the summary with the private draft. You can reopen and edit it later, or leave it empty. Editing a summary does not publish the draft.
 
@@ -118,7 +118,7 @@ Drafts MCP lets a compatible AI assistant create and update private drafts in St
 
 ### Use the demo Drafts MCP
 
-Add [the demo Drafts MCP address](https://write-placid-drafts-mcp.maxpfennighaus.workers.dev/mcp) to your compatible AI assistant, then sign in with the approved Cloudflare Access account and approve the connection. The demo has its own Worker, sign-in app, storage, and credentials. It connects only to the demo Studio.
+The demo Drafts MCP also runs 1.7.1. Add [the demo Drafts MCP address](https://write-placid-drafts-mcp.maxpfennighaus.workers.dev/mcp) to your compatible AI assistant, then sign in with the approved Cloudflare Access account and approve the connection. The demo has its own Worker, sign-in app, storage, and credentials. It connects only to the demo Studio.
 
 Use `save_write_placid_draft` with a title and the complete body in Markdown. Send the whole draft rather than a patch or excerpt.
 
@@ -187,4 +187,6 @@ The supplied commands run TypeScript 7.0.2 for all three apps' type checks and t
 
 Run the [setup checks](#6-check-the-setup) and your site's [core upgrade checks](CORE.md#upgrade-and-rollback) before deploying. Verify private draft saves, summaries, and reopening in a fresh tab. Test publication only on a site where you have chosen to enable it.
 
-The demo keeps publishing disabled and **Publish** hidden. The GitHub release provides a package to install; it does not deploy it to your site or publish any writing.
+The hosted demo Studio and Drafts MCP have been deployed from 1.7.1. After deployment, we checked private draft saves, updates without duplicates, one-line summaries, reopening in fresh tabs, and keeping recovery copies after **Delete**. We removed the test drafts and confirmed that their private recovery copies kept the saved writing and summaries. Demo publishing stays disabled and **Publish** stays hidden.
+
+Other installations choose when to upgrade and deploy. The GitHub release provides a package to install; it does not deploy it to your site or publish any writing.
