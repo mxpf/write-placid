@@ -2,6 +2,8 @@
 
 An optional connection that lets a compatible AI assistant create and update private drafts in Write Placid Studio.
 
+[Core 1.7.0](https://github.com/mxpf/write-placid/releases/tag/v1.7.0) includes one-line summaries and safer private draft updates. The [release notes](../../docs/releases/v1.7.0.md) explain the changes and upgrade requirements.
+
 ## Save a draft
 
 The `save_write_placid_draft` tool sends a title and the complete body in Markdown to Studio. Send the whole draft, not a patch or an excerpt. You can also supply a date and a source link. A source needs both `source_label` and `source_url`.
@@ -45,6 +47,14 @@ Follow the [Drafts MCP setup guide](../../docs/SETUP.md#set-up-your-own-connecti
 5. Add the deployed Drafts MCP URL followed by `/mcp` to your compatible AI assistant, then sign in and approve the connection.
 
 Keep credentials and populated deployment configuration out of public Git.
+
+## Upgrade with 1.7.0
+
+Follow the [1.7.0 upgrade guide](../../docs/SETUP.md#upgrade-to-170) to update Site and Studio together and use the verified core package. Back up your writing and private recovery data before upgrading.
+
+Drafts MCP is a separate Worker. Use the [1.7.0 Drafts MCP source](https://github.com/mxpf/write-placid/tree/v1.7.0/apps/drafts-mcp) when updating your own connection. Keep its Worker name, Studio service binding, OAuth storage, sign-in settings, and secrets in place. Run the checks below before deploying, then verify that updates change one private draft and preserve its saved summary when `dek` is left out.
+
+The GitHub release provides the package and source; each installation chooses when to deploy them. The demo keeps publishing disabled and **Publish** hidden.
 
 ## Checks and deployment
 
