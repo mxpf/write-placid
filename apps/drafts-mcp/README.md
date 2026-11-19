@@ -6,7 +6,7 @@ An optional connection that lets a compatible AI assistant create and update pri
 
 The `save_write_placid_draft` tool sends a title and the complete body in Markdown to Studio. Send the whole draft, not a patch or an excerpt. You can also supply a date and a source link. A source needs both `source_label` and `source_url`.
 
-The optional `dek` field adds a one-line summary below the title. Omit it to keep the existing summary, or send an empty string to clear it.
+The optional `dek` field is the draft's one-line summary. Include it to set or replace the summary. Leave `dek` out of a body update to keep the saved summary, including edits made in Studio. Send `dek: ""` to clear it. Every update still needs a title and the complete body.
 
 To update a private draft, send its exact `slug` or its `current_title` along with the complete new body. To rename it, put the new name in `title`. If several pieces share a title, use the slug. A missing draft, conflicting title and slug, or piece with publication history returns an error.
 
@@ -21,6 +21,8 @@ The tool cannot publish or delete writing. To remove a private draft, use Studio
 The demo Drafts MCP is deployed on its own Worker and connects only to the demo Studio. It has its own sign-in app, OAuth storage, and credentials.
 
 Add the MCP address in the [demo connection guide](../../README.md#demo-drafts-mcp) to a compatible AI assistant. Sign in with the approved Cloudflare Access account and approve the connection. You can then create and update private drafts with `save_write_placid_draft`.
+
+In Studio, **Optional dek** below the title shows the same summary. You can edit it there and wait for **Saved online** before closing the tab. Studio joins line breaks into one line. Reopen the draft in a fresh tab to check its summary and writing. The summary stays private while publishing is disabled.
 
 The demo Studio uses these settings.
 
@@ -61,4 +63,6 @@ npm run cf-typegen
 npm run deploy
 ```
 
-To check a new connection, save a new private draft through the assistant, revise it using its slug, and reopen it in a fresh Studio tab. Confirm there is one draft with the updated writing. With the demo settings, **Publish** stays hidden. Use Studio's **Delete** button if you want to remove the draft.
+To check a new connection, save a private draft with a summary through the assistant. Edit the summary in Studio and wait for **Saved online**. Then update the body through the assistant using its slug and the complete revised body, leaving `dek` out. Reopen Studio in a fresh tab and confirm there is one updated draft with the same Studio summary. Include a new `dek` in another complete update and check that the summary changes.
+
+With the demo settings, **Publish** stays hidden. Use Studio's **Delete** button if you want to remove the draft. Its private recovery copy keeps the summary and body.
