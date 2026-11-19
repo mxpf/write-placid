@@ -2,6 +2,8 @@
 
 Write Placid is an open-source template for publishing your own writing. Start with a public site and add a private editor or analytics if you need them. The template comes with sample writing you can replace. [See the live demo](https://maxpfennig.haus/write-placid/).
 
+The latest core release is [1.7.0](https://github.com/mxpf/write-placid/releases/tag/v1.7.0). It adds one-line summaries, safer private draft updates, and checks that confirm the saved version is live when publishing is enabled. Read the [release notes](docs/releases/v1.7.0.md) and [upgrade steps](docs/SETUP.md#upgrade-to-170) before updating an existing site.
+
 ![Write Placid publication](docs/site-desktop.png)
 
 ## What is included

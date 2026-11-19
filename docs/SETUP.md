@@ -172,3 +172,17 @@ Open the public homepage, an article, and the RSS feed over HTTPS. If you added 
 If you added Drafts MCP, create a private draft with a summary through your assistant. Update the body using its slug and the complete revised body, leaving `dek` out. Reopen Studio in a fresh tab and confirm there is one draft with the updated writing and the same summary. Then include a new `dek` in another complete update and check that the summary changes. With the demo's settings, **Publish** stays hidden.
 
 If you added Trackinghaus, confirm the dashboard shows page-view counts for your publication.
+
+## Upgrade to 1.7.0
+
+[Core 1.7.0](https://github.com/mxpf/write-placid/releases/tag/v1.7.0) adds one-line summaries, safer private draft updates, and checks that confirm the saved writing is live when publishing is enabled. Read the [release notes](releases/v1.7.0.md) before updating. Existing Markdown does not need a summary, and public snapshot contract `1` is unchanged.
+
+Back up your writing and private recovery data first, including D1 and kDrive if you use them. Keep your site's content, identity, credentials, storage connections, and publishing settings in place.
+
+If your site uses `@mxpf/write-placid-core` as a dependency, update Site and Studio together. Use the verified [1.7.0 package](https://github.com/mxpf/write-placid/releases/download/v1.7.0/mxpf-write-placid-core-1.7.0.tgz), pinned to that release URL, and commit the updated lockfiles. The release includes [SHA256SUMS.txt](https://github.com/mxpf/write-placid/releases/download/v1.7.0/SHA256SUMS.txt) so you can check the download. The template's own apps use the core from this repository; keep that local dependency when updating a copy of the template.
+
+If you maintain a custom Studio client, send the complete editor document to the Publish endpoint and include the published revision in the live check. A document ID alone is no longer enough. Document objects you create in code also need `dek` and `publishedRevision`; use empty strings when they have no value.
+
+Run the [setup checks](#6-check-the-setup) and your site's [core upgrade checks](CORE.md#upgrade-and-rollback) before deploying. Verify private draft saves, summaries, and reopening in a fresh tab. Test publication only on a site where you have chosen to enable it.
+
+The demo keeps publishing disabled and **Publish** hidden. The GitHub release provides a package to install; it does not deploy it to your site or publish any writing.
