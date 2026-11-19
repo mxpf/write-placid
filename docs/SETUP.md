@@ -30,6 +30,8 @@ Studio is a private editor on Cloudflare Workers. It uses Cloudflare Access for 
 
 The hosted demo lets approved users create a piece, wait for **Saved online**, and reopen it in a fresh tab. **Delete** removes a private draft from the library and keeps a private recovery copy. Publishing is disabled and **Publish** is hidden. [Open the demo Studio](https://write-placid-studio.maxpfennighaus.workers.dev/).
 
+Use **Optional dek** below the title to add a one-line summary. Studio joins line breaks into one line and saves the summary with the private draft. You can reopen and edit it later, or leave it empty. Editing a summary does not publish the draft.
+
 For a setup like the demo, set `WRITE_PLACID_STUDIO_D1_PREVIEW` to `1` and `WRITE_PLACID_AUTO_PUBLISH` to `0`, with kDrive disconnected. Keep `WRITE_PLACID_GITHUB_TOKEN` and `WRITE_PLACID_PUBLIC_CONTRACT_VERSION` unset so publishing stays disabled.
 
 To preview Studio locally, copy [`apps/studio/.env.example`](../apps/studio/.env.example) to `apps/studio/.env.local`. Set `NEXT_PUBLIC_SITE_URL` to the address printed by `npm run dev:site`. From the repository root, run `npm run dev:studio` and open the address it prints.
@@ -120,6 +122,8 @@ Add [the demo Drafts MCP address](https://write-placid-drafts-mcp.maxpfennighaus
 
 Use `save_write_placid_draft` with a title and the complete body in Markdown. Send the whole draft rather than a patch or excerpt.
 
+Include `dek` to set or replace the one-line summary. Omit `dek` on a later update to keep the saved summary, including changes made in Studio. Send `dek: ""` to clear it.
+
 To update a private draft, send its exact `slug` or `current_title` along with the complete revised body. To rename it, put the new name in `title`. Studio keeps the draft's identity, so the update changes the same draft. If several pieces share a title, use the slug. A missing draft or conflicting title and slug returns an error.
 
 Studio checks for competing edits before saving. If it reports a conflict, reopen the draft and compare the writing before trying again. You can reopen a saved draft in a fresh Studio tab. To remove it, use Studio's **Delete** button, which keeps a private recovery copy.
@@ -163,8 +167,8 @@ npm run check
 npm run lint --prefix apps/site
 ```
 
-Open the public homepage, an article, and the RSS feed over HTTPS. If you added Studio, sign in, save a draft, and reopen it in a fresh tab. With the demo's settings, **Publish** stays hidden. Check that **Delete** removes the draft and keeps a private recovery copy. If publishing is enabled for your own site, verify the article and feed after a test publication.
+Open the public homepage, an article, and the RSS feed over HTTPS. If you added Studio, sign in, save a private draft with a one-line summary, and reopen it in a fresh tab. Check that the writing and summary are both saved. With the demo's settings, **Publish** stays hidden. Check that **Delete** removes the draft and keeps a private recovery copy. If publishing is enabled for your own site, verify the article and feed after a test publication.
 
-If you added Drafts MCP, create a private draft through your assistant, then update it using its slug and the complete revised body. Reopen Studio in a fresh tab and confirm there is one draft with the updated writing. With the demo's settings, **Publish** stays hidden.
+If you added Drafts MCP, create a private draft with a summary through your assistant. Update the body using its slug and the complete revised body, leaving `dek` out. Reopen Studio in a fresh tab and confirm there is one draft with the updated writing and the same summary. Then include a new `dek` in another complete update and check that the summary changes. With the demo's settings, **Publish** stays hidden.
 
 If you added Trackinghaus, confirm the dashboard shows page-view counts for your publication.

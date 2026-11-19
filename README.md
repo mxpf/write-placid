@@ -23,6 +23,8 @@ The demo Studio requires an approved Cloudflare Access sign-in. You can open it 
 
 Choose **New piece** to create a private draft. Studio saves changes automatically. Wait for **Saved online** before closing the tab. You can reopen the draft in a fresh tab. **Delete** removes it from the library and keeps a private recovery copy.
 
+Use **Optional dek** below the title to add a one-line summary. Studio keeps it on one line and saves it with the private draft. You can edit it later or leave it empty.
+
 Publishing is disabled in the demo, so the **Publish** button is hidden.
 
 ### Demo Drafts MCP
@@ -30,6 +32,8 @@ Publishing is disabled in the demo, so the **Publish** button is hidden.
 Add [the demo Drafts MCP address](https://write-placid-drafts-mcp.maxpfennighaus.workers.dev/mcp) to a compatible AI assistant. Sign in with the approved Cloudflare Access account and approve the connection. This is a separate Worker connected only to the demo Studio.
 
 Use `save_write_placid_draft` with a title and the complete draft in Markdown. To update a private draft, send its exact `slug` or `current_title` and the complete revised body. Put the new name in `title` if you want to rename it. Studio updates the same draft and checks for competing edits.
+
+Include `dek` to set or replace the one-line summary. Leave `dek` out of an update to keep the summary already saved in Studio. Send `dek: ""` to clear it.
 
 The tool cannot update pieces with publication history. If several pieces share a title, use the slug. If Studio reports a save conflict, reopen the draft and compare the writing before trying again. Publishing stays disabled.
 
