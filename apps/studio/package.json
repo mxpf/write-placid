@@ -12,7 +12,7 @@
     "deploy": "npm run build && wrangler deploy --config wrangler.cloudflare.jsonc --keep-vars",
     "test": "npm run build && node --test tests/*.test.mjs",
     "lint": "eslint . --ignore-pattern dist --ignore-pattern .next",
-    "typecheck": "tsc --noEmit",
+    "typecheck": "node node_modules/typescript-compiler/bin/tsc --noEmit",
     "types": "wrangler types worker-configuration.d.ts --config wrangler.cloudflare.jsonc",
     "db:generate": "drizzle-kit generate"
   },
@@ -40,7 +40,8 @@
     "eslint-plugin-react-hooks": "7.1.1",
     "globals": "16.4.0",
     "react-server-dom-webpack": "^19.3.1",
-    "typescript": "5.9.3",
+    "typescript": "npm:@typescript/typescript6@6.0.2",
+    "typescript-compiler": "npm:typescript@7.0.2",
     "typescript-eslint": "^8.73.0",
     "vinext": "^1.0.1",
     "vite": "^8.3.3",

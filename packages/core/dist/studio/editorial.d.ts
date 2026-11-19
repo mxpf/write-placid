@@ -20,7 +20,7 @@ export declare function buildPublicSnapshot(documents: WritingDocument[]): {
         version: number;
         documents: {
             id: string;
-            type: "post" | "page" | "now";
+            type: "now" | "page" | "post";
             slug: string;
             path: string;
             url: string;
@@ -34,15 +34,11 @@ export declare function buildPublicSnapshot(documents: WritingDocument[]): {
 };
 /** Add a public, non-sensitive revision index used to verify static deployment. */
 export declare function buildPublishablePublicSnapshot(documents: WritingDocument[]): Promise<{
-    publication: PublicPublicationManifest;
-    revisions: {
-        [k: string]: string;
-    };
     manifest: {
         version: number;
         documents: {
             id: string;
-            type: "post" | "page" | "now";
+            type: "now" | "page" | "post";
             slug: string;
             path: string;
             url: string;
@@ -53,5 +49,9 @@ export declare function buildPublishablePublicSnapshot(documents: WritingDocumen
         };
     };
     files: Record<string, string>;
+    publication: PublicPublicationManifest;
+    revisions: {
+        [k: string]: string;
+    };
 }>;
 //# sourceMappingURL=editorial.d.ts.map

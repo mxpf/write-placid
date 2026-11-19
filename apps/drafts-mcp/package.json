@@ -7,7 +7,7 @@
 		"dev": "wrangler dev",
 		"start": "wrangler dev",
 		"cf-typegen": "wrangler types",
-		"type-check": "tsc --noEmit",
+		"type-check": "node node_modules/typescript/bin/tsc --noEmit",
 		"test": "node --test tests/*.test.mjs"
 	},
 	"dependencies": {
@@ -18,7 +18,7 @@
 	},
 	"devDependencies": {
 		"@types/node": "^26.6.4",
-		"typescript": "6.0.3",
+		"typescript": "7.0.2",
 		"wrangler": "^4.154.0"
 	},
 	"overrides": {

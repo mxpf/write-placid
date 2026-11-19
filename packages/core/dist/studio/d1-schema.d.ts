@@ -45,7 +45,7 @@ export declare const documents: import("drizzle-orm/sqlite-core").SQLiteTableWit
             tableName: "documents";
             dataType: "string";
             columnType: "SQLiteText";
-            data: "post" | "page" | "now";
+            data: "now" | "page" | "post";
             driverParam: string;
             notNull: true;
             hasDefault: false;
@@ -381,7 +381,7 @@ export declare const documents: import("drizzle-orm/sqlite-core").SQLiteTableWit
             length: number | undefined;
         }>;
     };
-    dialect: "sqlite";
+    dialect: 'sqlite';
 }>;
 export declare const deletedDocuments: import("drizzle-orm/sqlite-core").SQLiteTableWithColumns<{
     name: "deleted_documents";
@@ -445,6 +445,6 @@ export declare const deletedDocuments: import("drizzle-orm/sqlite-core").SQLiteT
             length: number | undefined;
         }>;
     };
-    dialect: "sqlite";
+    dialect: 'sqlite';
 }>;
 //# sourceMappingURL=d1-schema.d.ts.map

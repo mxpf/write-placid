@@ -12,13 +12,6 @@ export declare function kdriveConfigured(): boolean;
 export declare function listKdrivePostRefs(): Promise<KdrivePostRef[]>;
 export declare function readKdriveSource(ref: KdrivePostRef): Promise<string>;
 export declare function loadKdrivePost(ref: KdrivePostRef): Promise<{
-    type: "post" | "page" | "now";
-    status: "draft" | "published";
-    aliases: string[];
-    kdrivePath: string;
-    kdriveEtag: string;
-    remoteSha: string;
-    publishedSource: string;
     id: string;
     editBase?: string;
     path: string;
@@ -42,6 +35,13 @@ export declare function loadKdrivePost(ref: KdrivePostRef): Promise<{
     googleDocId: string;
     driveRevision: string;
     driveSyncedBody: string;
+    type: "now" | "page" | "post";
+    status: "draft" | "published";
+    aliases: string[];
+    kdrivePath: string;
+    kdriveEtag: string;
+    remoteSha: string;
+    publishedSource: string;
 }>;
 export declare function loadKdrivePosts(cached?: WritingDocument[]): Promise<WritingDocument[]>;
 export declare function editorialLocation(document: WritingDocument): string;

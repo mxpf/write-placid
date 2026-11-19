@@ -11,7 +11,7 @@ export declare function publishEditorialSnapshot(documents: WritingDocument[], o
         version: number;
         documents: {
             id: string;
-            type: "post" | "page" | "now";
+            type: "now" | "page" | "post";
             slug: string;
             path: string;
             url: string;

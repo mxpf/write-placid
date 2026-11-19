@@ -22,7 +22,7 @@
     "test": "npm run build:pages && node --test tests/*.test.mjs",
     "lint": "eslint . --ignore-pattern dist --ignore-pattern .next",
     "pretypecheck": "node scripts/generate-posts.mjs",
-    "typecheck": "tsc --noEmit",
+    "typecheck": "node node_modules/typescript-compiler/bin/tsc --noEmit",
     "audit:production": "npm audit --omit=dev --audit-level=high",
     "audit:full": "npm audit --audit-level=high"
   },
@@ -48,7 +48,8 @@
     "eslint-plugin-react-hooks": "7.1.1",
     "globals": "17.13.0",
     "react-server-dom-webpack": "^19.3.1",
-    "typescript": "5.9.3",
+    "typescript": "npm:@typescript/typescript6@6.0.2",
+    "typescript-compiler": "npm:typescript@7.0.2",
     "typescript-eslint": "^8.73.0",
     "vinext": "^1.0.1",
     "vite": "^8.3.3",

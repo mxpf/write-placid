@@ -1,5 +1,5 @@
 "use client";
-import { jsx as _jsx, jsxs as _jsxs, Fragment as _Fragment } from "react/jsx-runtime";
+import { Fragment as _Fragment, jsx as _jsx, jsxs as _jsxs } from "react/jsx-runtime";
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState, } from "react";
 import { GripVertical, Heading2, Image as ImageIcon, Italic, Link as LinkIcon, Quote as QuoteIcon, Redo2, Undo2, } from "lucide-react";
 import { acknowledgeSave, withEditBase } from "./save-state.js";

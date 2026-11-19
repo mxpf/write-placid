@@ -7,7 +7,7 @@ export declare function publishEditorialRepository(documents: WritingDocument[],
         version: number;
         documents: {
             id: string;
-            type: "post" | "page" | "now";
+            type: "now" | "page" | "post";
             slug: string;
             path: string;
             url: string;
