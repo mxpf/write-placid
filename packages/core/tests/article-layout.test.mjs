@@ -9,7 +9,7 @@ test("exports a responsive article layout with a bleed-safe reading measure", as
   ]);
   const packageManifest = JSON.parse(packageSource);
 
-  assert.equal(packageManifest.version, "1.6.0");
+  assert.equal(packageManifest.version, "1.7.0");
   assert.equal(
     packageManifest.exports["./article-layout.css"],
     "./packages/core/site/article-layout.css",
