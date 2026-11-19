@@ -4,7 +4,9 @@ Write Placid is the canonical owner of the reusable publishing foundation. Insta
 
 ## Version and contract
 
-The package is `@mxpf/write-placid-core`. Version `1.7.0` implements public snapshot contract `1`; both values are exported from the package root. See the [1.7.0 release notes](releases/v1.7.0.md) for changes and upgrade steps. `npm run pack:core` produces a self-contained artifact with ESM JavaScript, declarations, CSS, and source maps. It requires no build or sibling checkout when installed.
+The package is `@mxpf/write-placid-core`. Version `1.7.1` implements public snapshot contract `1`; both values are exported from the package root. See the [1.7.1 release notes](releases/v1.7.1.md) for changes and upgrade steps. `npm run pack:core` produces a self-contained artifact with ESM JavaScript, declarations, CSS, and source maps. It requires no build or sibling checkout when installed.
+
+Repository development uses TypeScript 7.0.2 for app type checks and the core build. Site and Studio keep Microsoft's TypeScript 6 compatibility API for lint tools. The supplied commands choose the compiler explicitly. The prebuilt package's declarations are checked with both compilers.
 
 Public sites can import `attachScrollFade` from `@mxpf/write-placid-core/scroll-fade`. The controller keeps images fully visible until observation is successfully initialized, preserves the installation's configurable bidirectional viewport fade, respects reduced motion, and restores the safe visible baseline during cleanup. Caption rendering and installation styling remain owned by the consuming site.
 

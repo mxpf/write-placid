@@ -2,7 +2,7 @@
 
 An optional connection that lets a compatible AI assistant create and update private drafts in Write Placid Studio.
 
-[Core 1.7.0](https://github.com/mxpf/write-placid/releases/tag/v1.7.0) includes one-line summaries and safer private draft updates. The [release notes](../../docs/releases/v1.7.0.md) explain the changes and upgrade requirements.
+[Core 1.7.1](https://github.com/mxpf/write-placid/releases/tag/v1.7.1) updates the development tools and Studio's icons. Creating and updating private drafts keeps the same behavior. The [release notes](../../docs/releases/v1.7.1.md) explain the changes and upgrade steps.
 
 ## Save a draft
 
@@ -48,17 +48,17 @@ Follow the [Drafts MCP setup guide](../../docs/SETUP.md#set-up-your-own-connecti
 
 Keep credentials and populated deployment configuration out of public Git.
 
-## Upgrade with 1.7.0
+## Upgrade with 1.7.1
 
-Follow the [1.7.0 upgrade guide](../../docs/SETUP.md#upgrade-to-170) to update Site and Studio together and use the verified core package. Back up your writing and private recovery data before upgrading.
+Follow the [1.7.1 upgrade guide](../../docs/SETUP.md#upgrade-to-171) to update Site and Studio together and use the verified core package. Back up your writing and private recovery data before upgrading.
 
-Drafts MCP is a separate Worker. Use the [1.7.0 Drafts MCP source](https://github.com/mxpf/write-placid/tree/v1.7.0/apps/drafts-mcp) when updating your own connection. Keep its Worker name, Studio service binding, OAuth storage, sign-in settings, and secrets in place. Run the checks below before deploying, then verify that updates change one private draft and preserve its saved summary when `dek` is left out.
+Drafts MCP is a separate Worker. Use the [1.7.1 Drafts MCP source](https://github.com/mxpf/write-placid/tree/v1.7.1/apps/drafts-mcp) when updating your own connection. Keep its Worker name, Studio service binding, OAuth storage, sign-in settings, and secrets in place. Run the checks below before deploying, then verify that updates change one private draft and preserve its saved summary when `dek` is left out.
 
 The GitHub release provides the package and source; each installation chooses when to deploy them. The demo keeps publishing disabled and **Publish** hidden.
 
 ## Checks and deployment
 
-From `apps/drafts-mcp`, install dependencies, then run the type check and tests.
+From `apps/drafts-mcp`, install dependencies, then run the type check and tests. The type check uses TypeScript 7.0.2 directly.
 
 ```bash
 npm ci

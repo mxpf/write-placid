@@ -4,7 +4,7 @@ Start with the public site. Add Studio for private editing, Drafts MCP for creat
 
 ## 1. Make a copy and preview it
 
-On GitHub, choose **Use this template** or fork the repository, then clone your copy. You’ll need Git and Node.js 22.13 or newer. For PowerShell on Windows, follow the [Git Bash setup in the README](../README.md#start-locally).
+On GitHub, choose **Use this template** or fork the repository, then clone your copy. Use Git and Node.js 22 (22.13 or newer), matching the included CI setup. For PowerShell on Windows, follow the [Git Bash setup in the README](../README.md#start-locally).
 
 From the root of your copy, run the setup and start the Site preview.
 
@@ -173,15 +173,17 @@ If you added Drafts MCP, create a private draft with a summary through your assi
 
 If you added Trackinghaus, confirm the dashboard shows page-view counts for your publication.
 
-## Upgrade to 1.7.0
+## Upgrade to 1.7.1
 
-[Core 1.7.0](https://github.com/mxpf/write-placid/releases/tag/v1.7.0) adds one-line summaries, safer private draft updates, and checks that confirm the saved writing is live when publishing is enabled. Read the [release notes](releases/v1.7.0.md) before updating. Existing Markdown does not need a summary, and public snapshot contract `1` is unchanged.
+[Core 1.7.1](https://github.com/mxpf/write-placid/releases/tag/v1.7.1) is a maintenance release with updated Studio icons, lint tools, and TypeScript 7. Read the [release notes](releases/v1.7.1.md) before updating. Writing and private drafts keep their existing format, and public snapshot contract `1` is unchanged.
 
 Back up your writing and private recovery data first, including D1 and kDrive if you use them. Keep your site's content, identity, credentials, storage connections, and publishing settings in place.
 
-If your site uses `@mxpf/write-placid-core` as a dependency, update Site and Studio together. Use the verified [1.7.0 package](https://github.com/mxpf/write-placid/releases/download/v1.7.0/mxpf-write-placid-core-1.7.0.tgz), pinned to that release URL, and commit the updated lockfiles. The release includes [SHA256SUMS.txt](https://github.com/mxpf/write-placid/releases/download/v1.7.0/SHA256SUMS.txt) so you can check the download. The template's own apps use the core from this repository; keep that local dependency when updating a copy of the template.
+If your site uses `@mxpf/write-placid-core` as a dependency, update Site and Studio together. Use the verified [1.7.1 package](https://github.com/mxpf/write-placid/releases/download/v1.7.1/mxpf-write-placid-core-1.7.1.tgz), pinned to that release URL, and commit the updated lockfiles. The release includes [SHA256SUMS.txt](https://github.com/mxpf/write-placid/releases/download/v1.7.1/SHA256SUMS.txt) so you can check the download. The template's own apps use the core from this repository; keep that local dependency when updating a copy of the template.
 
-If you maintain a custom Studio client, send the complete editor document to the Publish endpoint and include the published revision in the live check. A document ID alone is no longer enough. Document objects you create in code also need `dek` and `publishedRevision`; use empty strings when they have no value.
+If you are moving from a version before 1.7.0, the [1.7.0 upgrade notes](releases/v1.7.0.md#upgrading-an-existing-installation) describe the Publish requests and document fields needed by custom Studio clients.
+
+The supplied commands run TypeScript 7.0.2 for all three apps' type checks and the core build. Site and Studio install it as `typescript-compiler`; their `typescript` dependency provides Microsoft's TypeScript 6 compatibility API for lint tools. Keep both aliases when updating the tools. Drafts MCP uses TypeScript 7 directly. Site's Node types and CI runtime stay on Node 22.
 
 Run the [setup checks](#6-check-the-setup) and your site's [core upgrade checks](CORE.md#upgrade-and-rollback) before deploying. Verify private draft saves, summaries, and reopening in a fresh tab. Test publication only on a site where you have chosen to enable it.
 

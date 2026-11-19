@@ -2,7 +2,7 @@
 
 Write Placid is an open-source template for publishing your own writing. Start with a public site and add a private editor or analytics if you need them. The template comes with sample writing you can replace. [See the live demo](https://maxpfennig.haus/write-placid/).
 
-The latest core release is [1.7.0](https://github.com/mxpf/write-placid/releases/tag/v1.7.0). It adds one-line summaries, safer private draft updates, and checks that confirm the saved version is live when publishing is enabled. Read the [release notes](docs/releases/v1.7.0.md) and [upgrade steps](docs/SETUP.md#upgrade-to-170) before updating an existing site.
+The latest core release is [1.7.1](https://github.com/mxpf/write-placid/releases/tag/v1.7.1). It updates Studio's icons and the development tools, including TypeScript 7. Read the [release notes](docs/releases/v1.7.1.md) and [upgrade steps](docs/SETUP.md#upgrade-to-171) before updating an existing site.
 
 ![Write Placid publication](docs/site-desktop.png)
 
@@ -41,7 +41,7 @@ The tool cannot update pieces with publication history. If several pieces share 
 
 ## Start locally
 
-You’ll need Git and Node.js 22.13 or newer. `npm run setup` installs dependencies for all four apps.
+Use Git and Node.js 22 (22.13 or newer). `npm run setup` installs dependencies for all four apps. TypeScript 7 runs the type checks and builds the shared core; a separate TypeScript 6 compatibility package keeps Site and Studio's lint tools working.
 
 If you’re using PowerShell on Windows with Git Bash installed, set npm to use Bash before running the preview commands.
 

@@ -4,7 +4,7 @@ The private editor for a Write Placid publication. It works on phones too.
 
 Studio uses `@mxpf/write-placid-core` for the shared editor, saving, storage, and publishing rules. This app handles sign-in, service connections, and deployment settings.
 
-[Core 1.7.0](https://github.com/mxpf/write-placid/releases/tag/v1.7.0) adds one-line summaries, safer private draft updates, and checks that confirm the saved writing is live when publishing is enabled. See the [release notes](../../docs/releases/v1.7.0.md) for the changes and upgrade requirements.
+[Core 1.7.1](https://github.com/mxpf/write-placid/releases/tag/v1.7.1) updates Studio's icons and development tools. Private drafts, summaries, and publishing controls keep their existing behavior. See the [release notes](../../docs/releases/v1.7.1.md) for the changes and upgrade steps.
 
 ## Demo Studio
 
@@ -79,11 +79,13 @@ For private drafts with publishing disabled, use the demo settings above. The ex
 
 Never commit credentials, live database IDs, private document IDs, or populated environment files.
 
-## Upgrade to 1.7.0
+## Upgrade to 1.7.1
 
-Back up your writing and private recovery data first. Follow the [1.7.0 upgrade guide](../../docs/SETUP.md#upgrade-to-170) to update Site and Studio together. If your site installs the core as a dependency, use the verified release package and commit the updated lockfile. This repository's apps use the local core; keep that dependency when updating a copy of the template. Existing Markdown does not need a summary, and public snapshot contract `1` is unchanged.
+Back up your writing and private recovery data first. Follow the [1.7.1 upgrade guide](../../docs/SETUP.md#upgrade-to-171) to update Site and Studio together. If your site installs the core as a dependency, use the verified release package and commit the updated lockfile. This repository's apps use the local core; keep that dependency when updating a copy of the template. Writing and private drafts keep their existing format, and public snapshot contract `1` is unchanged.
 
-If you maintain a custom Studio client, send the complete editor document to the Publish endpoint and include the published revision in the live check. A document ID alone is no longer enough. Document objects you create in code also need `dek` and `publishedRevision`; use empty strings when they have no value.
+Studio's type check uses TypeScript 7.0.2. Its lint tools use Microsoft's TypeScript 6 compatibility API, installed under the `typescript` alias; the compiler is installed as `typescript-compiler`. Keep both aliases and use the included commands. ESLint 10 runs the React, hooks, TypeScript, Next.js, and accessibility checks.
+
+For custom clients moving from a version before 1.7.0, follow the [1.7.0 client upgrade notes](../../docs/releases/v1.7.0.md#upgrading-an-existing-installation).
 
 Keep your Worker name, database, service connections, sign-in settings, secrets, and publishing settings in place. Run the [full project checks](../../README.md#run-the-checks), plus Studio's lint and type checks, before deploying. Verify private drafts and summaries as described in the [setup checks](../../docs/SETUP.md#6-check-the-setup).
 
