@@ -4,6 +4,8 @@ The private editor for a Write Placid publication. It works on phones too.
 
 Studio uses `@mxpf/write-placid-core` for the shared editor, saving, storage, and publishing rules. This app handles sign-in, service connections, and deployment settings.
 
+[Core 1.7.0](https://github.com/mxpf/write-placid/releases/tag/v1.7.0) adds one-line summaries, safer private draft updates, and checks that confirm the saved writing is live when publishing is enabled. See the [release notes](../../docs/releases/v1.7.0.md) for the changes and upgrade requirements.
+
 ## Demo Studio
 
 The demo requires an approved Cloudflare Access sign-in. See the [demo Studio guide](../../README.md#demo-studio) for the link and how to open it from an article's **Edit** link.
@@ -76,6 +78,16 @@ For private drafts with publishing disabled, use the demo settings above. The ex
 - Cloudflare Access uses `CLOUDFLARE_ACCESS_TEAM_DOMAIN`, `CLOUDFLARE_ACCESS_AUD`, and `WRITE_PLACID_STUDIO_EMAIL`.
 
 Never commit credentials, live database IDs, private document IDs, or populated environment files.
+
+## Upgrade to 1.7.0
+
+Back up your writing and private recovery data first. Follow the [1.7.0 upgrade guide](../../docs/SETUP.md#upgrade-to-170) to update Site and Studio together. If your site installs the core as a dependency, use the verified release package and commit the updated lockfile. This repository's apps use the local core; keep that dependency when updating a copy of the template. Existing Markdown does not need a summary, and public snapshot contract `1` is unchanged.
+
+If you maintain a custom Studio client, send the complete editor document to the Publish endpoint and include the published revision in the live check. A document ID alone is no longer enough. Document objects you create in code also need `dek` and `publishedRevision`; use empty strings when they have no value.
+
+Keep your Worker name, database, service connections, sign-in settings, secrets, and publishing settings in place. Run the [full project checks](../../README.md#run-the-checks), plus Studio's lint and type checks, before deploying. Verify private drafts and summaries as described in the [setup checks](../../docs/SETUP.md#6-check-the-setup).
+
+The GitHub release provides a package to install; deployment is a separate step. The demo keeps publishing disabled and **Publish** hidden.
 
 ## Checks and deployment
 
