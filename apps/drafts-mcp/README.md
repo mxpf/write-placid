@@ -20,11 +20,13 @@ The tool cannot publish or delete writing. To remove a private draft, use Studio
 
 ## Demo connection
 
-The demo Drafts MCP is deployed on its own Worker and connects only to the demo Studio. It has its own sign-in app, OAuth storage, and credentials.
+The demo Drafts MCP and Studio run 1.7.1. Drafts MCP has its own Worker, sign-in app, OAuth storage, and credentials. It connects only to the demo Studio.
 
 Add the MCP address in the [demo connection guide](../../README.md#demo-drafts-mcp) to a compatible AI assistant. Sign in with the approved Cloudflare Access account and approve the connection. You can then create and update private drafts with `save_write_placid_draft`.
 
 In Studio, **Optional dek** below the title shows the same summary. You can edit it there and wait for **Saved online** before closing the tab. Studio joins line breaks into one line. Reopen the draft in a fresh tab to check its summary and writing. The summary stays private while publishing is disabled.
+
+After deploying 1.7.1, we checked that updates change the same private draft without duplicates. Leaving `dek` out kept a summary edited in Studio; supplying it replaced the summary. The writing and summary reopened in a fresh Studio tab. We deleted the test draft through Studio and confirmed its private recovery copy kept the final writing and summary.
 
 The demo Studio uses these settings.
 
@@ -54,7 +56,7 @@ Follow the [1.7.1 upgrade guide](../../docs/SETUP.md#upgrade-to-171) to update S
 
 Drafts MCP is a separate Worker. Use the [1.7.1 Drafts MCP source](https://github.com/mxpf/write-placid/tree/v1.7.1/apps/drafts-mcp) when updating your own connection. Keep its Worker name, Studio service binding, OAuth storage, sign-in settings, and secrets in place. Run the checks below before deploying, then verify that updates change one private draft and preserve its saved summary when `dek` is left out.
 
-The GitHub release provides the package and source; each installation chooses when to deploy them. The demo keeps publishing disabled and **Publish** hidden.
+The demo is already running 1.7.1, with publishing disabled and **Publish** hidden. Other installations choose when to upgrade and deploy. The GitHub release provides the package and source; it does not deploy them to your site or publish any writing.
 
 ## Checks and deployment
 
