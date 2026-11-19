@@ -10,7 +10,9 @@ The demo requires an approved Cloudflare Access sign-in. See the [demo Studio gu
 
 Choose **New piece** to create a private draft. Studio saves changes automatically. Wait for **Saved online** before closing the tab. You can reopen the draft in a fresh tab.
 
-To remove a private draft, open it, choose **Delete**, and confirm. Studio removes it from the library and keeps a private recovery copy. Delete does not remove published writing or drafts with publication history.
+Use **Optional dek** below the title for a one-line summary. Studio joins line breaks into one line and saves it with the draft. You can edit it later or clear the field to remove it. Reopen the draft in a fresh tab to check its writing and summary.
+
+To remove a private draft, open it, choose **Delete**, and confirm. Studio removes it from the library and keeps a private recovery copy, including its summary and body. Delete does not remove published writing or drafts with publication history.
 
 Publishing is disabled in the demo, so the **Publish** button is hidden. Saving or deleting a private draft does not change the public site.
 
@@ -28,6 +30,8 @@ The demo has a separate Drafts MCP Worker connected only to this Studio, with it
 
 Use `save_write_placid_draft` with a title and the complete body in Markdown. To update a private draft, send its exact `slug` or `current_title` and the complete revised body. Put the new name in `title` to rename it. Studio updates the same draft and keeps its identity.
 
+Include `dek` to set or replace the one-line summary. Leave it out of a body update to keep the saved summary, including edits made in Studio. Send `dek: ""` to clear it. Each update still needs a title and the complete body.
+
 If several pieces share a title, use the slug. A missing draft, conflicting title and slug, or piece with publication history returns an error. Studio checks for competing edits before saving. If it reports a conflict, reopen the draft and compare the writing before trying again.
 
 Reopen Studio in a fresh tab to read the updated draft. Drafts MCP cannot publish or delete writing. Use Studio's **Delete** button to remove a private draft and keep a private recovery copy. Publishing stays disabled and **Publish** stays hidden.
@@ -40,7 +44,7 @@ The [Drafts MCP README](../drafts-mcp/README.md) explains the draft fields and h
 - When publishing is enabled, Studio checks all the writing and sends Markdown, `content/identity-manifest.json`, and a public SHA-256 revision index to GitHub in one commit without overwriting its history. It verifies the proposed files and configured branch before reporting a successful publication.
 - Drafts can be reordered on desktop without changing public-site ordering.
 - Published revisions receive optional `updatedAt` metadata so the public site can show a quiet “Last edited” note.
-- An optional one-line dek is authored with the title and survives KDrive, D1 cache state, Drafts MCP revisions, and public snapshots.
+- The optional one-line summary stays with the writing in Studio, kDrive, D1, and Drafts MCP updates. Public snapshots include it when publishing is enabled.
 - Google Docs synchronization remains optional and detects conflicts when both copies changed.
 - KDrive supports `Drafts`, `Published`, `Pages`, `Now/Drafts`, `Now/Published`, and private `Images`, including nested folders. Fresh inventory and strong ETags prevent stale fallback or competing overwrites.
 - Saving and publishing are distinct. The starter keeps scheduled auto-publication off; set `WRITE_PLACID_AUTO_PUBLISH=1` only for an installation that explicitly wants the schedule to publish.
