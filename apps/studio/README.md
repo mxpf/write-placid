@@ -8,7 +8,7 @@ Studio uses `@mxpf/write-placid-core` for the shared editor, saving, storage, an
 
 ## Demo Studio
 
-The demo requires an approved Cloudflare Access sign-in. See the [demo Studio guide](../../README.md#demo-studio) for the link and how to open it from an article's **Edit** link.
+The demo Studio and Drafts MCP run 1.7.1. Studio requires an approved Cloudflare Access sign-in. See the [demo Studio guide](../../README.md#demo-studio) for the link and how to open it from an article's **Edit** link.
 
 Choose **New piece** to create a private draft. Studio saves changes automatically. Wait for **Saved online** before closing the tab. You can reopen the draft in a fresh tab.
 
@@ -37,6 +37,8 @@ Include `dek` to set or replace the one-line summary. Leave it out of a body upd
 If several pieces share a title, use the slug. A missing draft, conflicting title and slug, or piece with publication history returns an error. Studio checks for competing edits before saving. If it reports a conflict, reopen the draft and compare the writing before trying again.
 
 Reopen Studio in a fresh tab to read the updated draft. Drafts MCP cannot publish or delete writing. Use Studio's **Delete** button to remove a private draft and keep a private recovery copy. Publishing stays disabled and **Publish** stays hidden.
+
+After deploying 1.7.1, we checked private draft saves and updates in Studio and Drafts MCP, saving summaries, and reopening in fresh tabs. Updates changed the same draft without duplicates. Drafts MCP kept a summary edited in Studio when `dek` was left out, and replaced it when supplied. We removed the test drafts with **Delete** and confirmed that their private recovery copies kept the final writing and summaries.
 
 The [Drafts MCP README](../drafts-mcp/README.md) explains the draft fields and how to set up your own connection.
 
@@ -89,7 +91,7 @@ For custom clients moving from a version before 1.7.0, follow the [1.7.0 client 
 
 Keep your Worker name, database, service connections, sign-in settings, secrets, and publishing settings in place. Run the [full project checks](../../README.md#run-the-checks), plus Studio's lint and type checks, before deploying. Verify private drafts and summaries as described in the [setup checks](../../docs/SETUP.md#6-check-the-setup).
 
-The GitHub release provides a package to install; deployment is a separate step. The demo keeps publishing disabled and **Publish** hidden.
+The demo is already running 1.7.1, with publishing disabled and **Publish** hidden. Other installations choose when to upgrade and deploy. The GitHub release provides a package to install; it does not deploy it to your site or publish any writing.
 
 ## Checks and deployment
 
